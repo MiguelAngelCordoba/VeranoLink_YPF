@@ -1,0 +1,356 @@
+page 19 (
+    name: Mis reportes publicados
+    alias: MIS-REPORTES-PUBLICADOS
+    title: Mis reportes publicados
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword2(){
+                  var input = document.getElementById("P19_OLD_PASSWORD");
+                  var icon = document.getElementById("ojo2");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            function showPassword3(){
+                  var input = document.getElementById("P19_NEW_PASSWORD");
+                  var icon = document.getElementById("ojo3");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+        browserCache: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region ver-apis-publicas (
+        name: Ver Apis Publicas
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT ID_VL_APU_TABLE,
+                       API_TABLE_NAME AS "Nombre Reporte",
+                       API_TABLE_DESCRIPTION AS "Descipción de reporte",
+                       API_TABLE_QUERY AS "Sentencia Usada",
+                       API_ENDPOINT AS "Endpoint",
+                       CREATED_DATE AS "Fecha de creacion"
+                  FROM VL_APU_TABLES
+                  WHERE UPPER(COMPANY_NAME) = UPPER(:GET_COMPANY_NAME) AND ID_USER = :GET_ID;
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-Form--slimPadding
+                t-Form--stretchInputs
+            ]
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 25
+                items: {
+                    P25_ID_VL_APU_TABLE: #ID_VL_APU_TABLE#
+                }
+                action: clearRegions
+            }
+            linkIcon: <img src="#APEX_FILES#app_ui/img/icons/apex-edit-pencil.png" class="apex-edit-pencil" alt="">
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        heading {
+            fixedTo: region
+            maxReportHeight: 1000
+        }
+        advanced {
+            savedReportMappingIdentifier: 16606258848729203
+        }
+
+        column "Descipción de reporte" (
+            type: plainText
+            heading {
+                heading: Descipción De Reporte
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column Endpoint (
+            type: plainText
+            heading {
+                heading: Endpoint
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column "Fecha de creacion" (
+            type: plainText
+            heading {
+                heading: Fecha De Creacion
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column ID_VL_APU_TABLE (
+            type: hidden
+            heading {
+                heading: Id Vl Apu Table
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column "Nombre Reporte" (
+            type: plainText
+            heading {
+                heading: Nombre Reporte
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column "Sentencia Usada" (
+            type: plainText
+            heading {
+                heading: Sentencia Usada
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: CLOB
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: view_public_apis
+        }
+
+        savedReport 166209 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn "Descipción de reporte" (
+                sequence: 3
+            )
+
+            displayColumn "Endpoint" (
+                sequence: 4
+            )
+
+            displayColumn "Fecha de creacion" (
+                sequence: 1
+            )
+
+            displayColumn "Nombre Reporte" (
+                sequence: 2
+            )
+
+            displayColumn "Sentencia Usada" (
+                sequence: 5
+            )
+
+        )
+
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P19_CHANGE_NOTI
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P19_CHANGE_NOTI
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Contraseña cambiada exitosamente
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P19_CHANGE_NOTI
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Contraseña anterior es incorrecta, espere 10 segundos
+                showProgressBar: true
+                preventDuplicates: true
+                timeout: 14000
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P19_CHANGE_NOTI
+                value: 0
+            }
+        )
+
+    )
+
+    dynamicAction da-refresg-region-apis (
+        name: DA_REFRESG_REGION_APIS
+        execution {
+            sequence: 40
+        }
+        when {
+            event: apexafterclosecanceldialog
+            selectionType: region
+            region: @ver-apis-publicas
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @ver-apis-publicas
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

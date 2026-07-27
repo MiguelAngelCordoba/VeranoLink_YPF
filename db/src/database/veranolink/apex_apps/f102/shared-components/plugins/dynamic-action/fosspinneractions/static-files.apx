@@ -1,0 +1,45 @@
+file "css/fos-sa-spinner-styles.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "css/fos-sa-spinner-styles.css.map" (
+    mimeType: application/json
+    charSet: utf-8
+)
+
+file "css/fos-sa-spinner-styles.min.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "css/style.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "css/style.css.map" (
+    mimeType: application/json
+    charSet: utf-8
+)
+
+file "css/style.min.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "js/script.js" (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+
+file "js/script.js.map" (
+    mimeType: application/json
+    charSet: utf-8
+)
+
+file "js/script.min.js" (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+

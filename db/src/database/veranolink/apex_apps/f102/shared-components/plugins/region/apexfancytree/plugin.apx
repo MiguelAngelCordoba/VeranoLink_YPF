@@ -1,0 +1,287 @@
+plugin apexFancyTree (
+    name: APEX Fancy Tree
+    staticId: APEX.FANCYTREE.SELECT
+    type: region
+    component {
+        standardAttributes: [
+            regionSourceIsSqlQuery
+            pageItemsToSubmitAttr
+            noDataFoundMessageAttr
+            escapeSpecialCharsRegionAttr
+        ]
+    }
+    source {
+        plsqlCode:
+            ```plsql
+            FUNCTION SQL_TO_SYS_REFCURSOR (
+                P_IN_SQL_STATEMENT   CLOB,
+                P_IN_BINDS           SYS.DBMS_SQL.VARCHAR2_TABLE
+            ) RETURN SYS_REFCURSOR AS
+                VR_CURS         BINARY_INTEGER;
+                VR_REF_CURSOR   SYS_REFCURSOR;
+                VR_EXEC         BINARY_INTEGER;
+                VR_BINDS        VARCHAR(32767);
+            BEGIN
+                VR_CURS         := DBMS_SQL.OPEN_CURSOR;
+                DBMS_SQL.PARSE(
+                    VR_CURS,
+                    P_IN_SQL_STATEMENT,
+                    DBMS_SQL.NATIVE
+                );
+                IF P_IN_BINDS.COUNT > 0 THEN
+                    FOR I IN 1..P_IN_BINDS.COUNT LOOP
+                        /* TODO find out how to prevent ltrim */
+                        VR_BINDS   := LTRIM(
+                            P_IN_BINDS(I),
+                            ':'
+                        );
+                        DBMS_SQL.BIND_VARIABLE(
+                            VR_CURS,
+                            VR_BINDS,
+                            V(VR_BINDS)
+                        );
+                    END LOOP;
+                END IF;
+            
+                VR_EXEC         := DBMS_SQL.EXECUTE(VR_CURS);
+                VR_REF_CURSOR   := DBMS_SQL.TO_REFCURSOR(VR_CURS);
+                RETURN VR_REF_CURSOR;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    IF DBMS_SQL.IS_OPEN(VR_CURS) THEN
+                        DBMS_SQL.CLOSE_CURSOR(VR_CURS);
+                    END IF;
+                    RAISE;
+            END;
+            
+            FUNCTION F_AJAX (
+                P_REGION   IN         APEX_PLUGIN.T_REGION,
+                P_PLUGIN   IN         APEX_PLUGIN.T_PLUGIN
+            ) RETURN APEX_PLUGIN.T_REGION_AJAX_RESULT IS
+                VR_RESULT       APEX_PLUGIN.T_REGION_AJAX_RESULT;
+                VR_CUR          SYS_REFCURSOR;
+                VR_BIND_NAMES   SYS.DBMS_SQL.VARCHAR2_TABLE;
+            BEGIN
+                /* undocumented function of APEX for get all bindings */
+                VR_BIND_NAMES   := WWV_FLOW_UTILITIES.GET_BINDS(P_REGION.SOURCE);
+            
+                /* execute binding*/
+                VR_CUR          := SQL_TO_SYS_REFCURSOR(
+                    RTRIM(
+                        P_REGION.SOURCE,
+                        ';'
+                    ),
+                    VR_BIND_NAMES
+                );
+            
+                /* create json */
+                APEX_JSON.OPEN_OBJECT;
+                APEX_JSON.WRITE(
+                    'row',
+                    VR_CUR
+                );
+                APEX_JSON.CLOSE_OBJECT;
+            
+                RETURN VR_RESULT;
+            END;
+            
+            FUNCTION F_RENDER (
+                P_REGION                IN APEX_PLUGIN.T_REGION,
+                P_PLUGIN                IN APEX_PLUGIN.T_PLUGIN,
+                P_IS_PRINTER_FRIENDLY   IN BOOLEAN
+            ) RETURN APEX_PLUGIN.T_REGION_RENDER_RESULT IS
+                VR_RESULT             APEX_PLUGIN.T_REGION_RENDER_RESULT;
+                C_CONF_JSON           CONSTANT APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_01%TYPE := P_REGION.ATTRIBUTE_01;
+                C_SRC_ITEM            CONSTANT APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_02%TYPE := P_REGION.ATTRIBUTE_02;
+                C_ERR_MSG             CONSTANT APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_03%TYPE := P_REGION.ATTRIBUTE_03;
+                C_ACTIVE_ID_ITEM      CONSTANT APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_04%TYPE := P_REGION.ATTRIBUTE_04;
+                C_EXPANDED_NOTES_ITEM CONSTANT APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_07%TYPE := P_REGION.ATTRIBUTE_07;
+                C_ITEMS2SUBMIT        CONSTANT APEX_APPLICATION_PAGE_REGIONS.AJAX_ITEMS_TO_SUBMIT%TYPE := APEX_PLUGIN_UTIL.PAGE_ITEM_NAMES_TO_JQUERY(P_REGION.AJAX_ITEMS_TO_SUBMIT);
+                C_REGION_ID           CONSTANT VARCHAR2(200 CHAR) := 'ft-' || P_REGION.STATIC_ID;
+                VR_IS_CACHE_VALID     VARCHAR2(4000 CHAR) := 'V1';
+                VR_USE_LOCALSTORAGE   APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_05%TYPE := P_REGION.ATTRIBUTE_05;
+                VR_GET_CACHE_VERSION  APEX_APPLICATION_PAGE_REGIONS.ATTRIBUTE_06%TYPE := P_REGION.ATTRIBUTE_06;
+            BEGIN
+                APEX_CSS.ADD_FILE(
+                    P_NAME        => 'fancytree.pkgd.min',
+                    P_DIRECTORY   => P_PLUGIN.FILE_PREFIX,
+                    P_VERSION     => NULL,
+                    P_KEY         => 'fancytreecsssrc'
+                );
+            
+                APEX_JAVASCRIPT.ADD_LIBRARY(
+                    P_NAME        => 'fancytree.pkgd.min',
+                    P_DIRECTORY   => P_PLUGIN.FILE_PREFIX,
+                    P_VERSION     => NULL,
+                    P_KEY         => 'fancytreejssrc'
+                );
+            
+                SYS.HTP.P( '<div id="'|| APEX_PLUGIN_UTIL.ESCAPE( C_REGION_ID, TRUE ) || '" class="fancy-tree-region"></div>' );
+                
+                IF VR_USE_LOCALSTORAGE = 'Y' AND VR_GET_CACHE_VERSION IS NOT NULL THEN
+                    VR_IS_CACHE_VALID := APEX_PLUGIN_UTIL.GET_PLSQL_FUNCTION_RESULT(VR_GET_CACHE_VERSION);
+                END IF;
+            
+                APEX_JAVASCRIPT.ADD_ONLOAD_CODE( 'apex.jQuery(window).on("theme42ready", function() { fancyTree(apex, $).initTree('
+                 || APEX_JAVASCRIPT.ADD_VALUE( '#' || C_REGION_ID, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( APEX_PLUGIN.GET_AJAX_IDENTIFIER, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( P_REGION.NO_DATA_FOUND_MESSAGE, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_ERR_MSG, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_CONF_JSON, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_ITEMS2SUBMIT, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( P_REGION.ESCAPE_OUTPUT, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_SRC_ITEM, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_ACTIVE_ID_ITEM, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( VR_USE_LOCALSTORAGE, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( VR_IS_CACHE_VALID, TRUE )
+                 || APEX_JAVASCRIPT.ADD_VALUE( C_EXPANDED_NOTES_ITEM, FALSE )
+                 || '); });' );
+            
+                RETURN VR_RESULT;
+            END;
+            ```
+    }
+    callbacks {
+        apiInterface: function
+        renderProcedureName: F_RENDER
+        ajaxProcedureName: F_AJAX
+    }
+    advanced {
+        substituteAttributeValues: true
+    }
+    information {
+        version: 24.02.20
+        aboutUrl: https://github.com/RonnyWeiss/Apex-Fancy-Tree-Select
+        helpText:
+            ```
+            <p>This Plug-in is used to draw a FancyTree with select option. Selected item ids could be stored into apex items.</p>
+            <p>To trigger the following actions just fire e.g. on button click a dynamic action with JavaScriptCode:</p>
+            <ul>
+            <li><b>Expand Parents of selected Nodes all: </b>$("#static-tree-region-id-of-the-tree-region").trigger("expandSelected");</li>
+            <li><b>Expand all: </b>$("#static-tree-region-id-of-the-tree-region").trigger("expandAll");</li>
+            <li><b>Collapse all: </b>$("#static-tree-region-id-of-the-tree-region").trigger("collapseAll");</li>
+            <li><b>Select all: </b>$("#static-tree-region-id-of-the-tree-region").trigger("selectAll");</li>
+            <li><b>Unselect all: </b>$("#static-tree-region-id-of-the-tree-region").trigger("unselectAll");</li>
+            <li><b>expand Tree to a specific Level (When you left data then configJSON is used): </b>$("#static-tree-region-id-of-the-tree-region").trigger("expandToLevel", 3);</li>
+            </ul>
+            <p>When expand or collapse a node then also a event is fired on the region:</p>
+            <ul>
+            <li><b>Event on collapse: </b> "collapsed"</li>
+            <li><b>Event on expand: </b> "expanded"</li>
+            </ul>
+            <p>The tree also supports apexbeforerefresh and apexafterefresh event that are available in dynamic actions.</p>
+            ```
+    }
+
+    standardAttributeConfig (
+        name: regionSourceIsSqlQuery
+        validation {
+            required: true
+        }
+        sqlQuery {
+            minColumns: 3
+        }
+        default {
+            value:
+                ```
+                SELECT 
+                /* REQUIRED - positive number id of the element (should start with 1 or higher) */
+                     ROWNUM AS ID,
+                /* REQUIRED - positive number id of the parent (top parent should be 0) */
+                     CASE
+                         WHEN ROWNUM <= 2 THEN
+                             0
+                         ELSE ROUND( ROWNUM / 6 )
+                     END AS PARENT_ID,
+                /* REQUIRED - title of the item */
+                     'Item ' || ROWNUM AS TITLE,/* tooltip for the item */
+                /* REQUIRED when use select function - is set to items when selected */
+                     ROWNUM AS VALUE,
+                /* REQUIRED when use select function - is mapping value for typeSettings in config json */
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             10
+                         ELSE 20
+                     END AS TYPE,
+                /* Optional - set tooltip for this item */
+                     'This is item ' || ROWNUM AS TOOLTIP,
+                /* Optional - set custom icon for item */
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             'fa fa-folder-o'
+                         ELSE 'fa fa-file-o'
+                     END AS ICON,
+                /* Optional - set which nodes should be selcted on load (0 or null - not selected; 1 - selected)*/
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             1
+                     END AS SELECTED,
+                /* Optional - set if this item is expanded or not (0 or null - not expanded; 1 - expanded)*/
+                     NULL EXPANDED,
+                /* Optional - enable or disable checkbox for this item (0 or null - no checkbox; 1 - checkbox)*/
+                     1 AS CHECKBOX,
+                /* Optional - used to set item read only (0 or null - selectable; 1 - unselectable)*/
+                     0 AS UNSELECTABLE
+                /* activate link on click of the node */
+                     --,'https://linktr.ee/ronny.weiss' AS LINK
+                 FROM
+                     DUAL
+                 CONNECT BY
+                     ROWNUM <= 30
+                ```
+        }
+        help {
+            helpText:
+                ```
+                <pre>
+                SELECT 
+                /* REQUIRED - positive number id of the element (should start with 1 or higher) */
+                     ROWNUM AS ID,
+                /* REQUIRED - positive number id of the parent (top parent should be 0) */
+                     CASE
+                         WHEN ROWNUM <= 2 THEN
+                             0
+                         ELSE ROUND( ROWNUM / 6 )
+                     END AS PARENT_ID,
+                /* REQUIRED - title of the item */
+                     'Item ' || ROWNUM AS TITLE,/* tooltip for the item */
+                /* REQUIRED when use select function - is set to items when selected */
+                     ROWNUM AS VALUE,
+                /* REQUIRED when use select function - is mapping value for typeSettings in config json */
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             10
+                         ELSE 20
+                     END AS TYPE,
+                /* Optional - set tooltip for this item */
+                     'This is item ' || ROWNUM AS TOOLTIP,
+                /* Optional - set custom icon for item */
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             'fa fa-folder-o'
+                         ELSE 'fa fa-file-o'
+                     END AS ICON,
+                /* Optional - set which nodes should be selcted on load (0 or null - not selected; 1 - selected)*/
+                     CASE
+                         WHEN ROWNUM <= 8 THEN
+                             1
+                     END AS SELECTED,
+                /* Optional - set if this item is expanded or not (0 or null - not expanded; 1 - expanded)*/
+                     NULL EXPANDED,
+                /* Optional - enable or disable checkbox for this item (0 or null - no checkbox; 1 - checkbox)*/
+                     1 AS CHECKBOX,
+                /* Optional - used to set item read only (0 or null - selectable; 1 - unselectable)*/
+                     0 AS UNSELECTABLE
+                /* activate link on click of the node */
+                     --,'https://linktr.ee/ronny.weiss' AS LINK
+                 FROM
+                     DUAL
+                 CONNECT BY
+                     ROWNUM <= 30
+                </pre>
+                ```
+        }
+    )
+
+)
+

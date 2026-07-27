@@ -1,0 +1,1064 @@
+page 14 (
+    name: Gestión de fuentes
+    alias: GESTIÓN-DE-FUENTES
+    title: Gestión de Fuentes
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .js-confirmBtn ui-button ui-corner-all ui-widget ui-button--hot{
+                align-items: center;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region botones (
+        name: Botones
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region gestión-de-fuentes (
+        name: Gestión de fuentes
+        type: form
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ID_VL_SOURCE,
+                       ID_VL_COMPANY_APPLICATION,
+                       SOURCE_URL,
+                       ID_VL_WS_TYPE,
+                       ID_VL_TYPE_ENVIRONMENT
+                      
+                  from VL_SOURCES 
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P14_ID_VL_COMPANY_APPLICATION (
+        type: selectList
+        label {
+            label: Aplicación
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT A.NAME D, B.ID_VL_COMPANY_APPLICATION  R FROM VL_SOURCE_APPLICATIONS A INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B 
+                ON A.ID_VL_SOURCE_APPLICATION = B.ID_VL_SOURCE_APPLICATION WHERE B.VL_ID_COMPANY = :GET_COMPANY;
+                ```
+        }
+        layout {
+            sequence: 30
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-fuentes
+            column: ID_VL_COMPANY_APPLICATION
+            dataType: number
+        }
+        readOnly {
+            type: itemIsNotNull
+            item: P14_ID_VL_SOURCE
+        }
+    )
+
+    pageItem P14_ID_VL_SOURCE (
+        type: hidden
+        layout {
+            sequence: 20
+            region: @gestión-de-fuentes
+            slot: regionBody
+        }
+        source {
+            formRegion: @gestión-de-fuentes
+            column: ID_VL_SOURCE
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P14_ID_VL_WS_TYPE (
+        type: selectList
+        label {
+            label: Id Vl Ws Type
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @vl-ws-types-name-ws
+        }
+        layout {
+            sequence: 70
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-fuentes
+            column: ID_VL_WS_TYPE
+            dataType: number
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+    pageItem P14_PASS (
+        type: password
+        label {
+            label: Contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 60
+        }
+        validation {
+            maxLength: 500
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P14_RESPONSE (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @gestión-de-fuentes
+            slot: regionBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P14_SOURCE_URL (
+        type: textField
+        label {
+            label: URL principal
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 60
+        }
+        validation {
+            maxLength: 1000
+        }
+        source {
+            formRegion: @gestión-de-fuentes
+            column: SOURCE_URL
+            dataType: varchar2
+        }
+    )
+
+    pageItem P14_USER (
+        type: textField
+        label {
+            label: Usuario
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 60
+        }
+        validation {
+            maxLength: 500
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P14_VL_TYPE_ENVIRONMENT (
+        type: selectList
+        label {
+            label: Validator
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @vl-types-environment-type-environment
+            nullDisplayValue: --Seleccionar--
+        }
+        layout {
+            sequence: 80
+            region: @gestión-de-fuentes
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-fuentes
+            column: ID_VL_TYPE_ENVIRONMENT
+            dataType: number
+        }
+    )
+
+    button actualizar (
+        buttonName: Actualizar
+        label: Actualizar
+        layout {
+            sequence: 30
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P14_ID_VL_SOURCE
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @botones
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button crear (
+        buttonName: Crear
+        label: Conectar
+        layout {
+            sequence: 40
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P14_ID_VL_SOURCE
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Borrar
+        layout {
+            sequence: 20
+            region: @botones
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+            executeValidations: false
+            databaseAction: delete
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P14_ID_VL_SOURCE
+        }
+    )
+
+    dynamicAction da-add-url (
+        name: DA_ADD_URL
+        execution {
+            sequence: 20
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @crear
+        }
+        clientSideCondition {
+            type: jsExpression
+            javaScriptExpression:
+                ```javascript-browser
+                (apex.item('P14_ID_VL_COMPANY_APPLICATION').getValue() !=="" && apex.item('P14_SOURCE_URL').getValue() !=="" && apex.item('P14_USER').getValue() !==""
+                && apex.item('P14_PASS').getValue() !=="" && apex.item('P14_VL_TYPE_ENVIRONMENT').getValue() !=="")
+                ```
+        }
+
+        action native-alert (
+            action: alert
+            settings {
+                message: Conexión exitosa.
+                style: success
+                okLabel: Aceptar
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 1
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                        ENCODE64            VARCHAR2(15000 CHAR);
+                        GET_ALIAS           VARCHAR2(1500 CHAR);
+                        VALIDATOR           BOOLEAN;
+                        TOKEN_EXISTS        NUMBER;
+                    
+                    BEGIN
+                        -- Codificar usuario y contraseña en Base64
+                        SELECT vl_pkg_utl_base64.vl_fn_encode_base64("SYS"."UTL_RAW"."CAST_TO_RAW"(:P14_USER || ':' || :P14_PASS)) 
+                        INTO ENCODE64 
+                        FROM dual;
+                    
+                        -- Obtener el alias de la aplicación fuente
+                        SELECT VSA.ALIAS 
+                        INTO GET_ALIAS
+                        FROM VL_SOURCE_APPLICATIONS VSA
+                        INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS VCSA
+                            ON VSA.ID_VL_SOURCE_APPLICATION = VCSA.ID_VL_SOURCE_APPLICATION 
+                        WHERE VCSA.ID_VL_COMPANY_APPLICATION = :P14_ID_VL_COMPANY_APPLICATION;
+                    
+                        -- Verificar si el ambiente configurado
+                        SELECT COUNT(*)
+                        INTO TOKEN_EXISTS
+                        FROM 
+                            VL_SOURCE_APPLICATIONS A
+                            INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B
+                                ON A.ID_VL_SOURCE_APPLICATION = B.ID_VL_SOURCE_APPLICATION
+                            INNER JOIN VL_SOURCES C
+                                ON B.ID_VL_COMPANY_APPLICATION = C.ID_VL_COMPANY_APPLICATION
+                            INNER JOIN VL_COMPANIES G
+                                ON G.VL_ID_COMPANY = B.VL_ID_COMPANY
+                            INNER JOIN VL_SOURCE_COLLECTIONS D
+                                ON D.ID_VL_SOURCE_APPLICATION = A.ID_VL_SOURCE_APPLICATION
+                            INNER JOIN VL_PATH_CONTEXTS E
+                                ON D.ID_VL_SOURCE_COLLECTION = E.ID_VL_SOURCE_COLLECTION
+                            INNER JOIN VL_CALL_TYPES F
+                                ON F.ID_VL_CALL_TYPE = E.ID_VL_CALL_TYPE
+                        WHERE 
+                            B.ID_VL_COMPANY_APPLICATION = :P14_ID_VL_COMPANY_APPLICATION 
+                            AND G.SHORT_NAME = :GET_COMPANY_NAME
+                            AND C.ID_VL_TYPE_ENVIRONMENT = :P14_VL_TYPE_ENVIRONMENT 
+                            AND C.SOURCE_AUTHENTICATION IS NOT NULL
+                            AND E.NAME = 'Get Token';
+                    
+                        IF TOKEN_EXISTS > 0 THEN
+                    
+                            :P14_RESPONSE := 3; -- Si existe un ambiente configurado se retorna el valor 3 con el fin de mostrar la notificación
+                    
+                        ELSE
+                            -- Validar si la conexción es correcta
+                            VALIDATOR := VL_PKG_REST_SERVICES.VL_FN_VALIDATE_SOURCE(GET_ALIAS, :GET_COMPANY_NAME, :P14_VL_TYPE_ENVIRONMENT, ENCODE64, :P14_SOURCE_URL);
+                    
+                            IF VALIDATOR = True THEN
+                                :P14_RESPONSE := 1;
+                    
+                                INSERT INTO VL_SOURCES (
+                                    ID_VL_COMPANY_APPLICATION, 
+                                    SOURCE_URL, 
+                                    SOURCE_AUTHENTICATION, 
+                                    ID_VL_WS_TYPE, 
+                                    ID_VL_TYPE_ENVIRONMENT, 
+                                    VL_SOURCE_STATE
+                                ) VALUES (
+                                    :P14_ID_VL_COMPANY_APPLICATION, 
+                                    :P14_SOURCE_URL, 
+                                    ENCODE64, 
+                                    2, 
+                                    :P14_VL_TYPE_ENVIRONMENT, 
+                                    1
+                                );
+                    
+                                COMMIT;
+                            ELSE
+                                :P14_RESPONSE := 0;
+                            END IF;
+                        END IF;
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P14_ID_VL_SOURCE
+                    P14_ID_VL_COMPANY_APPLICATION
+                    P14_SOURCE_URL
+                    P14_USER
+                    P14_PASS
+                    P14_ID_VL_WS_TYPE
+                    P14_VL_TYPE_ENVIRONMENT
+                ]
+                itemsToReturn: P14_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: warning
+                text: Ingrese todos los datos
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: La configuración para este entorno ya se encuentra registrada.
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 3
+            }
+        )
+
+    )
+
+    dynamicAction da-cancel-dialog (
+        name: DA_CANCEL_DIALOG
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-delete-action (
+        name: DA_DELETE_ACTION
+        execution {
+            sequence: 60
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @delete
+        }
+
+        action native-alert (
+            action: alert
+            settings {
+                message: ¿Desea eliminar el registro?
+                style: danger
+                okLabel: Confirmar
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                    DELETE FROM VL_SOURCES WHERE ID_VL_SOURCE = :P14_ID_VL_SOURCE;
+                    EXCEPTION WHEN OTHERS THEN 
+                     IF SQLCODE = -02292 THEN 
+                        :P14_RESPONSE := 2;
+                        ELSE 
+                        NULL;
+                        END IF;
+                    END;
+                    ```
+                itemsToSubmit: P14_ID_VL_SOURCE
+                itemsToReturn: P14_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: P14_RESPONSE
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 120
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 1
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode: UPDATE VL_SOURCES SET VL_SOURCE_STATE = 1 WHERE ID_VL_SOURCE = :P14_ID_VL_SOURCE;
+                itemsToSubmit: P14_ID_VL_SOURCE
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 1
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        action native-execute-plsql-code-2 (
+            action: executeServerSideCode
+            settings {
+                plsqlCode: UPDATE VL_SOURCES SET VL_SOURCE_STATE = 0 WHERE ID_VL_SOURCE = :P14_ID_VL_SOURCE;
+                itemsToSubmit: P14_ID_VL_SOURCE
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 0
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        action native-execute-plsql-code-3 (
+            action: executeServerSideCode
+            settings {
+                plsqlCode: UPDATE VL_SOURCES SET VL_SOURCE_STATE = 0 WHERE ID_VL_SOURCE = :P14_ID_VL_SOURCE;
+                itemsToSubmit: P14_ID_VL_SOURCE
+            }
+            execution {
+                sequence: 70
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 0
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                action: removeSpinner
+            }
+            execution {
+                sequence: 90
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Conexión existosa
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Conexión fallida
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-3 (
+            action: plugin/toastrNotifications
+            settings {
+                text: No se puede eliminar, porque se esta usando en otras tablas
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 100
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 2
+            }
+        )
+
+    )
+
+    dynamicAction da-update-url (
+        name: DA_UPDATE_URL
+        execution {
+            sequence: 40
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @actualizar
+        }
+        clientSideCondition {
+            type: jsExpression
+            javaScriptExpression:
+                ```javascript-browser
+                (apex.item('P14_ID_VL_COMPANY_APPLICATION').getValue() !=="" && apex.item('P14_SOURCE_URL').getValue() !=="" && apex.item('P14_USER').getValue() !==""
+                && apex.item('P14_PASS').getValue() !=="" && apex.item('P14_VL_TYPE_ENVIRONMENT').getValue() !=="")
+                ```
+        }
+
+        action native-alert (
+            action: alert
+            settings {
+                message: Conexión exitosa.
+                style: success
+                okLabel: Aceptar
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 1
+            }
+        )
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                        ENCODE64            VARCHAR2(15000 CHAR);
+                        GET_ALIAS           VARCHAR2(1500 CHAR);
+                        VALIDATOR           BOOLEAN;
+                        TOKEN_EXISTS        NUMBER;
+                    
+                    BEGIN
+                        -- Codificar usuario y contraseña en Base64
+                        SELECT vl_pkg_utl_base64.vl_fn_encode_base64("SYS"."UTL_RAW"."CAST_TO_RAW"(:P14_USER || ':' || :P14_PASS)) 
+                        INTO ENCODE64 
+                        FROM dual;
+                    
+                        -- Obtener el alias de la aplicación fuente
+                        SELECT VSA.ALIAS 
+                        INTO GET_ALIAS
+                        FROM VL_SOURCE_APPLICATIONS VSA
+                        INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS VCSA
+                            ON VSA.ID_VL_SOURCE_APPLICATION = VCSA.ID_VL_SOURCE_APPLICATION 
+                        WHERE VCSA.ID_VL_COMPANY_APPLICATION = :P14_ID_VL_COMPANY_APPLICATION;
+                    
+                        -- Verificar si el ambiente configurado
+                        SELECT COUNT(*)
+                        INTO TOKEN_EXISTS
+                        FROM 
+                            VL_SOURCE_APPLICATIONS A
+                            INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B
+                                ON A.ID_VL_SOURCE_APPLICATION = B.ID_VL_SOURCE_APPLICATION
+                            INNER JOIN VL_SOURCES C
+                                ON B.ID_VL_COMPANY_APPLICATION = C.ID_VL_COMPANY_APPLICATION
+                            INNER JOIN VL_COMPANIES G
+                                ON G.VL_ID_COMPANY = B.VL_ID_COMPANY
+                            INNER JOIN VL_SOURCE_COLLECTIONS D
+                                ON D.ID_VL_SOURCE_APPLICATION = A.ID_VL_SOURCE_APPLICATION
+                            INNER JOIN VL_PATH_CONTEXTS E
+                                ON D.ID_VL_SOURCE_COLLECTION = E.ID_VL_SOURCE_COLLECTION
+                            INNER JOIN VL_CALL_TYPES F
+                                ON F.ID_VL_CALL_TYPE = E.ID_VL_CALL_TYPE
+                        WHERE 
+                            B.ID_VL_COMPANY_APPLICATION = :P14_ID_VL_COMPANY_APPLICATION 
+                            AND G.SHORT_NAME = :GET_COMPANY_NAME
+                            AND C.ID_VL_TYPE_ENVIRONMENT = :P14_VL_TYPE_ENVIRONMENT 
+                            AND C.SOURCE_AUTHENTICATION IS NOT NULL
+                            AND E.NAME = 'Get Token'
+                            AND ID_VL_SOURCE != :P14_ID_VL_SOURCE;
+                    
+                        IF TOKEN_EXISTS > 0 THEN
+                    
+                            :P14_RESPONSE := 3; -- Si existe un ambiente configurado (Que no sea el mismo que se esta actualizando) se retorna el valor 3 con el fin de mostrar la notificación
+                    
+                        ELSE
+                            -- Validar si la conexción es correcta
+                            VALIDATOR := VL_PKG_REST_SERVICES.VL_FN_VALIDATE_SOURCE(GET_ALIAS, :GET_COMPANY_NAME, :P14_VL_TYPE_ENVIRONMENT, ENCODE64, :P14_SOURCE_URL);
+                    
+                            IF VALIDATOR = True THEN
+                                :P14_RESPONSE := 1;
+                                UPDATE VL_SOURCES
+                                SET 
+                                    ID_VL_COMPANY_APPLICATION = :P14_ID_VL_COMPANY_APPLICATION,
+                                    SOURCE_URL = :P14_SOURCE_URL,
+                                    SOURCE_AUTHENTICATION = ENCODE64,
+                                    ID_VL_TYPE_ENVIRONMENT = :P14_VL_TYPE_ENVIRONMENT
+                                WHERE 
+                                    ID_VL_SOURCE = :P14_ID_VL_SOURCE;
+                    
+                                COMMIT;
+                            ELSE
+                                :P14_RESPONSE := 0;
+                            END IF;
+                        END IF;
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P14_ID_VL_SOURCE
+                    P14_ID_VL_COMPANY_APPLICATION
+                    P14_SOURCE_URL
+                    P14_USER
+                    P14_PASS
+                    P14_ID_VL_WS_TYPE
+                    P14_VL_TYPE_ENVIRONMENT
+                ]
+                itemsToReturn: P14_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                spinnerType: ellipsis
+                accessibilityText: Processing
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: warning
+                text: Ingrese todos los datos
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: La configuración para este entorno ya se encuentra registrada.
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P14_RESPONSE
+                value: 3
+            }
+        )
+
+    )
+
+    dynamicAction da-value-pass-user (
+        name: DA_VALUE_PASS_USER
+        execution {
+            sequence: 70
+        }
+        when {
+            event: ready
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P14_ID_VL_SOURCE
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    V_MAIN_VALUE CLOB;
+                    v_convert_value CLOB;
+                    BEGIN
+                    SELECT SOURCE_AUTHENTICATION INTO V_MAIN_VALUE FROM VL_SOURCES WHERE ID_VL_SOURCE= :P14_ID_VL_SOURCE;
+                    v_convert_value:=VL_PKG_CONVERT_BLOBCLOB.CLOBFROMBLOB(VL_PKG_UTL_BASE64.VL_FN_DECODE_BASE64(V_MAIN_VALUE));
+                    :P14_USER:= SUBSTR(v_convert_value, 1, INSTR(v_convert_value, ':') - 1);
+                    
+                    :P14_PASS:= SUBSTR(v_convert_value, INSTR(v_convert_value, ':') + 1);
+                    
+                    END;
+                    ```
+                itemsToSubmit: P14_ID_VL_SOURCE
+                itemsToReturn: [
+                    P14_USER
+                    P14_PASS
+                ]
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    process apclosedialog (
+        name: apCloseDialog
+        type: closeDialog
+        settings {
+            showSuccessMessages: false
+        }
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 6131765337172902
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: Crear,Actualizar,DELETE,CANCEL
+        }
+    )
+
+    process approcessformgestióndefuentes (
+        name: apProcessFormGestióndefuentes
+        type: formAutoRowProcessing
+        formRegion: @gestión-de-fuentes
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 6131386951172902
+        }
+    )
+
+    process initialize-form-gestión-de-fuentes (
+        name: Initialize form Gestión de fuentes
+        type: formInitialization
+        formRegion: @gestión-de-fuentes
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 6130929858172903
+        }
+    )
+
+)
+

@@ -1,0 +1,308 @@
+page 3 (
+    name: Recuperar Contraseña
+    alias: RECUPERAR-CONTRASEÑA
+    title: Recuperar Contraseña
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .btn {
+                width: 10rem;
+                padding: 0.8rem auto 0.8rem auto;
+                background-color: #ededec;
+                color: black;
+                font-weight: 700;
+                font-size: 1rem;
+                border-radius: 10px;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease 0s;
+                outline: none;
+            }
+            .btn:hover {
+                background-color: #508223;
+                box-shadow: 0px 15px 20px rgba(80, 130, 35, 0.4);
+                color: #fff;
+                transform: translatey(-7px);
+            }
+            ```
+    }
+    security {
+        authentication: public
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region recuperarcontraseña (
+        name: RecuperarContraseña
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region title (
+        name: TITLE
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <!DOCTYPE html>
+                <html>
+                
+                <head>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap');
+                
+                        * {
+                            margin: 0;
+                            padding: 0;
+                        }
+                
+                        .main-container {
+                            display: flex;
+                            width: 100%;
+                            height: 100%;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 1rem;
+                            margin: 0;
+                        }
+                
+                        .title_container {
+                            padding: 0 0.5rem 1rem 0.5rem;
+                            font-family: 'Nanum Gothic', sans-serif;
+                            font-weight: 700;
+                        }
+                
+                        .text-container {
+                            padding: 0 0.5rem 1rem 0.5rem;
+                            font-family: 'Nanum Gothic', sans-serif;
+                        }
+                    </style>
+                </head>
+                
+                <body>
+                    <main class="main-container">
+                        <div class="title_container">
+                            <h2>Buscar tu correo electrónico</h2>
+                        </div>
+                        <div class="text-container">
+                            <p>
+                                Ingresa su correo electrónico para la recuperación de la contraseña.
+                            </p>
+                        </div>
+                    </main>
+                </body>
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P3_EMAIL (
+        type: textField
+        label {
+            label: Ingrese su correo electrónico
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @recuperarcontraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P3_RETURN (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @recuperarcontraseña
+            slot: regionBody
+        }
+    )
+
+    button enviar (
+        buttonName: Enviar
+        label: Enviar
+        layout {
+            sequence: 10
+            region: @recuperarcontraseña
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+            cssClasses: btn
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 20
+            eventScope: dynamic
+        }
+        when {
+            selectionType: items
+            items: P3_RETURN
+        }
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Correo enviado exitosamente!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P3_RETURN
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: No se encontró este correo
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P3_RETURN
+                value: 0
+            }
+        )
+
+    )
+
+    dynamicAction da-send (
+        name: DA_SEND
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @enviar
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                     declare
+                        li_token clob;
+                        v_email clob;
+                    begin
+                       
+                        if VL_PKG_RESTORE.VL_RESTORE(UPPER(:P3_EMAIL)) THEN
+                            
+                            select dbms_random.string('A', 60) into li_token from dual;
+                            select STANDARD_HASH(EMAIL,'SHA256') into v_email 
+                            from VL_USERS
+                            where EMAIL= UPPER(:P3_EMAIL);
+                         
+                            update VL_USERS set TOKEN=li_token, TIME_EXPIRED=CURRENT_TIMESTAMP + interval '10' minute 
+                            where EMAIL=  UPPER(:P3_EMAIL);
+                            
+                            
+                              apex_mail.send(p_from => 'notification@veranoglobal.com', 
+                            p_to => :P3_EMAIL, 
+                            p_template_static_id => 'EMAILTRY',
+                            p_placeholders       => '{' ||
+                            ' "APPLICATION_LINK":'      || apex_json.stringify('https://apps.veranocloud.com.co' || apex_page.get_url(
+                                                            p_application => 140,
+                                                            p_page => 9998,
+                                                            p_plain_url =>true,
+                                                            p_session => null,
+                                                            p_items  => 'P9998_EMAIL,P9998_TOKEN',
+                                                            p_values =>  v_email || ',' || li_token)) ||
+                            '}' );
+                            
+                            apex_mail.push_queue();
+                            
+                            :P3_RETURN:=1;
+                        else
+                            :P3_RETURN:=0;
+                        end if;
+                    
+                    end;
+                    ```
+                itemsToSubmit: P3_EMAIL
+                itemsToReturn: P3_RETURN
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

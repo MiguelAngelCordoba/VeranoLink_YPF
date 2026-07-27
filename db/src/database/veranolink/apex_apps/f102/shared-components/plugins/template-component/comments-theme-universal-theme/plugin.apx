@@ -1,0 +1,86 @@
+plugin comments (
+    name: Comments
+    staticId: THEME_42$COMMENTS
+    theme: @universal-theme
+    templateComponent {
+        availableAs: [
+            partial
+            report
+        ]
+        partial:
+            ```html
+            {if APEX$IS_LAZY_LOADING/}
+              <div class="t-Comments-item">
+                {if DISPLAY_AVATAR%assigned/}
+                  <div class="t-Comments-icon">
+                    {with/}
+                      SIZE:=t-Avatar--xs
+                      SHAPE:=#AVATAR_SHAPE#
+                    {apply THEME$AVATAR/}
+                  </div>
+                {endif/}
+                <div class="t-Comments-body">
+                  <div class="t-Comments-info">
+                    <span class="t-Comments-user is-placeholder"></span>
+                  </div>
+                  <div class="t-Comments-comment is-placeholder"></div>
+                </div>
+              </div>
+            {else/}
+              <div class="t-Comments-item">
+                {if DISPLAY_AVATAR/}
+                  <div class="t-Comments-icon">
+                    {with/}
+                      TYPE:=#AVATAR_TYPE#
+                      IMAGE:=#AVATAR_IMAGE#
+                      IMAGE_ALT:=#AVATAR_IMAGE_ALT#
+                      ICON:=#AVATAR_ICON#
+                      INITIALS:=#AVATAR_INITIALS#
+                      SIZE:=t-Avatar--xs
+                      SHAPE:=#AVATAR_SHAPE#
+                      CSS_CLASSES:=u-color
+                      LINK:=#AVATAR_LINK#
+                      LINK_ATTR:=#AVATAR_LINK_ATTR!RAW#
+                    {apply THEME$AVATAR/}
+                  </div>
+                {endif/}
+                <div class="t-Comments-body">
+                  <div class="t-Comments-info">
+                    <span class="t-Comments-user">{if USER_NAME_LINK/}<a href="#USER_NAME_LINK!ATTR#" #USER_NAME_LINK_ATTR!RAW#>{endif/}#USER_NAME!RAW#{if USER_NAME_LINK/}</a>{endif/}</span>
+                    {if COMMENT_DATE/}<span class="t-Comments-date">#COMMENT_DATE!RAW#</span>{endif/}
+                    {if ACTIONS/}<span class="t-Comments-actions">#ACTIONS!RAW#</span>{endif/}
+                  </div>
+                  <div class="t-Comments-comment">
+                    #COMMENT_TEXT!RAW#
+                    {if ATTRIBUTES/}<div class="t-Comments-attributes">#ATTRIBUTES!RAW#</div>{endif/}
+                  </div>
+                </div>
+              </div>
+            {endif/}
+            ```
+        reportBody:
+            ```html
+            <ul class="t-Comments{if ?STYLE/} #STYLE#{endif/} {if APPLY_THEME_COLORS/} u-colors{endif/} #APEX$COMPONENT_CSS_CLASSES#">#APEX$ROWS#</ul>
+            
+            ```
+        reportRow:
+            ```html
+            <li class="t-Comments-item" #APEX$ROW_IDENTIFICATION#>#APEX$PARTIAL#</li>
+            
+            ```
+        numberOfLazyLoadingSkeletons: 3
+    }
+    component {
+        standardAttributes: regionTemplateAttr
+    }
+    advanced {
+        quickPick: true
+    }
+    information {
+        helpText: Display user comments and status updates. Supports avatars. Available for a single row or as a report with multiple rows.
+    }
+    subscription {
+        master: @/8842/templateComponent/comments/universal-theme
+    }
+)
+

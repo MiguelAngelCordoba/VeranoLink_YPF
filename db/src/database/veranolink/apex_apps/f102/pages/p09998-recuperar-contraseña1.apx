@@ -1,0 +1,359 @@
+page 9998 (
+    name: Recuperar contraseña
+    alias: RECUPERAR-CONTRASEÑA1
+    title: Recuperar contraseña
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigationMenu {
+        overrideUserInterfaceLevel: true
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    css {
+        inline:
+            ```css
+            .t-Header-branding {
+                height: 0px;
+                display: none;
+            }
+            .t-Footer{
+              display: none;
+            }
+            
+            ```
+    }
+    security {
+        authentication: public
+        deepLinking: false
+        browserCache: false
+    }
+    sessionManagement {
+        rejoinSessions: false
+    }
+
+    region expirado (
+        name: expirado
+        type: staticContent
+        source {
+            htmlCode: El link a expirado.
+        }
+        layout {
+            sequence: 40
+            slot: body
+            column: 5
+            columnSpan: 4
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                /*BEGIN
+                IF to_char(sysdate  ,'DD-MM-YYYY HH24:MI:SS') > :P9998_TIMESTAMP THEN
+                    RETURN TRUE ;
+                    ELSE 
+                    RETURN FALSE;
+                  END IF;
+                END ;*/
+                declare
+                 
+                v_token_status varchar2(10);
+                 
+                cursor c_exists_email (v_email varchar2) is
+                select TOKEN from VL_USERS where STANDARD_HASH(EMAIL,'SHA256') = v_email;
+                 
+                l_exists_email c_exists_email%rowtype;
+                l_exists_c_exists_email boolean;
+                 
+                begin
+                 
+                    select case when systimestamp > TIME_EXPIRED then 'Expirado' else 'Vigente' end into v_token_status  from VL_USERS
+                    where STANDARD_HASH(EMAIL,'SHA256')=:P9998_EMAIL;
+                
+                    OPEN c_exists_email(:P9998_EMAIL);
+                    FETCH c_exists_email INTO l_exists_email;
+                        l_exists_c_exists_email := c_exists_email%FOUND;
+                    CLOSE c_exists_email;
+                 
+                    if l_exists_c_exists_email then
+                
+                        if l_exists_email.TOKEN=:P9998_TOKEN and v_token_status='Vigente' then
+                
+                            return false;
+                        else
+                
+                            return true;
+                        end if;
+                     else 
+                        
+                       return true;
+                    end if;
+                end;
+                ```
+        }
+    )
+
+    region restaurar-contraseña (
+        name: Restaurar Contraseña
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: body
+            column: 5
+            columnSpan: 4
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                /*BEGIN
+                IF to_char(sysdate  ,'DD-MM-YYYY HH24:MI:SS') > :P9998_TIMESTAMP  OR :P9998_TIMESTAMP IS NULL THEN
+                    RETURN FALSE ;
+                    ELSE 
+                    RETURN TRUE;
+                  END IF;
+                END ;*/
+                declare
+                
+                v_token_status varchar2(10);
+                
+                cursor c_exists_email (v_email varchar2)is
+                select TOKEN from VL_USERS where STANDARD_HASH(EMAIL,'SHA256') = v_email;
+                
+                l_exists_email c_exists_email%rowtype;
+                l_exists_c_exists_email boolean;
+                
+                begin
+                    
+                    select case when systimestamp > TIME_EXPIRED then 'Expirado' else 'Vigente' end into v_token_status 
+                    from VL_USERS
+                    where STANDARD_HASH(EMAIL,'SHA256')=:P9998_EMAIL;
+                
+                    OPEN c_exists_email(:P9998_EMAIL);
+                    FETCH c_exists_email INTO l_exists_email;
+                        l_exists_c_exists_email := c_exists_email%FOUND;
+                    CLOSE c_exists_email;
+                
+                    if l_exists_c_exists_email then
+                
+                        if l_exists_email.TOKEN=:P9998_TOKEN and v_token_status='Vigente' then
+                            UPDATE VL_USERS SET 
+                                ACTIVE = 1
+                            WHERE STANDARD_HASH(EMAIL,'SHA256') = :P9998_EMAIL;
+                            return true;
+                        else
+                
+                            return false;
+                        end if;
+                     else 
+                        
+                       return false;
+                    end if;
+                end;
+                ```
+        }
+    )
+
+    pageItem P9998_CONFIRM (
+        type: textField
+        label {
+            label: Confirmar Contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @restaurar-contraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P9998_EMAIL (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+    )
+
+    pageItem P9998_NEW_PASS (
+        type: textField
+        label {
+            label: Nueva contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @restaurar-contraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P9998_TOKEN (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+    )
+
+    button cambiar (
+        buttonName: Cambiar
+        label: Cambiar
+        layout {
+            sequence: 10
+            region: @restaurar-contraseña
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    validation vldt-confirm-pass (
+        name: VLDT_CONFIRM_PASS
+        execution {
+            sequence: 1031
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                
+                IF :P9998_NEW_PASS != :P9998_CONFIRM THEN
+                    RETURN 'Las contraseñas no coinciden...';
+                END IF;
+                
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P9998_CONFIRM
+        }
+    )
+
+    validation vldt-format-pass (
+        name: VLDT_FORMAT_PASS
+        execution {
+            sequence: 1021
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                IF 8 <= LENGTH(:P9998_NEW_PASS) AND  LENGTH(:P9998_NEW_PASS) <= 15  THEN
+                    IF REGEXP_LIKE(:P9998_NEW_PASS, '^.*[0-9]') THEN
+                 IF REGEXP_LIKE(:P9998_NEW_PASS, '^.*[a-z]', 'c') THEN
+                 IF REGEXP_LIKE(:P9998_NEW_PASS, '^.*[A-Z]', 'c') THEN
+                 IF REGEXP_LIKE(:P9998_NEW_PASS, '^.*[.!@#$%^&*()_]', 'c') THEN
+                 RETURN '';
+                 ELSE
+                    RETURN 'La contraseña debe contener un caracter especial.';
+                 END IF;
+                 ELSE
+                    RETURN 'La contraseña debe tener minimo una mayuscula';
+                 END IF;   
+                 ELSE
+                    RETURN 'La contraseña debe tener minímo una minuscula';
+                 END IF;
+                 ELSE
+                    RETURN 'La contraseña debe contener un número';
+                 END IF; 
+                ELSE
+                RETURN 'La contraseña debe contener minímo 8 caracteres y maximo 15 caracteres, el tamaño actual es: '||' '||LENGTH(:P9998_NEW_PASS);
+                END IF;
+                
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P9998_NEW_PASS
+        }
+    )
+
+    validation vldt-null-pass (
+        name: VLDT_NULL_PASS
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9998_NEW_PASS
+        }
+        error {
+            errorMessage: Ingrese una contraseña
+            associatedItem: @P9998_NEW_PASS
+        }
+    )
+
+    process spupdatepass (
+        name: spUpdatePass
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    
+                    VL_PKG_RESTORE.UPDATE_PASSWORD ( :P9998_NEW_PASS , :P9998_EMAIL);
+                
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Contraseña actualizada
+        }
+        advanced {
+            executionMappingIdentifier: 3351718133405032
+        }
+        serverSideCondition {
+            whenButtonPressed: @cambiar
+        }
+    )
+
+)
+

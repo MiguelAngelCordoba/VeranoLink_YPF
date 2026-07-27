@@ -1,0 +1,901 @@
+page 15 (
+    name: Usar API
+    alias: USAR-API
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        deepLinking: false
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+        browserCache: false
+    }
+
+    region clob (
+        name: clob
+        type: plugin/jsonRegion2
+        source {
+            text: P15_SAVE_DATA
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        plugin-jsonSchema {
+            source: sqlQuery
+            sqlQuery: SELECT JSON_P FROM VL_PATH_CONTEXTS WHERE ID_VL_PATH_CONTEXT = :P15_COD_API
+        }
+        plugin-layout {
+            columnWidth: 12
+            headers: true
+        }
+        plugin-jsonData {
+            removeNullsFromJson: false
+        }
+    )
+
+    pageItem P15_ACTIVE (
+        type: switch
+        label {
+            label: Activado
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT CASE VPC.STATE WHEN  1 THEN 'Y' WHEN  0 THEN 'N' end FROM VL_PATH_CONTEXTS vpc WHERE VPC.ID_VL_PATH_CONTEXT = :P15_COD_API
+            used: always
+        }
+    )
+
+    pageItem P15_API_RESPONSE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P15_COD_API (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P15_DESCR_API (
+        type: displayOnly
+        label {
+            alignment: left
+        }
+        settings {
+            format: html
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    pageItem P15_SAVE_DATA (
+        type: textarea
+        label {
+            label: New
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    button ejecutar (
+        buttonName: Ejecutar
+        label: Ejecutar
+        layout {
+            sequence: 70
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-execute-validations (
+        name: DA_EXECUTE_VALIDATIONS
+        execution {
+            sequence: 60
+            eventScope: dynamic
+            type: debounce
+            time: 3000
+            immediate: true
+        }
+        when {
+            event: custom
+            customEvent: IDIOM
+            selectionType: jsExpression
+            javaScriptExpression: document
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    GET_RESPONSE VARCHAR2(1000);
+                    
+                    BEGIN
+                    
+                    
+                    
+                    GET_RESPONSE := VL_PKG_REST_SERVICES.VL_EXTRACT_API_RESPONSE(iv_param_json =>:P15_SAVE_DATA
+                                                      ,iv_cod_context => :P15_COD_API
+                                                      ,iv_company_name => :GET_COMPANY_NAME
+                                                      , iv_environment => :APPLICATION_ENVIRONMENT);
+                    
+                    
+                    
+                    :P15_API_RESPONSE := GET_RESPONSE;
+                    
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P15_SAVE_DATA
+                    P15_COD_API
+                    GET_COMPANY_NAME
+                    APPLICATION_ENVIRONMENT
+                ]
+                itemsToReturn: P15_API_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: console.log("asdas")
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                spinnerType: roller
+                accessibilityText: Processing
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-spinner-actions-2 (
+            action: plugin/fosSpinnerActions
+            settings {
+                spinnerType: roller
+                accessibilityText: Processing
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 80
+            eventScope: dynamic
+        }
+        when {
+            selectionType: items
+            items: P15_API_RESPONSE
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                    
+                    :GET_JSON_REQUEST:= :P15_SAVE_DATA;
+                    
+                    END;
+                    ```
+                itemsToSubmit: P15_SAVE_DATA
+                itemsToReturn: GET_JSON_REQUEST
+                showProcessing: true
+            }
+            execution {
+                sequence: 240
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: itemIsNotInList
+                item: P15_API_RESPONSE
+                list: [
+                    602
+                    603
+                    1039
+                    1049
+                    1074
+                    657
+                    811
+                    2051
+                    500
+                    713
+                    3000
+                    505
+                    709
+                    1059
+                    1305
+                    3002
+                    40441
+                    707
+                    404
+                    204
+                ]
+            }
+        )
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 16
+                    items: {
+                        P16_NAME_VIEW: &P15_API_RESPONSE.
+                        P16_ID_API: &P15_COD_API.
+                    }
+                }
+                options: submitPageItemsBeforeRedirect
+                pageItemsToSubmit: [
+                    P15_API_RESPONSE
+                    P15_SAVE_DATA
+                    P15_COD_API
+                ]
+            }
+            execution {
+                sequence: 250
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: itemIsNotInList
+                item: P15_API_RESPONSE
+                list: [
+                    602
+                    603
+                    1039
+                    1049
+                    1074
+                    657
+                    811
+                    2051
+                    500
+                    713
+                    3000
+                    505
+                    709
+                    1059
+                    1305
+                    3002
+                    40441
+                    707
+                    404
+                    204
+                ]
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                action: removeSpinner
+            }
+            execution {
+                sequence: 230
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Nombre de proceso de negocio incorrecto
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 603
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-10 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: El nombre de la hoja de programación no es válido.
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 120
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 713
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-11 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Dato no es válido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 130
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 505
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-12 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: El nombre del informe no es válido. Verifique si el informe existe o está habilitado para la integración.
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 140
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 709
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-13 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: "El Cash Flow no existe. "
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 150
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 1305
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-14 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es valido.
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 160
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 3000
+            }
+            serverSideCondition {
+                type: itemIsInColonDelimitedList
+                item: P15_COD_API
+                list: 157
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-15 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es valido.
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 170
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 1059
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-16 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es valido.
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 180
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 3002
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-17 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es valido..
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 190
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 40441
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-18 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: No existe hoja de costo
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 200
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 707
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-19 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Codigo no es válido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 210
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 404
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Número de proyecto/Shell es incorrecto
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 602
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-20 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: No hay contenido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 220
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 204
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-3 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es válido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 1039
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-4 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Nodetype no es válido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 1049
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-5 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: El nodepath no existe
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 70
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 1074
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-6 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Record_no es invalido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 80
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 657
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-7 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Item de entrada no es válido
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 90
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 811
+            }
+            serverSideCondition {
+                type: itemIsNotInColonDelimitedList
+                item: P15_COD_API
+                list: 157
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-8 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Shell Type invalido o no esta activo
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 100
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 2051
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-9 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Error interno, contacte al administrador
+                preventDuplicates: true
+                timeout: 2500
+                showDuration: 300
+                hideDuration: 800
+            }
+            execution {
+                sequence: 110
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_API_RESPONSE
+                value: 500
+            }
+        )
+
+    )
+
+    dynamicAction da-update-state (
+        name: DA_UPDATE_STATE
+        execution {
+            sequence: 90
+        }
+        when {
+            selectionType: items
+            items: P15_ACTIVE
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    
+                    BEGIN
+                    
+                    
+                    UPDATE VL_PATH_CONTEXTS SET STATE= 0 WHERE ID_VL_PATH_CONTEXT = :P15_COD_API;
+                    COMMIT;
+                    END;
+                    ```
+                itemsToSubmit: P15_COD_API
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_ACTIVE
+                value: N
+            }
+        )
+
+        action native-execute-plsql-code-2 (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    
+                    BEGIN
+                    
+                    
+                    UPDATE VL_PATH_CONTEXTS SET STATE= 1 WHERE ID_VL_PATH_CONTEXT = :P15_COD_API;
+                    COMMIT;
+                    END;
+                    ```
+                itemsToSubmit: P15_COD_API
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P15_ACTIVE
+                value: Y
+            }
+        )
+
+    )
+
+    process set-descrip (
+        name: SET_descrip
+        type: executeCode
+        source {
+            plsqlCode: SELECT PATH_DESCRIPTION INTO :P15_DESCR_API FROM VL_PATH_CONTEXTS WHERE ID_VL_PATH_CONTEXT = :P15_COD_API;
+        }
+        execution {
+            sequence: 10
+            point: afterHeader
+        }
+        advanced {
+            executionMappingIdentifier: 6664995263816030
+        }
+    )
+
+    branch (
+        name: EXECUTE_JAVASCRIPT
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                type: url
+                url: javascript:apex.event.trigger(document,'IDIOM'); console.log("PreventError");
+            }
+        }
+    )
+
+)
+

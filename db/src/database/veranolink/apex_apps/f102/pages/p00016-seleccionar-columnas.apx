@@ -1,0 +1,302 @@
+page 16 (
+    name: Seleccionar columnas
+    alias: SELECCIONAR-COLUMNAS
+    title: Seleccionar columnas
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        width: 1000
+        height: 400
+        resizable: false
+    }
+    navigationMenu {
+        overrideUserInterfaceLevel: true
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    pageItem P16_COLUMNS (
+        type: shuttle
+        label {
+            label: Seleccionar columnas
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT column_name ||' ('||lower(data_type)|| ')' as D, column_name
+                FROM USER_TAB_COLUMNS
+                WHERE table_name = UPPER(:P16_NAME_VIEW  )AND column_name<>'BP_NAME' AND column_name<>'PROJECT_ID' AND column_name<>'JSON_FILE'
+                AND column_name<>'ID_VL_PATH_CONTEXT' AND column_name<>'JSON_NAME' AND column_name<>'ID_VL_JSON_DOCUMENT';
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: [
+                #DEFAULT#
+                t-Form-fieldContainer--xlarge
+            ]
+            height: 18
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P16_ID_API (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+    )
+
+    pageItem P16_NAME_VIEW (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P16_QUERY_RESPONSE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P16_SEARCH_COLUMN (
+        type: textField
+        label {
+            label: Buscar Columna
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            used: always
+        }
+    )
+
+    button visualizar (
+        buttonName: Visualizar
+        label: Visualizar
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-create-query (
+        name: DA_CREATE_QUERY
+        execution {
+            sequence: 10
+        }
+        when {
+            event: custom
+            customEvent: redirect
+            selectionType: jsExpression
+            javaScriptExpression: document
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    BEGIN
+                    
+                    --:P16_QUERY_RESPONSE :='select "' || REPLACE ( :P16_COLUMNS ,':','","')||'" ' ||' from '||'"'||:P16_NAME_VIEW||'";';
+                    
+                    --:P16_QUERY_RESPONSE := :P16_COLUMNS;
+                    :VIEW_QUERY:= :P16_COLUMNS;
+                    END;
+                    ```
+                itemsToSubmit: P16_COLUMNS
+                itemsToReturn: [
+                    P16_QUERY_RESPONSE
+                    VIEW_QUERY
+                ]
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 12
+                    items: {
+                        P12_NAME_VIEW: &P16_NAME_VIEW.
+                        P12_ID_API: &P16_ID_API.
+                    }
+                    clearCache: 12
+                    action: resetRegions
+                }
+                options: submitPageItemsBeforeRedirect
+                pageItemsToSubmit: [
+                    P16_COLUMNS
+                    P16_ID_API
+                ]
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                spinnerType: dualRing
+                accessibilityText: Processing
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-search (
+        name: DA_SEARCH
+        execution {
+            sequence: 20
+        }
+        when {
+            event: keyup
+            selectionType: items
+            items: P16_SEARCH_COLUMN
+        }
+
+        action plugin-nl-detora-apex-restrict-shuttle-values (
+            action: plugin/restrictShuttleValues
+            settings {
+                searchItem: P16_SEARCH_COLUMN
+            }
+            affectedElements {
+                selectionType: items
+                items: P16_COLUMNS
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation vldt-null-element (
+        name: VLDT_NULL_ELEMENT
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P16_COLUMNS
+        }
+        error {
+            errorMessage: Seleccione columnas para visualizar
+            associatedItem: @P16_COLUMNS
+        }
+    )
+
+    validation vldt-select-columns (
+        name: VLDT_SELECT_COLUMNS
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                  v_column_count NUMBER;
+                BEGIN
+                 
+                
+                 
+                  v_column_count := LENGTH(:P16_COLUMNS) - LENGTH(REPLACE(:P16_COLUMNS, ':', '')) + 1;
+                
+                  -- Verifica si el número de columnas es mayor que 100
+                  IF v_column_count > 80 THEN
+                    return('No puede seleccionar más de 80 columnas, la selección actual es de ' || TO_CHAR(v_column_count)) ;
+                  
+                  END IF;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P16_COLUMNS
+        }
+    )
+
+    branch (
+        name: Go To Page 12
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                type: url
+                url: javascript:  apex.event.trigger(document,'redirect'); console.log("PreventError");
+            }
+        }
+    )
+
+)
+

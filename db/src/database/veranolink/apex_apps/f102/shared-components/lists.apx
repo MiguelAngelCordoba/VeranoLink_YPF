@@ -1,0 +1,476 @@
+list flow-custom-report (
+    name: flow_custom_report
+
+    entry atributos (
+        label: Atributos
+        icon {
+            imageIconCssClasses: fa-list
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 20
+            }
+        }
+    )
+
+    entry columnas (
+        label: Columnas
+        icon {
+            imageIconCssClasses: fa-columns
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 22
+            }
+        }
+    )
+
+    entry fuente-de-datos (
+        label: Fuente de datos
+        icon {
+            imageIconCssClasses: fa-database
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 21
+            }
+        }
+    )
+
+    entry información-de-usuario (
+        label: Información de Usuario
+        icon {
+            imageIconCssClasses: fa-table-cursor
+        }
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 23
+            }
+        }
+    )
+
+    entry resumen (
+        label: Resumen
+        layout {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 24
+            }
+        }
+    )
+
+)
+
+list navigation-bar (
+    name: Navigation Bar
+
+    entry app-user (
+        label: &APP_USER.
+        icon {
+            imageIconCssClasses: fa-user
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                type: url
+                url: #
+            }
+        }
+        userDefinedAttributes {
+            2: has-username
+        }
+    )
+
+    entry descargar-app (
+        label: Descargar App
+        icon {
+            imageIconCssClasses: fa-cloud-download
+        }
+        layout {
+            sequence: 10
+        }
+        isCurrent {
+            type: never
+        }
+        link {
+            target: {
+                type: url
+                url: #action$a-pwa-install
+            }
+        }
+        userDefinedAttributes {
+            2: a-pwaInstall
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+    entry list_item (
+        label: ---
+        layout {
+            sequence: 30
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: separator
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+    entry mi-perfil (
+        label: Mi perfil
+        icon {
+            imageIconCssClasses: fa-user-circle
+        }
+        layout {
+            sequence: 39
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                page: 5
+                items: {
+                    P5_VL_ID_USER: &GET_ID.
+                }
+            }
+        }
+    )
+
+    entry salir (
+        label: Salir
+        icon {
+            imageIconCssClasses: fa-sign-out
+        }
+        layout {
+            sequence: 40
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: &LOGOUT_URL.
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+)
+
+list navigation-menu (
+    name: Navigation Menu
+
+    entry administrador (
+        label: "Administrador "
+        icon {
+            imageIconCssClasses: fa-user-lock
+        }
+        layout {
+            sequence: 30
+        }
+        security {
+            authorizationScheme: @adminview
+        }
+    )
+
+    entry api-s-personalizadas (
+        label: API's Personalizadas
+        icon {
+            imageIconCssClasses: fa-pencil-square
+        }
+        layout {
+            sequence: 76
+        }
+    )
+
+    entry aplicaciones (
+        label: "Aplicaciones "
+        icon {
+            imageIconCssClasses: fa-laptop
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry cambio-contraseña-servicio-web (
+        label: Cambio contraseña Servicio Web
+        icon {
+            imageIconCssClasses: fa-key
+        }
+        layout {
+            sequence: 106
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: 28
+        }
+        link {
+            target: {
+                page: 28
+            }
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                Begin
+                if :GET_COMPANY_NAME = 'RENOBO' THEN 
+                RETURN TRUE;
+                ELSE 
+                RETURN FALSE;
+                END IF;
+                
+                end;
+                ```
+        }
+    )
+
+    entry compañías (
+        label: Compañías
+        icon {
+            imageIconCssClasses: fa-building-o
+        }
+        layout {
+            sequence: 31
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                4
+                7
+            ]
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+        security {
+            authorizationScheme: @superadmin
+        }
+    )
+
+    entry crear-api-personalizada (
+        label: Crear API personalizada
+        icon {
+            imageIconCssClasses: fa-plus-square
+        }
+        layout {
+            sequence: 66
+            parentEntry: @api-s-personalizadas
+        }
+        link {
+            target: {
+                page: 20
+            }
+        }
+    )
+
+    entry fuentes (
+        label: Fuentes
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 46
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                13
+                14
+            ]
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry logs-de-api-s (
+        label: Logs de API'S
+        icon {
+            imageIconCssClasses: fa-table-clock
+        }
+        layout {
+            sequence: 96
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: 26
+        }
+        link {
+            target: {
+                page: 26
+            }
+        }
+    )
+
+    entry mis-api-s-publicas-total-api (
+        label: "Mis API's publicas [&TOTAL_API.]"
+        icon {
+            imageIconCssClasses: fa-table-play
+        }
+        layout {
+            sequence: 86
+            parentEntry: @api-s-personalizadas
+        }
+        isCurrent {
+            type: pages
+            pages: 19
+        }
+        link {
+            target: {
+                page: 19
+            }
+        }
+    )
+
+    entry tablas-guardadas (
+        label: Tablas Guardadas
+        icon {
+            imageIconCssClasses: fa-table-bookmark
+        }
+        layout {
+            sequence: 56
+        }
+        isCurrent {
+            type: pages
+            pages: 18
+        }
+        link {
+            target: {
+                page: 18
+            }
+        }
+    )
+
+    entry trabajos (
+        label: Trabajos
+        icon {
+            imageIconCssClasses: fa-alarm-clock
+        }
+        layout {
+            sequence: 116
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: 27
+        }
+        link {
+            target: {
+                page: 27
+            }
+        }
+    )
+
+    entry usuarios (
+        label: Usuarios
+        icon {
+            imageIconCssClasses: fa-table-user
+        }
+        layout {
+            sequence: 36
+            parentEntry: @administrador
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                8
+                9
+            ]
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+)
+
+list nuevo (
+    name: nuevo
+
+    entry a (
+        label: a
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 19
+                items: {
+                    P19_STEP: 1
+                }
+            }
+        }
+    )
+
+    entry aa (
+        label: aa
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 19
+                items: {
+                    P19_STEP: 2
+                }
+            }
+        }
+    )
+
+    entry aaa (
+        label: aaa
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 19
+                items: {
+                    P19_STEP: 3
+                }
+            }
+        }
+    )
+
+)
+

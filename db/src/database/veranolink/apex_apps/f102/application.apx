@@ -1,0 +1,86 @@
+app VERANO-LINK (
+    name: Verano Link
+    version: " "
+    logo {
+        type: text
+        text: Verano Link
+    }
+    navigation {
+        homeUrl: {
+            page: 1
+        }
+        loginUrl: {
+            page: LOGIN
+        }
+    }
+    navigationMenu {
+        listTemplate: @side-navigation-menu
+        templateOptions: [
+            #DEFAULT#
+            t-TreeNav--styleA
+            js-navCollapsed--hidden
+        ]
+        list: @navigation-menu
+    }
+    navigationBar {
+        list: @navigation-bar
+        listTemplate: @navigation-bar
+        templateOptions: #DEFAULT#
+    }
+    userInterface {
+        currentTheme: @universal-theme
+        globalPage: 0
+        addBuiltWithApexToFooter: false
+    }
+    appFormatMasks {
+        date: DS
+        timestamp: DS
+        timestampTimeZone: DS
+    }
+    authentication {
+        scheme: @oracle-apex-accounts
+        publicUser: APEX_PUBLIC_USER
+    }
+    security {
+        embedInFrames: allow
+        runtimeApiUsage: [
+            modifyThisApp
+            modifyOtherApps
+            modifyWorkspaceRepository
+        ]
+    }
+    sessionStateProtection {
+        checksumSalt: 2DE9F9236FDD1AF27A0C52288B3971E9D1D0FF3B1964CB52804DF9207BB8C4B6
+    }
+    globalization {
+        primaryLanguage: en-us
+        documentDirection: leftToRight
+        translationMethod: translationApps
+        autoTimeZone: true
+    }
+    progressiveWebApp {
+        installable: true
+    }
+    runtime {
+        allowFeedback: true
+        compatibilityMode: 21.2
+        accessibleReadOnlyItems: false
+    }
+    advanced {
+        modernizeApp: true
+    }
+
+    substitution APP_NAME (
+        value {
+            staticValue: Verano Link
+        }
+    )
+
+    languageMapping (
+        appId: 103
+        language: es
+        documentDirection: false
+    )
+
+)
+

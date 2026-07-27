@@ -1,0 +1,275 @@
+page 20 (
+    name: Custom Report - Step 1
+    alias: CUSTOM-REPORT-STEP-1
+    title: Crear API Personalizada
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @wizard-modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        width: 900
+        attributes: closeOnEscape:false
+        cssClasses: no-close
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        executeWhenPageLoads:
+            ```javascript-browser
+            var button = parent.$('.ui-dialog-titlebar-close'); //get the button
+            button.hide(); //hide the button
+            console.log(button)
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region lista-de-progreso (
+        name: Lista de progreso
+        type: list
+        source {
+            list: @flow-custom-report
+        }
+        layout {
+            sequence: 20
+            slot: wizardProgressBar
+        }
+        appearance {
+            template: @blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    region region-de-atributos (
+        name: Region de Atributos
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P20_DESCRIP (
+        type: textarea
+        label {
+            label: Descripción
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @region-de-atributos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+        validation {
+            maxLength: 2000
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P20_NAME (
+        type: textField
+        label {
+            label: Nombre de la API
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @region-de-atributos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        validation {
+            maxLength: 1000
+        }
+        source {
+            used: always
+        }
+    )
+
+    button cancelar (
+        buttonName: Cancelar
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @region-de-atributos
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button siguiente (
+        buttonName: Siguiente
+        label: Siguiente
+        layout {
+            sequence: 10
+            region: @region-de-atributos
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-close-delete (
+        name: DA_CLOSE_DELETE
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    BEGIN
+                    EXECUTE IMMEDIATE 'DROP VIEW '||:GET_COMPANY_NAME||'.VIEW_'||UPPER(:CUSTOM_REPORT_NAME);
+                    COMMIT;
+                    EXCEPTION WHEN OTHERS THEN 
+                    NULL;
+                    END;
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation vldt-name-exist (
+        name: VLDT_NAME_EXIST
+        execution {
+            sequence: 30
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                validator number;
+                BEGIN
+                SELECT COUNT(*) into validator FROM VL_APU_TABLES WHERE API_TABLE_NAME = lower(:P20_NAME) AND COMPANY_NAME= UPPER(:GET_COMPANY_NAME) AND ID_USER = :GET_ID;
+                
+                IF validator != 0 THEN 
+                return 'Ya existe un reporte con este nombre';
+                end if;
+                
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P20_NAME
+        }
+    )
+
+    validation vldt-no-special-char (
+        name: VLDT_NO_SPECIAL_CHAR
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: itemMatchesRegexp
+            item: P20_NAME
+            regexp: "^[a-zA-Z0-9_]*$"
+        }
+        error {
+            errorMessage: El único caracteres especiales permitido es el guion bajo ( _ ).
+            associatedItem: @P20_NAME
+        }
+    )
+
+    validation vldt-null-name (
+        name: VLDT_NULL_NAME
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P20_NAME
+        }
+        error {
+            errorMessage: Debe ingresar un nombre!
+            associatedItem: @P20_NAME
+        }
+    )
+
+    branch (
+        name: Go To Page 21
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 21
+                items: {
+                    CUSTOM_REPORT_NAME: &P20_NAME.
+                    CUSTOM_REPORT_DESCRIP: &P20_DESCRIP.
+                }
+                clearCache: 21
+                action: clearRegions
+            }
+        }
+    )
+
+)
+

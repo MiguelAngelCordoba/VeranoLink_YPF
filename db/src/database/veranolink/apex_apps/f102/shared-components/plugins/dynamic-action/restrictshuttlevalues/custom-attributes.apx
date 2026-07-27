@@ -1,0 +1,16 @@
+customAttribute attribute_01 (
+    apexlangName: searchItem
+    attribute: 1
+    name: Search Item
+    type: pageItem
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    help {
+        helpText: Item that contains the search string to limit the values in the left shuttle pane
+    }
+)
+

@@ -1,0 +1,65 @@
+plugin restrictShuttleValues (
+    name: Restrict Shuttle Values
+    staticId: NL.DETORA.APEX.RESTRICT_SHUTTLE_VALUES
+    type: dynamicAction
+    component {
+        standardAttributes: [
+            forItem
+            affectedElementRequired
+        ]
+    }
+    source {
+        plsqlCode:
+            ```plsql
+            /*--------------------------------------------------------------------------
+             * APEX Restrict Shuttle Values
+             * Version: 1.1 (22-04-2017)
+             * Author:  Dick Dral
+             *
+             * DD  22-04-2017    V1.1    Adapted for other triggering elements than search item
+             * DD  16-04-2017    V1.0    Initial version
+             *--------------------------------------------------------------------------
+            */
+            FUNCTION render_restrict_shuttle_values(p_dynamic_action IN apex_plugin.t_dynamic_action,
+                                           p_plugin         IN apex_plugin.t_plugin)
+              RETURN apex_plugin.t_dynamic_action_render_result IS
+              --
+              l_onload_code       varchar2(4000) := q'!console.log('Catch Return'); $("[search_item]").keypress(function(e){
+                  return e.keyCode != 13;
+               });!';
+              
+              -- plugin attributes
+              l_result            apex_plugin.t_dynamic_action_render_result;
+              l_search_item       varchar2(100)  := p_dynamic_action.attribute_01;
+              --
+            BEGIN
+              --
+              l_onload_code := replace(l_onload_code,'[search_item]','#'||l_search_item);
+              apex_javascript.add_onload_code(l_onload_code);
+              --
+              l_result.javascript_function := 'apex_restrict_shuttle_values.doIt';
+              --
+              l_result.attribute_01        := l_search_item;
+              --
+              RETURN l_result;
+              --
+            END render_restrict_shuttle_values;
+            ```
+    }
+    callbacks {
+        apiInterface: function
+        renderProcedureName: render_restrict_shuttle_values
+    }
+    advanced {
+        category: effect
+        substituteAttributeValues: true
+    }
+    javaScript {
+        fileUrls: #PLUGIN_FILES#apex_restrict_shuttle_values.js
+    }
+    information {
+        version: 1.1
+        aboutUrl: http://www.speech2form.com/ords/f?p=OPFG:RESTRICT_SHUTTLE
+    }
+)
+

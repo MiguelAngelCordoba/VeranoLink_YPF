@@ -1,0 +1,1056 @@
+page 9 (
+    name: Validar_Correo
+    alias: GESTIÓN-DE-USUARIOS
+    title: Gestión de Usuarios
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword2(){
+                  var input = document.getElementById("P9_PASSWORD");
+                  var icon = document.getElementById("ojo2");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            ```
+    }
+    security {
+        formAutoComplete: false
+    }
+
+    region botones (
+        name: Botones
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region gestión-de-usuarios (
+        name: Gestión de Usuarios
+        type: form
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select VL_ID_USER,
+                       NAME,
+                       EMAIL,
+                       PASSWORD,
+                       VL_ID_COMPANY,
+                       CREATED_DATE,
+                       VL_ID_ROL,
+                       STATE
+                  from VL_USERS
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P9_EMAIL (
+        type: textField
+        label {
+            label: Correo Electrónico
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 30
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 100
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: EMAIL
+            dataType: varchar2
+        }
+    )
+
+    pageItem P9_NAME (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 20
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 100
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: NAME
+            dataType: varchar2
+        }
+    )
+
+    pageItem P9_NOTI_DELETE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 130
+            region: @gestión-de-usuarios
+            slot: regionBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P9_PASSWORD (
+        type: password
+        label {
+            label: Contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 1000
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword2()" style="padding:0">
+                <span id="ojo2" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: PASSWORD
+            dataType: varchar2
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    pageItem P9_SL_SOURCES (
+        type: checkboxGroup
+        label {
+            label: Ambientes
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                
+                    C.NAME||' - '||D.TYPE_ENVIRONMENT AS D, A.ID_VL_SOURCE 
+                    FROM VL_SOURCES A 
+                
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B ON A.ID_VL_COMPANY_APPLICATION = B.ID_VL_COMPANY_APPLICATION
+                INNER JOIN VL_SOURCE_APPLICATIONS C ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION
+                INNER JOIN VL_TYPES_ENVIRONMENT D ON D.ID_VL_TYPE_ENVIRONMENT = A.ID_VL_TYPE_ENVIRONMENT 
+                WHERE B.VL_ID_COMPANY = :GET_COMPANY ;
+                ```
+        }
+        layout {
+            sequence: 120
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT listagg(ID_VL_SOURCE_ENVIRONMENT, ':' ) within group (order by ID_VL_SOURCE_ENVIRONMENT) FROM vl_SOURCE_ASSIGNS WHERE ID_VL_USER=:P9_VL_ID_USER
+            used: always
+        }
+    )
+
+    pageItem P9_STATE (
+        type: selectList
+        label {
+            label: Estado
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC:ACTIVO;1,INACTIVO;0
+            displayNullValue: false
+        }
+        layout {
+            sequence: 110
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: STATE
+            dataType: number
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    pageItem P9_VL_ID_COMPANY_AD (
+        type: displayOnly
+        label {
+            label: "Compañía "
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            type: item
+            item: GET_COMPANY_NAME
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 2
+        }
+    )
+
+    pageItem P9_VL_ID_COMPANY_SA (
+        type: selectList
+        label {
+            label: "Compañía "
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @vl-companies-name
+        }
+        layout {
+            sequence: 50
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: VL_ID_COMPANY
+            dataType: number
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 1
+        }
+    )
+
+    pageItem P9_VL_ID_ROL_AD (
+        type: selectList
+        label {
+            label: Rol
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery: SELECT R.NAME D , R.VL_ID_ROL R FROM VL_ROLES R WHERE R.VL_ID_ROL != 1 ;
+        }
+        layout {
+            sequence: 90
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: VL_ID_ROL
+            dataType: number
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 2
+        }
+    )
+
+    pageItem P9_VL_ID_ROL_SA (
+        type: selectList
+        label {
+            label: Rol
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @vl-roles-name
+        }
+        layout {
+            sequence: 80
+            region: @gestión-de-usuarios
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: VL_ID_ROL
+            dataType: number
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 1
+        }
+    )
+
+    pageItem P9_VL_ID_USER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @gestión-de-usuarios
+            slot: regionBody
+        }
+        source {
+            formRegion: @gestión-de-usuarios
+            column: VL_ID_USER
+            dataType: number
+            primaryKey: true
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    button actualizar (
+        buttonName: Actualizar
+        label: Actualizar
+        layout {
+            sequence: 30
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: Seguro que desea actualizar?
+            style: success
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    button actualizar-contraseña (
+        buttonName: Actualizar_Contraseña
+        label: Actualizar Contraseña
+        layout {
+            sequence: 20
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 2
+                items: {
+                    P2_VL_ID_USER: &P9_VL_ID_USER.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @botones
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button crear (
+        buttonName: Crear
+        label: Crear
+        layout {
+            sequence: 40
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    dynamicAction da-canceldialog (
+        name: DA_CANCELDIALOG
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-get-value (
+        name: DA_GET_VALUE
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P9_SL_SOURCES
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: console.log(apex.item('P9_SL_SOURCES').getValue())
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-noti-delete (
+        name: DA_NOTI_DELETE
+        execution {
+            sequence: 50
+            eventScope: dynamic
+        }
+        when {
+            selectionType: items
+            items: P9_NOTI_DELETE
+        }
+
+        action native-submit-page (
+            action: submitPage
+            settings {
+                requestButtonName: Eliminar
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P9_NOTI_DELETE
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Usuario eliminado
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P9_NOTI_DELETE
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Error al eliminar el usuario
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P9_NOTI_DELETE
+                value: 0
+            }
+        )
+
+    )
+
+    dynamicAction da-show-hiide (
+        name: DA_SHOW_HIIDE
+        execution {
+            sequence: 60
+        }
+        when {
+            selectionType: items
+            items: P9_VL_ID_ROL_AD
+        }
+
+        action hide (
+            name: Hide
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P9_SL_SOURCES
+            }
+            execution {
+                sequence: 10
+            }
+            clientSideCondition {
+                type: item!=value
+                item: P9_VL_ID_ROL_AD
+                value: 3
+            }
+        )
+
+        action show (
+            name: show
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P9_SL_SOURCES
+            }
+            execution {
+                sequence: 10
+            }
+            clientSideCondition {
+                type: item=value
+                item: P9_VL_ID_ROL_AD
+                value: 3
+            }
+        )
+
+    )
+
+    validation vldt-email (
+        name: VLDT_EMAIL
+        execution {
+            sequence: 40
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_EMAIL
+        }
+        error {
+            errorMessage: Ingrese un correo electrónico
+            associatedItem: @P9_EMAIL
+        }
+    )
+
+    validation vldt-format-email (
+        name: VLDT_FORMAT_EMAIL
+        execution {
+            sequence: 110
+        }
+        validation {
+            type: itemMatchesRegexp
+            item: P9_EMAIL
+            regexp: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        }
+        error {
+            errorMessage: El email ingresado no es valido
+            associatedItem: @P9_EMAIL
+        }
+    )
+
+    validation vldt-format-name (
+        name: VLDT_FORMAT_NAME
+        execution {
+            sequence: 30
+        }
+        validation {
+            type: itemMatchesRegexp
+            item: P9_NAME
+            regexp: "^[A-ZÁÉÍÓÚÑa-záéíóúñ ]*$"
+            alwaysExecute: true
+        }
+        error {
+            errorMessage: Ingrese un nombre válido
+            associatedItem: @P9_NAME
+        }
+    )
+
+    validation vldt-format-pass (
+        name: VLDT_FORMAT_PASS
+        execution {
+            sequence: 60
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                  -- Verificar si la contraseña es nula o vacía
+                  IF :P9_PASSWORD IS NULL OR TRIM(:P9_PASSWORD) = '' THEN
+                    RETURN 'Es necesario proporcionar una contraseña para continuar.';
+                  END IF;
+                
+                  -- Verificar la longitud de la contraseña
+                  IF LENGTH(:P9_PASSWORD) >= 8 AND LENGTH(:P9_PASSWORD) <= 15 THEN
+                    -- Verificar si contiene un número
+                    IF REGEXP_LIKE(:P9_PASSWORD, '[0-9]') THEN
+                      -- Verificar si contiene una letra minúscula
+                      IF REGEXP_LIKE(:P9_PASSWORD, '[a-z]', 'c') THEN
+                        -- Verificar si contiene una letra mayúscula
+                        IF REGEXP_LIKE(:P9_PASSWORD, '[A-Z]', 'c') THEN
+                          -- Verificar si contiene un carácter especial
+                          IF REGEXP_LIKE(:P9_PASSWORD, '[,.!@#$%^&*()_]', 'c') THEN
+                            RETURN ''; -- Contraseña válida
+                          ELSE
+                            RETURN 'La contraseña debe contener al menos un carácter especial, como uno de los siguientes: [,.!@#$%^&*()_]';
+                          END IF;
+                        ELSE
+                          RETURN 'La contraseña debe contener al menos una letra mayúscula.';
+                        END IF;
+                      ELSE
+                        RETURN 'La contraseña debe contener al menos una letra minúscula.';
+                      END IF;
+                    ELSE
+                      RETURN 'La contraseña debe contener al menos un número.';
+                    END IF;
+                  ELSE
+                    RETURN 'La contraseña debe tener entre 8 y 15 caracteres. El tamaño actual es: ' || LENGTH(:P9_PASSWORD);
+                  END IF;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P9_PASSWORD
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    validation vldt-null-company-ad (
+        name: VLDT_NULL_COMPANY_AD
+        execution {
+            sequence: 80
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_VL_ID_COMPANY_AD
+        }
+        error {
+            errorMessage: Seleccione una compañia
+            associatedItem: @P9_VL_ID_COMPANY_AD
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 2
+        }
+    )
+
+    validation vldt-null-company-sa (
+        name: VLDT_NULL_COMPANY_SA
+        execution {
+            sequence: 70
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_VL_ID_COMPANY_SA
+        }
+        error {
+            errorMessage: Seleccione una compañia
+            associatedItem: @P9_VL_ID_COMPANY_SA
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 1
+        }
+    )
+
+    validation vldt-null-name (
+        name: VLDT_NULL_NAME
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_NAME
+            alwaysExecute: true
+        }
+        error {
+            errorMessage: El nombre no puede estar vacío.
+            associatedItem: @P9_NAME
+        }
+    )
+
+    validation vldt-null-rol-ad (
+        name: VLDT_NULL_ROL_AD
+        execution {
+            sequence: 100
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_VL_ID_ROL_AD
+        }
+        error {
+            errorMessage: Seleccione un rol
+            associatedItem: @P9_VL_ID_ROL_AD
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 2
+        }
+    )
+
+    validation vldt-null-rol-sa (
+        name: VLDT_NULL_ROL_SA
+        execution {
+            sequence: 90
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_VL_ID_ROL_SA
+        }
+        error {
+            errorMessage: Seleccione un rol
+            associatedItem: @P9_VL_ID_ROL_SA
+        }
+        serverSideCondition {
+            type: item=value
+            item: GET_ROL
+            value: 1
+        }
+    )
+
+    validation vldt-passw (
+        name: VLDT_PASSW
+        execution {
+            sequence: 50
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9_PASSWORD
+        }
+        error {
+            errorMessage: Ingrese una contraseña
+            associatedItem: @P9_PASSWORD
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P9_VL_ID_USER
+        }
+    )
+
+    validation vldt-user-exist (
+        name: VLDT_USER_EXIST
+        execution {
+            sequence: 120
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                COUNTER NUMBER;
+                BEGIN
+                SELECT COUNT(*) INTO COUNTER FROM VL_USERS WHERE EMAIL =UPPER(:P9_EMAIL);
+                
+                IF COUNTER != 0 THEN
+                    RETURN 'Ya existe un usuario con este email!';
+                
+                  END IF;
+                
+                
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P9_EMAIL
+        }
+        serverSideCondition {
+            whenButtonPressed: @crear
+        }
+    )
+
+    process approcessformgestióndeusuarios (
+        name: apProcessFormGestióndeUsuarios
+        type: formAutoRowProcessing
+        formRegion: @gestión-de-usuarios
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 3183171598875855
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        settings {
+            showSuccessMessages: false
+        }
+        execution {
+            sequence: 90
+        }
+        advanced {
+            executionMappingIdentifier: 3183541197875855
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: Crear,SAVE,Eliminar,Actualizar
+        }
+    )
+
+    process initialize-form-gestión-de-usuarios (
+        name: Initialize form Gestión de Usuarios
+        type: formInitialization
+        formRegion: @gestión-de-usuarios
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 3182723015875855
+        }
+    )
+
+    process spactualizarusuario (
+        name: spActualizarUsuario
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                
+                l_elements varchar2(50);
+                
+                BEGIN
+                IF :GET_ROL = 1 THEN 
+                VL_PKG_CRUD_USER.UPDATE_USER (:P9_NAME, :P9_EMAIL,:P9_VL_ID_COMPANY_SA, :P9_VL_ID_ROL_SA, :P9_STATE, :P9_VL_ID_USER);
+                ELSIF :GET_ROL = 2 THEN
+                VL_PKG_CRUD_USER.UPDATE_USER (:P9_NAME, :P9_EMAIL, :GET_COMPANY, :P9_VL_ID_ROL_AD, :P9_STATE, :P9_VL_ID_USER);
+                END IF;
+                
+                
+                select listagg(:P9_SL_SOURCES, ':') into l_elements from dual;
+                
+                VL_PKG_CRUD_USER.UPDATE_USER_SOURCES(l_elements, :P9_VL_ID_USER);
+                
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 80
+        }
+        successMessage {
+            successMessage: Usuario actualizado
+        }
+        advanced {
+            executionMappingIdentifier: 3205064969819531
+        }
+        serverSideCondition {
+            whenButtonPressed: @actualizar
+        }
+    )
+
+    process spcrearusuario (
+        name: spCrearUsuario
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                
+                DECLARE
+                
+                    l_elements varchar2(50);
+                    v_id number;
+                
+                BEGIN
+                
+                    IF :GET_ROL = 1 THEN 
+                        v_id := VL_PKG_CRUD_USER.NEW_USER (:P9_NAME, :P9_EMAIL, :P9_PASSWORD, :P9_VL_ID_COMPANY_SA, :P9_VL_ID_ROL_SA);
+                
+                    ELSIF :GET_ROL = 2 THEN
+                        v_id := VL_PKG_CRUD_USER.NEW_USER (:P9_NAME, :P9_EMAIL, :P9_PASSWORD, :GET_COMPANY, :P9_VL_ID_ROL_AD);
+                        select listagg(:P9_SL_SOURCES, ':') into l_elements from dual;
+                        VL_PKG_CRUD_USER.UPDATE_USER_SOURCES(l_elements, v_id);
+                
+                    END IF;
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 60
+        }
+        successMessage {
+            successMessage: Usuario Creado
+        }
+        advanced {
+            executionMappingIdentifier: 3203542031819516
+        }
+        serverSideCondition {
+            whenButtonPressed: @crear
+        }
+    )
+
+)
+

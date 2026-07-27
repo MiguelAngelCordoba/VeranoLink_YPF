@@ -1,0 +1,208 @@
+customAttribute attribute_01 (
+    apexlangName: textarealimit
+    attribute: 1
+    name: Textarealimit
+    type: integer
+    validation {
+        required: true
+    }
+    appearance {
+        attributeGroup: @layout
+        sequence: 50
+    }
+    default {
+        value: 250
+    }
+    help {
+        helpText: The maximal length of a simple text input field. When the maxLength of the field is longer a textarea is used to display the field.
+    }
+)
+
+customAttribute attribute_02 (
+    apexlangName: source
+    attribute: 2
+    name: Source
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        attributeGroup: @jsonSchema
+        sequence: 10
+    }
+    default {
+        value: 1
+    }
+    help {
+        helpText:
+            ```
+            The source for the JSON-schema.
+            This could be a static schema or a schema retrieved by a SQL-query.
+            ```
+    }
+
+    entry sqlQuery (
+        sequence: 20
+        display: SQL-Query
+        return: 2
+    )
+
+    entry static (
+        sequence: 10
+        display: Static
+        return: 1
+    )
+
+)
+
+customAttribute attribute_03 (
+    apexlangName: staticSchema
+    attribute: 3
+    name: Static schema
+    type: textarea
+    validation {
+        maxLength: 4000
+    }
+    appearance {
+        attributeGroup: @jsonSchema
+        sequence: 20
+    }
+    builder {
+        displayWidth: 80
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: =
+        value: 1
+    }
+    help {
+        helpText:
+            ```
+            The static JSON-schema.
+            
+            The schema must contain the attributes
+            type, properties and optionally required.
+            For a detailed JSON-schema description see https://json-schema.org/
+            ```
+    }
+)
+
+customAttribute attribute_04 (
+    apexlangName: sqlQuery
+    attribute: 4
+    name: SQL-query
+    type: textarea
+    validation {
+        required: true
+        maxLength: 4000
+    }
+    appearance {
+        attributeGroup: @jsonSchema
+        sequence: 30
+    }
+    builder {
+        displayWidth: 80
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: !=
+        value: 1
+    }
+    help {
+        helpText:
+            ```
+            The Query to retrieve the JSON-schema. It must return exactly one row with the JSON-schema-column.
+            
+            The schema must contain the attributes
+            type, properties and optionally required.
+            For a detailed JSON-schema description see https://json-schema.org/
+            ```
+    }
+)
+
+customAttribute attribute_05 (
+    apexlangName: columnWidth
+    attribute: 5
+    name: Column width
+    type: integer
+    validation {
+        required: true
+    }
+    appearance {
+        attributeGroup: @layout
+        sequence: 40
+    }
+    default {
+        value: 3
+    }
+    help {
+        helpText:
+            ```
+            The width of a column.
+            The default universal-theme supports here 1 (12 columns), 2, 3, 4, 6, 12(1 column)
+            ```
+    }
+)
+
+customAttribute attribute_06 (
+    apexlangName: keepAdditionalAttributes
+    attribute: 6
+    name: Keep additional attributes
+    type: yesNo
+    appearance {
+        attributeGroup: @jsonData
+        sequence: 60
+    }
+    help {
+        helpText: When the JSON contains more attributes than defined in the JSON-schema the additional attributes are kept when updating the data.
+    }
+)
+
+customAttribute attribute_07 (
+    apexlangName: headers
+    attribute: 7
+    name: Headers
+    type: yesNo
+    appearance {
+        attributeGroup: @layout
+        sequence: 70
+    }
+    help {
+        helpText: When the JSON-schema contains "sub-objects" headers for each sub-object are shown.
+    }
+)
+
+customAttribute attribute_08 (
+    apexlangName: hideJson
+    attribute: 8
+    name: Hide JSON
+    type: yesNo
+    appearance {
+        attributeGroup: @layout
+        sequence: 80
+    }
+    default {
+        value: true
+    }
+    help {
+        helpText: Automatically hide the related JSON-item. This is the default.
+    }
+)
+
+customAttribute attribute_09 (
+    apexlangName: removeNullsFromJson
+    attribute: 9
+    name: Remove NULLS from JSON
+    type: yesNo
+    appearance {
+        attributeGroup: @jsonData
+        sequence: 90
+    }
+    default {
+        value: true
+    }
+    help {
+        helpText: Remove NULL values from JSON. This is useful to compact JSON-data with only a few attributes set.
+    }
+)
+

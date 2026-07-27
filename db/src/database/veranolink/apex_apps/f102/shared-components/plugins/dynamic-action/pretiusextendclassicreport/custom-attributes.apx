@@ -1,0 +1,82 @@
+customAttribute attribute_01 (
+    apexlangName: freezeType
+    attribute: 1
+    name: Freeze type
+    type: checkboxes
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    default {
+        value: freeze_header:freeze_column
+    }
+    help {
+        helpText:
+            ```
+            <p>
+              Selected type defines which part of report will be frozen
+            </p>
+            ```
+    }
+
+    entry columns (
+        sequence: 10
+        display: Columns
+        return: freeze_column
+        help {
+            helpText:
+                ```
+                <p>
+                  This option allows freeze the columns of report
+                </p>
+                ```
+        }
+    )
+
+    entry header (
+        sequence: 20
+        display: Header
+        return: freeze_header
+        help {
+            helpText:
+                ```
+                <p>
+                  This option allows freeze the header of report
+                </p>
+                ```
+        }
+    )
+
+)
+
+customAttribute attribute_02 (
+    apexlangName: columnsToFreeze
+    attribute: 2
+    name: Columns to freeze
+    type: number
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 20
+    }
+    default {
+        value: 1
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: inList
+        list: freeze_column
+    }
+    help {
+        helpText:
+            ```
+            <p>
+              Entered number will determine how many columns(count from the left) will be frozen
+            </p>
+            ```
+    }
+)
+

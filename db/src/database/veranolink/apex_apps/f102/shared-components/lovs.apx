@@ -1,0 +1,195 @@
+lov format-masks-num (
+    name: FORMAT_MASKS_NUM
+    source {
+        location: staticValues
+    }
+
+    entry lov_data (
+        sequence: 1
+        display: $5,234.10
+        return: FML999G999G999G999G990D00
+    )
+
+    entry lov_data-2 (
+        sequence: 2
+        display: 5,234.10
+        return: 999G999G999G999G990D00
+    )
+
+    entry lov_data-3 (
+        sequence: 3
+        display: 5,234.1000
+        return: 999G999G999G999G990D0000
+    )
+
+    entry lov_data-4 (
+        sequence: 4
+        display: 5,234
+        return: 999G999G999G999G999G999G990
+    )
+
+    entry lov_data-5 (
+        sequence: 5
+        display: 5,234.10-
+        return: 999G999G999G999G990D00MI
+    )
+
+    entry lov_data-6 (
+        sequence: 6
+        display: -5,234.10
+        return: S999G999G999G999G990D00
+    )
+
+    entry lov_data-7 (
+        sequence: 7
+        display: <5,234.10>
+        return: 999G999G999G999G990D00PR
+    )
+
+)
+
+lov format-masks-time (
+    name: FORMAT_MASKS_TIME
+    source {
+        location: staticValues
+    }
+
+    entry 12-jan (
+        sequence: 1
+        display: 12-JAN-04
+        return: DD-MON-RR
+    )
+
+    entry 12-jan-2 (
+        sequence: 2
+        display: 12-JAN-2004
+        return: DD-MON-YYYY
+    )
+
+    entry 12-jan-2004-14-30-america-new-york (
+        sequence: 4
+        display: 12-JAN-2004 14:30 AMERICA/NEW_YORK
+        return: DD-MON-YYYY HH24:MI TZR
+    )
+
+    entry 16-hours-ago (
+        sequence: 5
+        display: 16 hours ago
+        return: SINCE
+    )
+
+    entry monday-12-january (
+        sequence: 3
+        display: Monday, 12 January, 2004
+        return: fmDay, fmDD fmMonth, YYYY
+    )
+
+)
+
+lov vl-call-types-call-name (
+    name: VL_CALL_TYPES.CALL_NAME
+    source {
+        tableName: VL_CALL_TYPES
+    }
+    columnMapping {
+        return: ID_VL_CALL_TYPE
+        display: CALL_NAME
+        defaultSort: CALL_NAME
+    }
+)
+
+lov vl-companies-name (
+    name: VL_COMPANIES.NAME
+    source {
+        tableName: VL_COMPANIES
+    }
+    columnMapping {
+        return: VL_ID_COMPANY
+        display: NAME
+        defaultSort: NAME
+    }
+)
+
+lov vl-companies-source-applications-id-vl-company-application (
+    name: VL_COMPANIES_SOURCE_APPLICATIONS.ID_VL_COMPANY_APPLICATION
+    source {
+        tableName: VL_COMPANIES_SOURCE_APPLICATIONS
+    }
+    columnMapping {
+        return: ID_VL_COMPANY_APPLICATION
+        defaultSort: ID_VL_COMPANY_APPLICATION
+    }
+)
+
+lov vl-countries-name (
+    name: VL_COUNTRIES.NAME
+    source {
+        tableName: VL_COUNTRIES
+    }
+    columnMapping {
+        return: VL_ID_COUNTRY
+        display: NAME
+        defaultSort: NAME
+    }
+)
+
+lov vl-roles-name (
+    name: VL_ROLES.NAME
+    source {
+        tableName: VL_ROLES
+    }
+    columnMapping {
+        return: VL_ID_ROL
+        display: NAME
+        defaultSort: NAME
+    }
+)
+
+lov vl-source-applications-name (
+    name: VL_SOURCE_APPLICATIONS.NAME
+    source {
+        tableName: VL_SOURCE_APPLICATIONS
+    }
+    columnMapping {
+        return: ID_VL_SOURCE_APPLICATION
+        display: NAME
+        defaultSort: NAME
+    }
+)
+
+lov vl-sources-source-url (
+    name: VL_SOURCES.SOURCE_URL
+    source {
+        tableName: VL_SOURCES
+    }
+    columnMapping {
+        return: ID_VL_SOURCE
+        display: SOURCE_URL
+        defaultSort: SOURCE_URL
+    }
+)
+
+lov vl-types-environment-type-environment (
+    name: VL_TYPES_ENVIRONMENT.TYPE_ENVIRONMENT
+    source {
+        tableName: VL_TYPES_ENVIRONMENT
+    }
+    columnMapping {
+        return: ID_VL_TYPE_ENVIRONMENT
+        display: TYPE_ENVIRONMENT
+        defaultSort: TYPE_ENVIRONMENT
+    }
+)
+
+lov vl-ws-types-name-ws (
+    name: VL_WS_TYPES.NAME_WS
+    source {
+        tableName: VL_WS_TYPES
+    }
+    columnMapping {
+        return: ID_VL_WS_TYPE
+        display: NAME_WS
+        defaultSort: NAME_WS
+    }
+)
+

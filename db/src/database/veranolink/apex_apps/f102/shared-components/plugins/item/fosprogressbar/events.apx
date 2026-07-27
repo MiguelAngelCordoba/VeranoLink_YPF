@@ -1,0 +1,16 @@
+event fos_prb_after_refresh (
+    name: FOS - Progress Bar - After Refresh
+)
+
+event fos_prb_before_refresh (
+    name: FOS - Progress Bar - Before Refresh
+)
+
+event fos_prb_interval_over (
+    name: FOS - Progress Bar - Interval End
+)
+
+event fos_prb_progress_complete (
+    name: FOS - Progress Bar - Progress Complete
+)
+

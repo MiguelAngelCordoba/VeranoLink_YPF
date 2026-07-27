@@ -1,0 +1,24 @@
+attributeGroup jsonData (
+    name: JSON-Data
+    sequence: 3
+    advanced {
+        staticId: json-data
+    }
+)
+
+attributeGroup jsonSchema (
+    name: JSON-Schema
+    sequence: 1
+    advanced {
+        staticId: json-schema
+    }
+)
+
+attributeGroup layout (
+    name: Layout
+    sequence: 2
+    advanced {
+        staticId: layout
+    }
+)
+

@@ -1,0 +1,314 @@
+page 13 (
+    name: Fuentes
+    alias: FUENTES
+    title: Fuentes
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region fuentes (
+        name: Fuentes
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ID_VL_SOURCE,
+                       SOURCE_URL,
+                       ID_VL_WS_TYPE,
+                       ID_VL_TYPE_ENVIRONMENT,
+                       C.NAME,
+                       CASE WHEN VL_SOURCE_STATE = 1 THEN 'ACTIVO'
+                       WHEN VL_SOURCE_STATE = 0 THEN 'INACTIVO' END ICON
+                from VL_SOURCES A 
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B ON A.ID_VL_COMPANY_APPLICATION=B.ID_VL_COMPANY_APPLICATION
+                LEFT JOIN VL_SOURCE_APPLICATIONS C ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION
+                
+                where B.VL_ID_COMPANY = :GET_COMPANY
+                order by SOURCE_URL, ID_VL_TYPE_ENVIRONMENT;
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: #DEFAULT#
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 14
+                items: {
+                    P14_ID_VL_SOURCE: #ID_VL_SOURCE#
+                }
+                action: resetPagination
+            }
+            linkIcon: <span role="img" aria-label="Edit"><span class="fa fa-edit" aria-hidden="true" title="Edit"></span></span>
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        advanced {
+            savedReportMappingIdentifier: 5645299556413346
+        }
+
+        column ICON (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column ID_VL_SOURCE (
+            type: hidden
+            heading {
+                heading: Id Vl Source
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column ID_VL_TYPE_ENVIRONMENT (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Ambiente
+            }
+            lov {
+                lov: @vl-types-environment-type-environment
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column ID_VL_WS_TYPE (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Tipo Web Service
+            }
+            lov {
+                lov: @vl-ws-types-name-ws
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column NAME (
+            type: plainText
+            heading {
+                heading: Aplicación
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column SOURCE_URL (
+            type: plainText
+            heading {
+                heading: URL
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Fuentes
+        }
+
+        savedReport 61545 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ICON (
+                sequence: 5
+            )
+
+            displayColumn ID_VL_TYPE_ENVIRONMENT (
+                sequence: 3
+            )
+
+            displayColumn ID_VL_WS_TYPE (
+                sequence: 4
+            )
+
+            displayColumn NAME (
+                sequence: 1
+            )
+
+            displayColumn SOURCE_URL (
+                sequence: 2
+            )
+
+        )
+
+    )
+
+    button create (
+        buttonName: CREATE
+        label: Crear
+        layout {
+            sequence: 10
+            region: @fuentes
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 14
+                clearCache: 14
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-actualizacion-fuentes (
+        name: DA_ACTUALIZACION_FUENTES
+        execution {
+            sequence: 20
+        }
+        when {
+            event: input
+            selectionType: region
+            region: @fuentes
+        }
+        config {
+            buildOption: @commented-out
+        }
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Fuentes Actualizadas.
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-refresh (
+        name: DA_REFRESH
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosecanceldialog
+            selectionType: region
+            region: @fuentes
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @fuentes
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

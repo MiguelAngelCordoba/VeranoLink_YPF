@@ -1,0 +1,25 @@
+automation get-all (
+    name: GET_ALL
+    execution {
+        scheduleExpression: FREQ=MINUTELY;INTERVAL=5
+        actionsInitiatedOn: always
+    }
+
+    action ejecutar-codigo (
+        name: EJECUTAR_CODIGO
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                VL_PKG_SOAP_SERVICES.VL_SP_SEND_FILE_TAMPUS();
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+    )
+
+)
+

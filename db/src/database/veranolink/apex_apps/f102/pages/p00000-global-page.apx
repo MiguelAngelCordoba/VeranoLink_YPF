@@ -1,0 +1,41 @@
+page 0 (
+    name: Global Page
+
+    region new (
+        name: New
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <!-- <span class="footer-text">&copy Elaborado por 
+                <a href="https://www.veranoglobal.com/" target="_blank"
+                title="Verano Ingenieria LTDA">Verano Ingeniería LTDA</a></span> -->
+                <style>
+                .t-Footer-apex{
+                    line-height: 0rem;
+                }
+                
+                </style>
+                <span class="footer-text" style="font-size: 12px; color: #333; text-align: center; line-height: 0rem;">
+                    &copy; Elaborado por 
+                    <a href="https://www.veranoglobal.com/" target="_blank" 
+                       style="color: #007bff; text-decoration: none;" 
+                       title="Verano Ingenieria LTDA">
+                       Verano Ingeniería LTDA
+                    </a>
+                </span>
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: footer
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+)
+

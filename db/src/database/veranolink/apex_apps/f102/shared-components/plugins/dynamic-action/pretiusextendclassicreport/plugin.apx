@@ -1,0 +1,96 @@
+plugin pretiusExtendClassicReport (
+    name: Pretius Extend Classic Report
+    staticId: PRETIUS_EXTEND_CLASSIC_REPORT
+    type: dynamicAction
+    component {
+        standardAttributes: defaultFireOnInitialization
+    }
+    source {
+        plsqlCode:
+            ```plsql
+            function render (
+              p_dynamic_action in apex_plugin.t_dynamic_action,
+              p_plugin         in apex_plugin.t_plugin 
+            ) return apex_plugin.t_dynamic_action_render_result 
+            as
+              v_result apex_plugin.t_dynamic_action_render_result;
+            
+              v_attr_freeze_type          APEX_APPLICATION_PAGE_DA_ACTS.ATTRIBUTE_01%TYPE := p_dynamic_action.attribute_01;
+              v_attr_columns_to_freeze    APEX_APPLICATION_PAGE_DA_ACTS.ATTRIBUTE_02%TYPE := p_dynamic_action.attribute_02;
+            
+            begin
+            
+              if v_attr_columns_to_freeze < 0 then
+                APEX_ERROR.ADD_ERROR (
+                  p_message          => 'Pretius Freeze Report',
+                  p_additional_info  => 'Number of columns to freeze should be larger than 0',
+                  p_display_location => apex_error.c_on_error_page
+                );
+              end if;
+              if floor(v_attr_columns_to_freeze) != v_attr_columns_to_freeze then
+                APEX_ERROR.ADD_ERROR (
+                  p_message          => 'Pretius Freeze Report',
+                  p_additional_info  => 'Number of columns to freeze should be a number without decimal point',
+                  p_display_location => apex_error.c_on_error_page
+                );
+              end if;
+            
+              apex_javascript.add_library (
+                p_name      => 'pretius.FreezeWidget',
+                p_directory => p_plugin.file_prefix
+              );
+            
+              apex_css.add_file (
+                p_name => 'pretius.FreezeWidget',
+                p_directory => p_plugin.file_prefix
+               );
+            
+              v_result.ajax_identifier     := wwv_flow_plugin.get_ajax_identifier;
+              v_result.attribute_02        := v_attr_columns_to_freeze;
+              v_result.attribute_01        := v_attr_freeze_type;
+              v_result.javascript_function := '
+                function(){
+                  var debugName = ''# ''+this.action.action;
+                  $(this.triggeringElement).freezeWidget({           
+                      plugin          : this
+                    } );
+                }
+              ';
+            
+              return v_result;
+            end;
+            ```
+    }
+    callbacks {
+        apiInterface: function
+        renderProcedureName: render
+    }
+    advanced {
+        category: component
+        substituteAttributeValues: true
+    }
+    information {
+        version: 1.0.0
+        aboutUrl: https://github.com/Pretius/Pretius-Extend-Classic-Report
+        helpText:
+            ```
+            <strong>About plugin</strong>
+            <p>
+              Pretius Extend Classic Report is dynamic action plugin for freezing columns and header of classic report.
+            </p>
+            <p>
+              Github: <code>https://github.com/Pretius/Pretius-Extend-Classic-Report</code>
+            </p>
+            <strong>About author</strong>
+            </p>
+            <p>
+              Author: <code>Bartosz Sypuła</code><br/>
+              E-mail: <code>bartosz.sypula94@gmail.com</code><br/>
+              Twitter: <code>@sypulabartosz</code><br/>
+            </p>
+            <strong>About Pretius</strong>
+            <p>Website: https://pretius.com</p>
+            ```
+    }
+)
+

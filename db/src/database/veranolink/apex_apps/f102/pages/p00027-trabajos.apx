@@ -1,0 +1,389 @@
+page 27 (
+    name: Trabajos
+    alias: TRABAJOS
+    title: Trabajos
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            span.SUCCEEDED, span.Activo {
+            color: #fff;
+            background-color: #4ec625;
+            border-color: #4cae4c;
+            }
+            
+            span.FAILED, span.Inactivo {
+            color: #fff;
+            background-color: #c5254d;
+            border-color: #4cae4c;
+            }
+            
+            span.notify {
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 90%;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region informe-trabajos (
+        name: Informe Trabajos
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select job.job_name,
+                
+                CASE 
+                        WHEN prev_run.status = 'SUCCEEDED' THEN 'Exitoso'
+                        WHEN prev_run.status = 'FAILED' THEN 'Fallido'
+                        WHEN prev_run.status = 'STOPPED' THEN 'Interrumpido'
+                        ELSE 'Desconocido'
+                    END AS previous_run_status,
+                    --    prev_run.status previous_run_status,
+                       to_char(prev_run.previous_run_date - interval '5' hour, 'DD/MON/YYYY HH:MI:SS AM') as adjusted_previous_run_date,
+                       to_char(job.next_run_date - interval '5' hour, 'DD/MON/YYYY HH:MI:SS AM') as adjusted_next_run_date,
+                       job.repeat_interval,
+                       decode(job.enabled, 'TRUE', 'Activo', 'Inactivo') status,
+                       job.comments,
+                       1 action_run,
+                       null action_edit,
+                       null action_stats,
+                       1 action_remove
+                from   user_scheduler_jobs job,
+                       (select run.job_name, run.status, run.actual_start_date previous_run_date
+                        from   user_scheduler_job_run_details run
+                        where  (run.job_name, run.actual_start_date) in (
+                           select run_max.job_name, max(run_max.actual_start_date)
+                           from   user_scheduler_job_run_details run_max
+                           group by run_max.job_name)) prev_run
+                where  job.job_name = prev_run.job_name (+)
+                and    job.job_name not in ('CREATE_USER_JOB', 'UPDATE_PW_REST_USER', 'UPDATE_PW_USER', 'UPDATE_USER_PASS_JOB')
+                --AND comments NOT LIKE '%STEP%'
+                order by job.enabled desc, job.job_name;
+                
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 3087607247419111
+        }
+
+        column ACTION_EDIT (
+            type: link
+            heading {
+                heading: Editar
+            }
+            layout {
+                sequence: 90
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 29
+                    items: {
+                        P29_NAME_JOB: #JOB_NAME#
+                    }
+                    request: EDIT_JOB
+                }
+                linkText: <img src="#APEX_FILES#app_ui/img/icons/apex-edit-page.png" class="apex-edit-page" alt="">
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column ACTION_REMOVE (
+            type: plainText
+            heading {
+                heading: Action Remove
+                alignment: end
+            }
+            layout {
+                sequence: 110
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column ACTION_RUN (
+            type: hidden
+            heading {
+                heading: Action Run
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column ACTION_STATS (
+            type: link
+            heading {
+                heading: Ver logs
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 29
+                    items: {
+                        P29_NAME_JOB: #JOB_NAME#
+                    }
+                    request: VIEW_LOGS
+                }
+                linkText: <span role="img" aria-label="Ver" class="t-Icon t-Icon--left fa fa-eye" title="Ver"></span>
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column ADJUSTED_NEXT_RUN_DATE (
+            type: plainText
+            heading {
+                heading: Proxima Ejecución
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column ADJUSTED_PREVIOUS_RUN_DATE (
+            type: plainText
+            heading {
+                heading: Ultima Ejecución
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column COMMENTS (
+            type: plainText
+            heading {
+                heading: Descripción
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column JOB_NAME (
+            type: plainText
+            heading {
+                heading: Nombre trabajo
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column PREVIOUS_RUN_STATUS (
+            type: plainText
+            heading {
+                heading: Ultimo estado
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column REPEAT_INTERVAL (
+            type: plainText
+            heading {
+                heading: Intervalo
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column STATUS (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 60
+            }
+            columnFormatting {
+                htmlExpression: <span class="notify #STATUS#">#STATUS#</span>
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport 39049 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTION_EDIT (
+                sequence: 9
+            )
+
+            displayColumn ACTION_RUN (
+                sequence: 8
+            )
+
+            displayColumn ACTION_STATS (
+                sequence: 10
+            )
+
+            displayColumn ADJUSTED_NEXT_RUN_DATE (
+                sequence: 4
+            )
+
+            displayColumn ADJUSTED_PREVIOUS_RUN_DATE (
+                sequence: 3
+            )
+
+            displayColumn COMMENTS (
+                sequence: 7
+            )
+
+            displayColumn JOB_NAME (
+                sequence: 1
+            )
+
+            displayColumn PREVIOUS_RUN_STATUS (
+                sequence: 2
+            )
+
+            displayColumn REPEAT_INTERVAL (
+                sequence: 5
+            )
+
+            displayColumn STATUS (
+                sequence: 6
+            )
+
+        )
+
+    )
+
+)
+

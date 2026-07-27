@@ -1,0 +1,135 @@
+breadcrumb breadcrumb (
+    name: Breadcrumb
+
+    entry api-x27-s (
+        name: API&#x27;s
+        pageNumber: 10
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+    entry compañías (
+        name: Compañías
+        pageNumber: 4
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry fuentes (
+        name: Fuentes
+        pageNumber: 13
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry home (
+        name: Home
+        pageNumber: 1
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry logs-de-api-s (
+        name: Logs de API'S
+        pageNumber: 26
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 26
+            }
+        }
+    )
+
+    entry mis-api-s-publicadas (
+        name: Mis API's Publicadas
+        pageNumber: 19
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 19
+            }
+        }
+    )
+
+    entry respuesta (
+        name: Respuesta
+        pageNumber: 12
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 12
+            }
+        }
+    )
+
+    entry tablas-guardadas (
+        name: Tablas Guardadas
+        pageNumber: 18
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 18
+            }
+        }
+    )
+
+    entry trabajos (
+        name: Trabajos
+        pageNumber: 27
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 27
+            }
+        }
+    )
+
+    entry usuarios (
+        name: Usuarios
+        pageNumber: 8
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+)
+

@@ -1,0 +1,1364 @@
+page 29 (
+    name: Editar Trabajo
+    alias: EDITAR-TRABAJO
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        width: 1200
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        fileUrls: https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js
+    }
+    css {
+        fileUrls: https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css
+        inline:
+            ```css
+            .jsonview {
+              font-family: monospace;
+              width: max-content;
+              font-size: 1.1em;
+              white-space: pre-wrap; }
+              .jsonview .prop {
+                font-weight: bold;
+                text-decoration: none;
+                color: #000; }
+              .jsonview .null {
+                color: red; }
+              .jsonview .undefined {
+                color: red; }
+              .jsonview .bool {
+                color: blue; }
+              .jsonview .num {
+                color: blue; }
+              .jsonview .string {
+                color: green;
+                white-space: pre-wrap; }
+                .jsonview .string.multiline {
+                  display: inline-block;
+                  vertical-align: text-top; }
+              .jsonview .collapser {
+                position: absolute;
+                left: -1em;
+                cursor: pointer; }
+              .jsonview .collapsible {
+                transition: height 1.2s;
+                transition: width 1.2s; }
+              .jsonview .collapsible.collapsed {
+                height: .8em;
+                width: 1em;
+                display: inline-block;
+                overflow: hidden;
+                margin: 0; }
+              .jsonview .collapsible.collapsed:before {
+                content: "…";
+                width: 1em;
+                margin-left: .2em; }
+              .jsonview .collapser.collapsed {
+                transform: rotate(0deg); }
+              .jsonview .q {
+                display: inline-block;
+                width: 0px;
+                color: transparent; }
+              .jsonview li {
+                position: relative; }
+              .jsonview ul {
+                list-style: none;
+                margin: 0 0 0 2em;
+                padding: 0; }
+              .jsonview h1 {
+                font-size: 1.2em; }
+            
+            
+            .json-buttons-container {
+              position: fixed;
+                top: 80px; /* Ajusta la distancia desde el borde superior */
+                right: 20px; /* Ajusta la distancia desde el borde derecho */
+                z-index: 1000; /* Asegura que los botones se muestren por encima de otros elementos */
+                padding: 10px;
+                border-radius: 5px; /* Opcional: Añadir bordes redondeados */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+            }
+            
+            .json-button {
+               margin: 5px;
+                padding: 10px 15px;
+                font-size: 13px;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background-color: #e7edf3; /* Cambiar el color de fondo */
+                color: rgb(0, 0, 0);
+                transition: background-color 0.3s;
+            }
+            
+            .json-button:hover {
+              background-color: #0056b3; /* Color más oscuro al pasar el cursor */
+              color: white;
+            }
+            
+            .json-button:active {
+              background-color: #004085; /* Color más oscuro al hacer clic */
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    advanced {
+        reloadOnSubmit: always
+    }
+
+    region editar-trabajo-p29-name-job (
+        name: Editar trabajo &P29_NAME_JOB.
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: request=Value
+            value: EDIT_JOB
+        }
+    )
+
+    region información-del-trabajo (
+        name: Información del trabajo
+        type: staticContent
+        layout {
+            sequence: 120
+            parentRegion: @editar-trabajo-p29-name-job
+            slot: regionBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: request=Value
+            value: EDIT_JOB
+        }
+        comments {
+            comments: Se hace una nueva región para solucionar un bug relacionado con ocultar y mostrar el P29_JOB_DAYS, el cual no estaba funcionando, así que se adapto todo para que se ocultara la region en lugar de los elementos individualmente.
+        }
+    )
+
+    region ver-json (
+        name: Ver JSON
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <div class="json-buttons-container">
+                  <button id="expandBtn" class="json-button fa fa-expand ">Expandir JSON</button>
+                  <button id="collapseBtn" class="json-button fa fa-compress">Colapsar JSON</button>
+                 
+                </div>
+                
+                <pre class="my_json_item"></pre>
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @vista-de-logs
+            slot: regionBody
+        }
+        appearance {
+            template: @inline-dialog
+            templateOptions: [
+                #DEFAULT#
+                js-dialog-size720x480
+            ]
+            cssClasses: .jsonview
+        }
+        advanced {
+            htmlDomId: loquequiera
+        }
+    )
+
+    region vista-de-logs (
+        name: Vista de logs
+        title: Logs de trabajo &P29_NAME_JOB.
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    log.log_id AS log_id,
+                    log.job_name AS job_name,
+                    TO_CHAR(run.req_start_date - INTERVAL '5' HOUR, 'DD-MON-YYYY HH:MI:SS AM') AS schedule_time,
+                    TO_CHAR(run.actual_start_date - INTERVAL '5' HOUR, 'DD-MON-YYYY HH:MI:SS AM') AS start_time,
+                    TO_CHAR((run.actual_start_date - INTERVAL '5' HOUR) + run.run_duration, 'DD-MON-YYYY HH:MI:SS AM') AS end_time,
+                    TO_CHAR(run.run_duration, 'HH24:MI:SS') AS duration,
+                    
+                    CASE
+                        WHEN log.operation = 'RUN' THEN 'Ejecutado'
+                        WHEN log.operation = 'CHAIN_RUN' THEN 'Ejecución de cadena'
+                        WHEN log.operation = 'CHAIN_START' THEN 'Inicio de cadena'
+                
+                    END AS operation, 
+                    CASE 
+                        WHEN log.status = 'SUCCEEDED' THEN 'Exitoso'
+                        WHEN log.status = 'FAILED' THEN 'Fallido'
+                        WHEN log.status = 'STOPPED' THEN 'Interrumpido'
+                        ELSE 'Desconocido'
+                    END AS status,
+                    '<div>' || 
+                        CASE 
+                            WHEN DBMS_LOB.GETLENGTH(run.binary_output) > 120000 THEN
+                                '<div class="cc-actions-column">
+                                    <span>
+                                        <a href="' || APEX_PAGE.GET_URL (
+                                            p_page   => 0,
+                                            p_items  => 'ID_PARAMETER',
+                                            p_values => log.log_id,
+                                            p_request => 'APPLICATION_PROCESS=DOWNLOAD_JSON'
+                                        ) || '" aria-hidden="false" class="fa fa-download t-Button t-Button--simple cc-download-btn" data-id="' || run.log_id || '"></a>
+                                    </span>
+                                </div>'
+                            WHEN run.binary_output IS NOT NULL THEN
+                                '<div class="cc-actions-column">
+                                    <span>
+                                        <a href="##" aria-hidden="false" class="fa fa-eye t-Button t-Button--simple cc-clear-btn" data-id="' || run.log_id || '"></a>
+                                    </span>
+                                </div>'
+                            ELSE 
+                                'No se genera JSON'
+                        END || 
+                    '</div>' AS "Ver logs"
+                FROM 
+                    user_scheduler_job_log log
+                JOIN 
+                    user_scheduler_job_run_details run
+                ON 
+                    log.log_id = run.log_id
+                WHERE 
+                    log.job_name = :P29_NAME_JOB
+                ORDER BY 
+                    start_time DESC;
+                
+                ```
+            pageItemsToSubmit: [
+                P29_NAME_JOB
+                P29_ID_LOG
+                P29_JSON
+            ]
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            htmlDomId: Vsdt
+        }
+        serverSideCondition {
+            type: request=Value
+            value: VIEW_LOGS
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        componentAdvanced {
+            maxRowsPerPageInSelector: 10
+        }
+        advanced {
+            savedReportMappingIdentifier: 3950683206240641
+        }
+
+        column DURATION (
+            type: plainText
+            heading {
+                heading: Duración
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column END_TIME (
+            type: plainText
+            heading {
+                heading: Tiempo de finalización
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column JOB_NAME (
+            type: hidden
+            heading {
+                heading: Job Name
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column LOG_ID (
+            type: hidden
+            heading {
+                heading: Log Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column OPERATION (
+            type: plainText
+            heading {
+                heading: Operación
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column SCHEDULE_TIME (
+            type: plainText
+            heading {
+                heading: Tiempo programado
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column START_TIME (
+            type: plainText
+            heading {
+                heading: Tiempo de ejecución
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column STATUS (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column "Ver logs" (
+            type: plainText
+            heading {
+                heading: Ver Logs
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: L
+            }
+            security {
+                escapeSpecialChars: false
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Logs de trabajo &P29_NAME_JOB.
+        }
+
+        savedReport 40260 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 10
+            }
+
+            displayColumn DURATION (
+                sequence: 4
+            )
+
+            displayColumn END_TIME (
+                sequence: 3
+            )
+
+            displayColumn OPERATION (
+                sequence: 5
+            )
+
+            displayColumn SCHEDULE_TIME (
+                sequence: 1
+            )
+
+            displayColumn START_TIME (
+                sequence: 2
+            )
+
+            displayColumn STATUS (
+                sequence: 6
+            )
+
+            displayColumn "Ver logs" (
+                sequence: 7
+            )
+
+        )
+
+    )
+
+    pageItem P29_DESCRIPTION (
+        type: textField
+        label {
+            label: Descripción del Trabajo
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @editar-trabajo-p29-name-job
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            customAttributes: readonly="readonly"
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT comments 
+                FROM   user_scheduler_jobs
+                WHERE  job_name = :P29_JOB_NAME;
+                ```
+            used: always
+        }
+    )
+
+    pageItem P29_ENABLED (
+        type: selectList
+        label {
+            label: Estado
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC:Activo;TRUE,Inactivo;FALSE
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 50
+            region: @editar-trabajo-p29-name-job
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT enabled
+                FROM   user_scheduler_jobs WHERE job_name= :P29_NAME_JOB;
+                ```
+            used: always
+        }
+    )
+
+    pageItem P29_ID_LOG (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+    )
+
+    pageItem P29_JOB_DAYS (
+        type: checkboxGroup
+        label {
+            label: Frecuencia en dias
+            alignment: left
+        }
+        settings {
+            noOfCols: 3
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Lunes;MON,Martes;TUE,Miércoles;WED,Jueves;THU,Viernes;FRI,Sábado;SAT,Domingo;SUN
+            displayExtraValues: false
+        }
+        layout {
+            sequence: 10
+            region: @información-del-trabajo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT 
+                       REPLACE(REGEXP_SUBSTR(repeat_interval, 'BYDAY=([^;]+)', 1, 1, NULL, 1), ',', ':') AS byday_values
+                FROM   user_scheduler_jobs
+                WHERE  job_name = :P29_JOB_NAME;
+                ```
+            used: always
+        }
+    )
+
+    pageItem P29_JOB_FREQ (
+        type: selectList
+        label {
+            label: Frecuencia de repetición
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Cada minuto;Minutely,Cada hora;Hourly,Diariamente;Daily,Semanalmente;Weekly,Mensualmente;Monthly,Anualmente;Yearly
+            displayNullValue: false
+        }
+        layout {
+            sequence: 10
+            region: @información-del-trabajo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT 
+                       CASE
+                           WHEN repeat_interval LIKE '%FREQ=WEEKLY%' THEN 'Weekly'
+                           WHEN repeat_interval LIKE '%FREQ=DAILY%' THEN 'Daily'
+                           WHEN repeat_interval LIKE '%FREQ=YEARLY%' THEN 'Yearly'
+                           WHEN repeat_interval LIKE '%FREQ=MONTHLY%' THEN 'Monthly'
+                           WHEN repeat_interval LIKE '%FREQ=HOURLY%' THEN 'Hourly'
+                           WHEN repeat_interval LIKE '%FREQ=MINUTELY%' THEN 'Minutely'
+                           ELSE 'Unknown'
+                       END AS frequency
+                FROM   user_scheduler_jobs where job_name = :P29_JOB_NAME;
+                ```
+        }
+    )
+
+    pageItem P29_JOB_INTERVAL (
+        type: numberField
+        label {
+            label: Intervalo
+            alignment: left
+        }
+        settings {
+            virtualKeyboard: numeric
+        }
+        layout {
+            sequence: 10
+            region: @información-del-trabajo
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 3
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT
+                    --JOB_NAME AS name,
+                    LOWER(REGEXP_SUBSTR(REPEAT_INTERVAL, 'interval=([0-9]+)', 1, 1, NULL, 1)) AS interval_value
+                FROM
+                    USER_SCHEDULER_JOBS
+                
+                WHERE 
+                    job_name= :P29_NAME_JOB;
+                ```
+            used: always
+        }
+    )
+
+    pageItem P29_JOB_NAME (
+        type: textField
+        label {
+            label: Nombre del Trabajo
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @editar-trabajo-p29-name-job
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 128
+        }
+        advanced {
+            customAttributes: readonly="readonly"
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT job_name
+                FROM   user_scheduler_jobs WHERE job_name= :P29_NAME_JOB;
+                ```
+            used: always
+        }
+    )
+
+    pageItem P29_JSON (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+        sessionState {
+            dataType: clob
+        }
+    )
+
+    pageItem P29_NAME_JOB (
+        type: hidden
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P29_REPEAT_INTERVAL (
+        type: textField
+        label {
+            label: Repeat Interval
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @información-del-trabajo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            customAttributes: readonly="readonly"
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery:
+                ```sql
+                SELECT 
+                       repeat_interval
+                FROM   user_scheduler_jobs WHERE job_name=:P29_JOB_NAME;
+                ```
+            used: always
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    pageItem P29_VALIDATOR (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @editar-trabajo-p29-name-job
+            slot: regionBody
+        }
+        source {
+            used: always
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    button actualizar-trabajo (
+        buttonName: Actualizar_trabajo
+        label: Actualizar Trabajo
+        layout {
+            sequence: 10
+            region: @editar-trabajo-p29-name-job
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button cancelar (
+        buttonName: Cancelar
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @editar-trabajo-p29-name-job
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction ad-validate (
+        name: AD_VALIDATE
+        execution {
+            sequence: 100
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @actualizar-trabajo
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                        v_job_name        VARCHAR2(100) := :P29_JOB_NAME;       -- Nombre del job
+                        v_new_state       VARCHAR2(5) := :P29_ENABLED;          -- Estado: 'TRUE' o 'FALSE'
+                        v_new_interval    VARCHAR2(4000) := :P29_REPEAT_INTERVAL; -- Nuevo repeat_interval
+                        v_job_interval    NUMBER;                               -- Intervalo proporcionado
+                    BEGIN
+                        -- Validar que P29_JOB_INTERVAL sea un número
+                        v_job_interval := TO_NUMBER(TRIM(:P29_JOB_INTERVAL));
+                    
+                        -- Validar que P29_JOB_INTERVAL esté entre 1 y 100
+                        IF v_job_interval >= 1 AND v_job_interval <= 99 THEN
+                    
+                            --:P29_VALIDATOR := v_job_interval;
+                            -- Actualizar el estado del job
+                            IF v_new_state = 'FALSE' THEN
+                                DBMS_SCHEDULER.DISABLE(name => v_job_name);
+                            ELSE
+                                DBMS_SCHEDULER.ENABLE(name => v_job_name);
+                            END IF;
+                    
+                            -- Actualizar el repeat_interval
+                            DBMS_SCHEDULER.SET_ATTRIBUTE(
+                                name      => v_job_name,
+                                attribute => 'repeat_interval',
+                                value     => v_new_interval
+                            );
+                    
+                            -- Actualizar el comentario
+                            DBMS_SCHEDULER.SET_ATTRIBUTE(
+                                name      => v_job_name,
+                                attribute => 'comments',
+                                value     => :P29_DESCRIPTION
+                            );
+                    
+                            -- Configurar la hora de inicio a la hora actual + 1 minuto
+                            DBMS_SCHEDULER.SET_ATTRIBUTE(
+                                name      => v_job_name,
+                                attribute => 'start_date',
+                                value     => SYSTIMESTAMP + INTERVAL '1' MINUTE
+                            );
+                    
+                            :P29_VALIDATOR := 1;
+                        ELSE
+                            -- Si no cumple con la validación, asignar 0 a P29_VALIDATOR
+                            :P29_VALIDATOR := 0;
+                        END IF;
+                    
+                    EXCEPTION
+                        WHEN VALUE_ERROR THEN
+                            -- Si ocurre un error de conversión, asignar 0 a P29_VALIDATOR
+                            :P29_VALIDATOR := 2;
+                        WHEN OTHERS THEN
+                            -- Manejo general de errores
+                            :P29_VALIDATOR := 0;
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P29_JOB_NAME
+                    P29_ENABLED
+                    P29_REPEAT_INTERVAL
+                    P29_DESCRIPTION
+                    P29_JOB_INTERVAL
+                ]
+                itemsToReturn: P29_VALIDATOR
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-close-dialog (
+        name: DA_CLOSE_DIALOG
+        execution {
+            sequence: 40
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notifications (
+        name: DA_NOTIFICATIONS
+        execution {
+            sequence: 110
+        }
+        when {
+            selectionType: items
+            items: P29_VALIDATOR
+        }
+
+        action native-alert (
+            action: alert
+            settings {
+                message: ¡El trabajo se actualizó correctamente!
+                style: success
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_VALIDATOR
+                value: 1
+            }
+        )
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 27
+                }
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_VALIDATOR
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: El intervalo debe ser un número entero comprendido entre 1 y 99.
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_VALIDATOR
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Intervalo Invalido.
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_VALIDATOR
+                value: 2
+            }
+        )
+
+    )
+
+    dynamicAction da-refresh-freq-year (
+        name: DA_REFRESH_FREQ_YEAR
+        execution {
+            sequence: 120
+        }
+        when {
+            selectionType: items
+            items: P29_JOB_FREQ
+        }
+        clientSideCondition {
+            type: item=value
+            item: P29_JOB_FREQ
+            value: Yearly
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P29_JOB_DAYS
+            }
+            execution {
+                sequence: 10
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_JOB_FREQ
+                value: Yearly
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P29_JOB_DAYS
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+            clientSideCondition {
+                type: item!=value
+                item: P29_JOB_FREQ
+                value: Yearly
+            }
+        )
+
+    )
+
+    dynamicAction da-update-freq (
+        name: DA_UPDATE_FREQ
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: [
+                P29_JOB_FREQ
+                P29_JOB_INTERVAL
+                P29_JOB_DAYS
+            ]
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    var repeat_interval = "";
+                    
+                    if ($v("P29_JOB_FREQ").length > 0) {
+                        repeat_interval = repeat_interval + "FREQ=" + $v("P29_JOB_FREQ").trim().toUpperCase() + "; ";
+                    }
+                    
+                    // Solo concatena BYDAY si la frecuencia no es "YEARLY"
+                    if ($v("P29_JOB_FREQ").trim().toUpperCase() !== "YEARLY" && $v("P29_JOB_DAYS").length > 0) {
+                        repeat_interval = repeat_interval + "BYDAY=" + $v("P29_JOB_DAYS").replace(/:/g, ",") + "; ";
+                    }
+                    
+                    if ($v("P29_JOB_INTERVAL").length > 0) {
+                        repeat_interval = repeat_interval + "interval=" + $v("P29_JOB_INTERVAL") + "; ";
+                    }
+                    
+                    $s("P29_REPEAT_INTERVAL", repeat_interval);
+                    ```
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction dahideitemsactive (
+        name: DaHideItemsActive
+        execution {
+            sequence: 70
+        }
+        when {
+            selectionType: items
+            items: P29_ENABLED
+        }
+        clientSideCondition {
+            type: item=value
+            item: P29_ENABLED
+            value: TRUE
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: region
+                region: @información-del-trabajo
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_ENABLED
+                value: FALSE
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: region
+                region: @información-del-trabajo
+            }
+            execution {
+                sequence: 10
+            }
+            clientSideCondition {
+                type: item=value
+                item: P29_ENABLED
+                value: TRUE
+            }
+        )
+
+    )
+
+    dynamicAction darefreshitemjson (
+        name: DaRefreshItemJson
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P29_ID_LOG
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: items
+                items: P29_JSON
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction openjsonview (
+        name: OpenJsonView
+        execution {
+            sequence: 60
+            eventScope: dynamic
+            staticContainer: #Vsdt
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .cc-clear-btn
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    
+                    (function () {
+                      var parameterValue = $v("P29_JSON");
+                    
+                      $(".my_json_item").empty(); // Limpiar contenido previo
+                    
+                      if (!parameterValue || parameterValue.trim() === "") {
+                        document.querySelector(".my_json_item").textContent = "No se usaron parámetros.";
+                      } else {
+                        document.querySelector(".my_json_item").textContent = parameterValue;
+                    
+                        try {
+                          var json = JSON.parse(parameterValue);
+                    
+                        
+                          $(".my_json_item").JSONView(json, { collapsed: true }); 
+                    
+                          
+                          $("#expandBtn").on("click", function (event) {
+                            event.preventDefault(); 
+                            $(".my_json_item").JSONView('expand'); // Expande todo el JSON
+                          });
+                    
+                     
+                          $("#collapseBtn").on("click", function (event) {
+                            event.preventDefault(); 
+                            $(".my_json_item").JSONView('collapse'); // Colapsa todo el JSON
+                          });
+                         
+                        } catch (e) {
+                          console.error("El valor no es un JSON válido:", e);
+                        }
+                      }
+                    })();
+                    
+                    ```
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-javascript-code-2 (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    (function() {
+                      var parameterValue = $v("P29_VL_PARAMETERS");
+                    
+                      $(".my_json_item").empty();
+                    
+                    
+                      if (!parameterValue || parameterValue.trim() === "") {
+                        document.querySelector(".my_json_item").textContent = "No se usaron parámetros.";
+                      } else {
+                        // Asigna el valor a la región <pre>
+                        document.querySelector(".my_json_item").textContent = parameterValue;
+                    
+                        try {
+                          // Intentar formatear el JSON
+                          var json = JSON.parse(parameterValue);
+                          $(".my_json_item").JSONView(json, { collapsed: false });
+                        } catch (e) {
+                          console.error("El valor no es un JSON válido:", e);
+                        }
+                      }
+                    })();
+                    
+                    ```
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+            serverSideCondition {
+                type: never
+            }
+        )
+
+        action native-open-region (
+            action: openRegion
+            affectedElements {
+                selectionType: region
+                region: @ver-json
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression:
+                    ```javascript-browser
+                    $(this.triggeringElement).data('id');
+                    
+                    ```
+            }
+            affectedElements {
+                selectionType: items
+                items: P29_ID_LOG
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+        action native-set-value-2 (
+            action: setValue
+            settings {
+                type: plsqlFunctionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    BEGIN
+                       RETURN CONVERT_BLOB_TO_CLOB(:P29_ID_LOG);
+                    END;
+                    
+                    ```
+                itemsToSubmit: [
+                    P29_JSON
+                    P29_ID_LOG
+                ]
+                escapeSpecialChars: false
+            }
+            affectedElements {
+                selectionType: items
+                items: P29_JSON
+            }
+            execution {
+                sequence: 30
+            }
+        )
+
+    )
+
+)
+

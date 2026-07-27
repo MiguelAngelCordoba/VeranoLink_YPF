@@ -1,0 +1,556 @@
+page 21 (
+    name: Custom Report - Step 2
+    alias: CUSTOM-REPORT-STEP-2
+    title: Crear Reporte Personalizado
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        attributes: closeOnEscape:false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        executeWhenPageLoads:
+            ```javascript-browser
+            var button = parent.$('.ui-dialog-titlebar-close'); //get the button
+            button.hide(); //hide the button
+            console.log(button)
+            ```
+    }
+    css {
+        inline:
+            ```css
+            /* .t-Dialog-bodyWrapperIn{
+                overflow: hidden !important;
+            } */
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region lista-de-progreso (
+        name: Lista de Progreso
+        type: list
+        source {
+            list: @flow-custom-report
+        }
+        layout {
+            sequence: 10
+            slot: dialogHeader
+        }
+        appearance {
+            template: @blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    region seleccionar-tabla (
+        name: Seleccionar Tabla
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P21_SELECT_TABLES (
+        type: selectList
+        label {
+            label: Seleccionar Tabla
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery: SELECT TABLE_NAME D , VL_ID_SAVED_TABLE R FROM VL_SAVED_TABLES WHERE SHORT_COMPANY = :GET_COMPANY_NAME AND ID_USER = :GET_ID;
+            nullDisplayValue: --Seleccione una tabla--
+        }
+        layout {
+            sequence: 10
+            region: @seleccionar-tabla
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P21_SQLQUERY (
+        type: textarea
+        label {
+            label: SQL QUERY
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @seleccionar-tabla
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+            maxLength: 32767
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    button cancelar (
+        buttonName: Cancelar
+        label: Cancelar
+        layout {
+            sequence: 20
+            region: @seleccionar-tabla
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button siguiente (
+        buttonName: Siguiente
+        label: Siguiente
+        layout {
+            sequence: 10
+            region: @seleccionar-tabla
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 10
+            region: @seleccionar-tabla
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-arrow-left
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 20
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-progress-list (
+        name: DA_PROGRESS_LIST
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    BEGIN
+                    EXECUTE IMMEDIATE 'DROP VIEW '||:GET_COMPANY_NAME||'.VIEW_'||UPPER(:CUSTOM_REPORT_NAME);
+                    COMMIT;
+                    EXCEPTION WHEN OTHERS THEN 
+                    NULL;
+                    END;
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-redirect (
+        name: DA_REDIRECT
+        execution {
+            sequence: 20
+        }
+        when {
+            event: custom
+            customEvent: redirect
+            selectionType: jsExpression
+            javaScriptExpression: document
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    v_from_part number;
+                    v_query_text VARCHAR2(32767);
+                    BEGIN
+                    -- v_from_part := INSTR(:P21_SQLQUERY, 'FROM', 1);
+                    --   v_query_text := SUBSTR(:P21_SQLQUERY, v_from_part);
+                    
+                    :CUSTOM_REPORT_FROM_QUERY := :P21_SQLQUERY;
+                    -- :CUSTOM_REPORT_FROM_QUERY := 'asd';
+                    
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P21_SQLQUERY
+                    CUSTOM_REPORT_FROM_QUERY
+                ]
+                itemsToReturn: CUSTOM_REPORT_FROM_QUERY
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 22
+                }
+                options: submitPageItemsBeforeRedirect
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-set-query (
+        name: DA_SET_QUERY
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P21_SELECT_TABLES
+        }
+
+        action native-clear (
+            action: clear
+            affectedElements {
+                selectionType: items
+                items: P21_SQLQUERY
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: itemIsNull
+                item: P21_SELECT_TABLES
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: plsqlFunctionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    DECLARE
+                       v_query VARCHAR2(4000);
+                       v_formatted_query VARCHAR2(4000);
+                    BEGIN
+                       -- Tu consulta
+                      SELECT TABLE_QUERY INTO v_query FROM VL_SAVED_TABLES WHERE VL_ID_SAVED_TABLE = :P21_SELECT_TABLES;
+                         -- Formatear la consulta
+                      
+                           v_query := REGEXP_REPLACE(v_query, ',', ', ' || CHR(10), 1, 0, 'i');
+                    
+                       -- Imprimir la consulta formateada
+                      RETURN v_query;
+                    END;
+                    
+                    ```
+                itemsToSubmit: P21_SELECT_TABLES
+                escapeSpecialChars: false
+            }
+            affectedElements {
+                selectionType: items
+                items: P21_SQLQUERY
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: itemIsNotNull
+                item: P21_SELECT_TABLES
+            }
+        )
+
+    )
+
+    validation vldt-errors (
+        name: VLDT_ERRORS
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                    v_query     VARCHAR2(20000);
+                    v_respuesta VARCHAR2(20000);
+                --    v_formatted_query VARCHAR2(20);
+                    l_report_cursor INTEGER         := NULL;
+                BEGIN
+                    --EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = "' || :GET_COMPANY_NAME || '"';
+                    --EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = '||:GET_COMPANY_NAME ;
+                    --commit;
+                   v_query := :P21_SQLQUERY;
+                
+                    v_respuesta:= VL_PKG_SECURITY.API_TABLES_VERIFICATION(
+                        v_query,  -- Consulta que quieres validar
+                        :GET_COMPANY_NAME,                                 -- Nombre de la empresa
+                        TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3'), -- Genera el ID con milisegundos
+                        :GET_ID                                    -- ID del usuario
+                    ); 
+                    
+                    IF v_respuesta != 'Permitido' then
+                
+                        return v_respuesta;
+                
+                        EXECUTE IMMEDIATE v_query;
+                
+                        -- l_report_cursor := SYS.DBMS_SQL.OPEN_CURSOR;
+                        --       sys.DBMS_SQL.parse(c             => l_report_cursor,
+                        --                          statement     => :P21_SQLQUERY,
+                        --                          language_flag => sys.DBMS_SQL.native,
+                        --                          schema        => :GET_COMPANY_NAME);
+                          
+                    --else
+                
+                        --return v_respuesta;
+                
+                
+                    end if;
+                    
+                    --AS RESULTADO
+                    --FROM DUAL;
+                  
+                  --EXECUTE IMMEDIATE v_query;
+                
+                    --EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = ' || :GET_COMPANY_NAME;
+                    --EXECUTE IMMEDIATE v_query;
+                
+                    -- EXECUTE IMMEDIATE '
+                    --     BEGIN
+                    --         EXECUTE IMMEDIATE ''ALTER SESSION SET CURRENT_SCHEMA = ' || :GET_COMPANY_NAME || ''';
+                    --         EXECUTE IMMEDIATE ''' || v_query || ''';
+                    --     END;';
+                
+                
+                
+                    --EXECUTE IMMEDIATE 'EXPLAIN PLAN SET STATEMENT_ID = ''my_plan_id5'' FOR ' || v_query ;
+                    -- commit;
+                
+                
+                    l_report_cursor := SYS.DBMS_SQL.OPEN_CURSOR;
+                      sys.DBMS_SQL.parse(c             => l_report_cursor,
+                                         statement     => :P21_SQLQUERY,
+                                         language_flag => sys.DBMS_SQL.native,
+                                         schema        => :GET_COMPANY_NAME);
+                    --return v_respuesta;
+                  exception when others then
+                    
+                    return SQLERRM;
+                
+                    --return v_respuesta;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P21_SQLQUERY
+        }
+    )
+
+    validation vldt-from-validate (
+        name: VLDT_FROM_VALIDATE
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = '||:GET_COMPANY_NAME;
+                commit;
+                EXECUTE IMMEDIATE 'CREATE OR REPLACE VIEW VIEW_'||:CUSTOM_REPORT_NAME||' AS ('||:P21_SQLQUERY ||')';
+                VL_PKG_PROCESS_CUSTOM_REPORT.collect_column_info(:P21_SQLQUERY,'COLUMNS','N',:GET_COMPANY_NAME);
+                
+                EXCEPTION WHEN OTHERS THEN 
+                
+                RETURN SQLERRM;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P21_SQLQUERY
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    validation vldt-select-validate (
+        name: VLDT_SELECT_VALIDATE
+        execution {
+            sequence: 1
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                   v_query VARCHAR2(4000);
+                BEGIN
+                   -- Tu string
+                   v_query := :P21_SQLQUERY;
+                
+                   -- Validar utilizando INSTR
+                   IF INSTR(UPPER(v_query), 'SELECT') = 0 THEN
+                      RETURN 'La consulta debe iniciar con SELECT';
+                   END IF;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P21_SQLQUERY
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    process spsetcollection (
+        name: spSetCollection
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = '||:GET_COMPANY_NAME;
+                    commit;
+                    EXECUTE IMMEDIATE 'CREATE OR REPLACE VIEW VIEW_'||:CUSTOM_REPORT_NAME||' AS ('||:P21_SQLQUERY ||')';
+                    VL_PKG_PROCESS_CUSTOM_REPORT.collect_column_info(:P21_SQLQUERY,'COLUMNS','N',:GET_COMPANY_NAME);
+                
+                        EXCEPTION
+                        WHEN OTHERS THEN
+                            NULL;--RETURN 'Error: ' || SQLERRM;
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 14038773507768039
+        }
+    )
+
+    branch (
+        name: Go To Page 22
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                type: url
+                url: javascript:  apex.event.trigger(document,'redirect');
+            }
+        }
+    )
+
+    branch (
+        name: Go To Page 22
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                page: 22
+                clearCache: Y
+            }
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+)
+

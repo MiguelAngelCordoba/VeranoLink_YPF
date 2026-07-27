@@ -1,0 +1,242 @@
+page 24 (
+    name: Custom Report - Step 5
+    alias: CUSTOM-REPORT-STEP-5
+    title: Crear Reporte Personalizado
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        height: 2000px
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region lista-de-progreso (
+        name: Lista de progreso
+        type: list
+        source {
+            list: @flow-custom-report
+        }
+        layout {
+            sequence: 10
+            slot: dialogHeader
+        }
+        appearance {
+            template: @blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    region mostrar-resumen (
+        name: Mostrar Resumen
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Resumen de Creación de APIs</title>
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                          
+                            background-color: #f5f5f5;
+                            color: #333;
+                        }
+                
+                        h2 {
+                            color: #444444;
+                            text-align: center;
+                            font-size: 28px; /* Tamaño de letra aumentado */
+                        }
+                
+                        .api-summary {
+                            list-style-type: none;
+                            padding: 0;
+                        }
+                
+                        .api-summary li {
+                            margin-bottom: 15px;
+                            font-size: 18px; /* Tamaño de letra aumentado */
+                        }
+                
+                        .api-summary strong {
+                            font-weight: bold;
+                            color: #000000;
+                        }
+                
+                        .api-summary span {
+                            font-weight: normal;
+                            color: #555;
+                            word-wrap: break-word;
+                        }
+                    </style>
+                </head>
+                <body>
+                
+                    <h2>Resumen de Creación de APIs</h2>
+                
+                    <ul class="api-summary">
+                        <li><strong>Usuario para consumir API:</strong> <span>&P24_API_USER.</span></li>
+                        <li><strong>Nombre del reporte:</strong> <span>&P24_REPORT_NAME.</span></li>
+                        <li><strong>Descripción del reporte:</strong> <span>&P24_REPORT_DESCRIP.</span></li>
+                        <li><strong>Endpoint para consumir:</strong> <span>&P24_END_POINT.</span></li>
+                    </ul>
+                
+                </body>
+                </html>
+                
+                ```
+        }
+        layout {
+            sequence: 70
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--hiddenOverflow
+            ]
+        }
+    )
+
+    pageItem P24_API_USER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P24_END_POINT (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        source {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                v_return varchar2(3000);
+                v_encode varchar2(3000);
+                BEGIN
+                v_encode:= VL_PKG_UTL_BASE64.ENCODE_NUMBER_TO_BASE64(:GET_ID);
+                v_return :=  'https://vl-epm-stage.veranocloud.com.co/vl/api/' || LOWER(:GET_COMPANY_NAME) || '/' || LOWER(v_encode) ||'/'||LOWER(:CUSTOM_REPORT_NAME);
+                return v_return;
+                END;
+                ```
+        }
+    )
+
+    pageItem P24_REPORT_DESCRIP (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        source {
+            type: item
+            item: CUSTOM_REPORT_DESCRIP
+            used: always
+        }
+    )
+
+    pageItem P24_REPORT_NAME (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: select lower(:CUSTOM_REPORT_NAME) from dual;
+            used: always
+        }
+    )
+
+    button cerrar (
+        buttonName: Cerrar
+        label: Cerrar
+        layout {
+            sequence: 80
+            slot: contentBody
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-close-dialog (
+        name: DA_CLOSE_DIALOG
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cerrar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-submit-page (
+            action: submitPage
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

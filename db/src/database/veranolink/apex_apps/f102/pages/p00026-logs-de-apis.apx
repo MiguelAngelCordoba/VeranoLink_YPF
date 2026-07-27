@@ -1,0 +1,1332 @@
+page 26 (
+    name: Logs de APIS
+    alias: LOGS-DE-APIS
+    title: Logs de APIS
+    appearance {
+        pageTemplate: @left-side-column
+        templateOptions: #DEFAULT#
+        cssClasses: json
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        fileUrls: https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js
+    }
+    css {
+        fileUrls: https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css
+        inline:
+            ```css
+            #LogApi .t-fht-thead{
+            
+            overflow: auto !important;
+            
+            }
+            #P26_JSON_VIEW_DISPLAY{
+                align-items: center;
+                text-size-adjust: auto;
+            }
+            
+            .jsonview {
+              font-family: monospace;
+              width: max-content;
+              font-size: 1.1em;
+              white-space: pre-wrap; }
+              .jsonview .prop {
+                font-weight: bold;
+                text-decoration: none;
+                color: #000; }
+              .jsonview .null {
+                color: red; }
+              .jsonview .undefined {
+                color: red; }
+              .jsonview .bool {
+                color: blue; }
+              .jsonview .num {
+                color: blue; }
+              .jsonview .string {
+                color: green;
+                white-space: pre-wrap; }
+                .jsonview .string.multiline {
+                  display: inline-block;
+                  vertical-align: text-top; }
+              .jsonview .collapser {
+                position: absolute;
+                left: -1em;
+                cursor: pointer; }
+              .jsonview .collapsible {
+                transition: height 1.2s;
+                transition: width 1.2s; }
+              .jsonview .collapsible.collapsed {
+                height: .8em;
+                width: 1em;
+                display: inline-block;
+                overflow: hidden;
+                margin: 0; }
+              .jsonview .collapsible.collapsed:before {
+                content: "…";
+                width: 1em;
+                margin-left: .2em; }
+              .jsonview .collapser.collapsed {
+                transform: rotate(0deg); }
+              .jsonview .q {
+                display: inline-block;
+                width: 0px;
+                color: transparent; }
+              .jsonview li {
+                position: relative; }
+              .jsonview ul {
+                list-style: none;
+                margin: 0 0 0 2em;
+                padding: 0; }
+              .jsonview h1 {
+                font-size: 1.2em; }
+            
+            
+            .t-MediaList-badge{
+                background: none;
+            }
+            .t-MediaList{
+                width: 250px;
+            }
+            
+            .t-MediaList t-MediaList--showIcons t-MediaList--showDesc t-MediaList--showBadges u-colors t-MediaList--stack t-Report--hideNoPagination lto72256690361914867_1{
+                width: 350px;
+            }
+            .t-Body-side{
+                width: auto;
+            }
+            
+            .container-name{
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                position: relative;
+                color: #333;
+            }
+            .container-name::after{
+            content: '';
+                display: block;
+                width: 50%;
+                height: 3px;
+                background-color: #4CAF50;
+                margin: 5px auto 0;
+                transition: width 0.3s ease-in-out;
+            
+            }
+            .container-name:hover::after{
+            width: 100%;
+            cursor: none;
+            
+            }
+            .search-results {
+                flex: 1;
+                overflow: auto;
+            }
+            /* Format Search Region */
+            .search-region {
+                border-bottom: 1px solid rgba(0,0,0,.1);
+                flex-shrink: 0;
+                
+            }
+            
+            .search-region padding-md  lto3843968853614001_0{
+                width: 350px;
+                
+            }
+            
+            #P26_BUSQUEDA{
+                width: 220px;
+                
+            }
+            
+            
+            .json-buttons-container {
+              position: fixed;
+                top: 80px; /* Ajusta la distancia desde el borde superior */
+                right: 20px; /* Ajusta la distancia desde el borde derecho */
+                z-index: 1000; /* Asegura que los botones se muestren por encima de otros elementos */
+                padding: 10px;
+                border-radius: 5px; /* Opcional: Añadir bordes redondeados */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+            }
+            
+            .json-button {
+               margin: 5px;
+                padding: 10px 15px;
+                font-size: 13px;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background-color: #e7edf319; /* Cambiar el color de fondo */
+                color: rgb(0, 0, 0);
+                transition: background-color 0.3s;
+            }
+            
+            .json-button:hover {
+              background-color: #0056b3; /* Color más oscuro al pasar el cursor */
+              color: white;
+            }
+            
+            .json-button:active {
+              background-color: #004085; /* Color más oscuro al hacer clic */
+            }
+            .grupo-titulo {
+                font-weight: bold;
+                text-align: center;
+                background-color: #ffffff;
+                color: #333;
+                padding: 5px;
+            }
+            
+            
+            ```
+    }
+    htmlHeader {
+        htmlHeader:
+            ```html
+            <meta charset="UTF-8">
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region detail (
+        name: Detail
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    ID_LOG AS ID_LOG,
+                    vpc.name AS "Api Usada",
+                    COMPANY_SHORTNAME AS "Companny Shortname",
+                    VL_AUDIT_LOG AS "Codigo Log",
+                    VL_LOG_DESCRIPTION AS "Descripcion del Log",
+                    TO_CHAR(VL_TIMESTAMP, 'DD-MM-YYYY HH:MI:SS AM') AS "Fecha de ejecucion",
+                    
+                
+                    CASE 
+                        WHEN VL_STATUS_CODE IN (0, 1) THEN 'Procesamiento interno'
+                        ELSE VL_METHOD
+                    END AS "Metodo",
+                    VL_APLICATION AS "Aplicacion",
+                    VL_SIZE AS "Size",
+                    CASE
+                        WHEN VL_STATUS_CODE = 0 OR VL_STATUS_CODE = 1 THEN
+                            NULL
+                        ELSE
+                            VL_STATUS_CODE
+                    END AS "Codigo de retorno",
+                    CASE
+                        WHEN VL_PARAMETERS IS NOT NULL THEN DBMS_LOB.GETLENGTH(VL_PARAMETERS)
+                        ELSE 0
+                    END AS "BBLOB_LENGTH",
+                    '<div>' || 
+                    CASE 
+                        WHEN DBMS_LOB.GETLENGTH(VL_PARAMETERS) > 120000 THEN
+                            '<div class="cc-actions-column">
+                                <span>
+                                    <a href="' || APEX_PAGE.GET_URL(
+                                        p_page   => 0,
+                                        p_items  => 'ID_PARAMETER',
+                                        p_values => ID_LOG,
+                                        p_request => 'APPLICATION_PROCESS=DOWNLOAD_JSON'
+                                    ) || '" aria-hidden="false" class="fa fa-download t-Button t-Button--simple cc-download-btn" data-id="' || ID_LOG || '"></a>
+                                </span>
+                            </div>'
+                        WHEN VL_PARAMETERS IS NOT NULL THEN
+                            '<div class="cc-actions-column">
+                                <span>
+                                    <a href="##" aria-hidden="false" class="fa fa-eye t-Button t-Button--simple cc-clear-btn" data-id="' || ID_LOG || '"></a>
+                                </span>
+                            </div>'
+                        ELSE 
+                            'No se genera JSON'
+                    END ||
+                    '</div>'  ||CASE 
+                        WHEN ROW_NUMBER() OVER (PARTITION BY VL_AUDIT_LOG ORDER BY VL_TIMESTAMP ASC) = 1 THEN
+                            '<tr><td colspan="8" class="grupo-titulo">Grupo: ' || VL_AUDIT_LOG || '</td></tr>'
+                        ELSE 
+                            NULL
+                END AS "LINK_VL_PARAMETERS"
+                
+                FROM VL_LOGS vlg
+                LEFT JOIN VL_PATH_CONTEXTS vpc
+                    ON vlg.id_vl_path_context = vpc.id_vl_path_context
+                WHERE (COMPANY_SHORTNAME = 'EPM' AND VL_NAME_API = :P26_NAME_API) 
+                   OR (VL_AUDIT_LOG = :P26_VL)
+                ORDER BY VL_TIMESTAMP DESC;
+                
+                ```
+            pageItemsToSubmit: [
+                P26_VL
+                P26_LOG
+                P26_NAME_API
+            ]
+        }
+        layout {
+            sequence: 60
+            slot: body
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--accent3
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            htmlDomId: Detail_r
+            customAttributes: id="collapsible-ir"
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            lazyLoading: true
+        }
+        messages {
+            whenNoDataFound: No hay datos que mostrar
+        }
+        componentAdvanced {
+            maxRowsPerPageInSelector: 50
+        }
+        advanced {
+            savedReportMappingIdentifier: 3155944251954408
+        }
+
+        column "Api Usada" (
+            type: plainText
+            heading {
+                heading: Api Usada
+                alignment: center
+            }
+            layout {
+                sequence: 120
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AR
+            }
+        )
+
+        column Aplicacion (
+            type: plainText
+            heading {
+                heading: Aplicacion
+                alignment: center
+            }
+            layout {
+                sequence: 70
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AM
+            }
+        )
+
+        column BBLOB_LENGTH (
+            type: plainText
+            heading {
+                heading: Bblob Length
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AP
+            }
+        )
+
+        column "Codigo Log" (
+            type: plainText
+            heading {
+                heading: Codigo Log
+            }
+            layout {
+                sequence: 170
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: BC
+            }
+        )
+
+        column "Codigo de retorno" (
+            type: plainText
+            heading {
+                heading: Codigo De Retorno
+                alignment: center
+            }
+            layout {
+                sequence: 40
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AI
+            }
+        )
+
+        column "Companny Shortname" (
+            type: plainText
+            heading {
+                heading: Nombre corto de la empresa
+                alignment: center
+            }
+            layout {
+                sequence: 20
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AG
+            }
+        )
+
+        column "Descripcion del Log" (
+            type: plainText
+            heading {
+                heading: Descripcion Del Log
+                alignment: center
+            }
+            layout {
+                sequence: 50
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AJ
+            }
+        )
+
+        column "Fecha de ejecucion" (
+            type: plainText
+            heading {
+                heading: Fecha De Ejecución
+                alignment: center
+            }
+            layout {
+                sequence: 110
+                columnAlignment: center
+            }
+            appearance {
+                formatMask: DD-MM-YYYY HH24:MI:SS
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AQ
+            }
+        )
+
+        column ID_LOG (
+            type: hidden
+            heading {
+                heading: Id Log
+            }
+            layout {
+                sequence: 150
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AZ
+            }
+        )
+
+        column LINK_VL_PARAMETERS (
+            type: plainText
+            heading {
+                heading: JSON Generado
+                alignment: center
+            }
+            layout {
+                sequence: 160
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: BB
+            }
+            security {
+                escapeSpecialChars: false
+            }
+        )
+
+        column Metodo (
+            type: plainText
+            heading {
+                heading: Metodo
+                alignment: center
+            }
+            layout {
+                sequence: 60
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AL
+            }
+        )
+
+        column Size (
+            type: hidden
+            heading {
+                heading: Size
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AN
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport 32026 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 31
+            }
+
+            displayColumn "Api Usada" (
+                sequence: 5
+            )
+
+            displayColumn "Aplicacion" (
+                sequence: 4
+            )
+
+            displayColumn "Codigo Log" (
+                sequence: 2
+            )
+
+            displayColumn "Codigo de retorno" (
+                sequence: 8
+            )
+
+            displayColumn "Companny Shortname" (
+                sequence: 3
+            )
+
+            displayColumn "Descripcion del Log" (
+                sequence: 6
+            )
+
+            displayColumn "Fecha de ejecucion" (
+                sequence: 1
+            )
+
+            displayColumn LINK_VL_PARAMETERS (
+                sequence: 9
+            )
+
+            displayColumn "Metodo" (
+                sequence: 7
+            )
+
+            highlight ir-condition (
+                name: Codigo Log
+                condition {
+                    column: "Codigo Log"
+                    operator: contains
+                    value: T-
+                }
+                colors {
+                    background: #efeeee
+                }
+                execution {
+                    sequence: 10
+                }
+            )
+
+        )
+
+    )
+
+    region logs-de-apis (
+        name: Logs de APIS
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT
+                    MIN(ID_LOG) AS ID_LOG,
+                    
+                    MIN(VL_AUDIT_LOG) AS LINK_CLASS,
+                    NULL AS ICON_CLASS,
+                    NULL AS LINK_ATTR,
+                    NULL AS ICON_COLOR_CLASS,
+                    NULL AS LIST_CLASS,
+                    apex_page.get_url(p_items => 'P26_NAME_API,P26_VL', p_values => MIN(VL_NAME_API) || ',' || MIN(VL_AUDIT_LOG)) AS LINK,
+                
+                    SUBSTR(MIN(VL_NAME_API), 1, 60) || 
+                    CASE 
+                        WHEN LENGTH(MIN(VL_NAME_API)) > 60 THEN '...' 
+                        ELSE '' 
+                    END AS LIST_TITLE,
+                    
+                   'Última sincronización: ' || TO_CHAR(MAX(VL_TIMESTAMP), 'DD-MM-YYYY HH:MI:SS AM') AS LIST_TEXT,
+                
+                    
+                    SUBSTR(MIN(VL_AUDIT_LOG), 1, 50) || 
+                    CASE 
+                        WHEN LENGTH(MIN(VL_AUDIT_LOG)) > 50 THEN '...' 
+                        ELSE '' 
+                    END AS LIST_TEXT_2,
+                
+                    NULL AS LIST_BADGE
+                FROM
+                    VL_LOGS v_log
+                LEFT JOIN VL_PATH_CONTEXTS vpc
+                    ON v_log.ID_VL_PATH_CONTEXT = vpc.ID_VL_PATH_CONTEXT
+                WHERE
+                    COMPANY_SHORTNAME = :GET_COMPANY_NAME AND (
+                        :P26_BUSQUEDA IS NULL
+                        OR UPPER(v_log.VL_NAME_API) LIKE '%' || UPPER(:P26_BUSQUEDA) || '%'
+                    ) 
+                GROUP BY
+                    VL_NAME_API
+                ORDER BY
+                    MAX(VL_TIMESTAMP) DESC;
+                
+                ```
+            pageItemsToSubmit: [
+                P26_LOG
+                P26_BUSQUEDA
+                P26_NAME_API
+                P26_VL
+            ]
+        }
+        layout {
+            sequence: 30
+            slot: leftColumn
+        }
+        appearance {
+            template: @blank-with-attributes-no-grid
+            templateOptions: [
+                #DEFAULT#
+                margin-right-none
+            ]
+            cssClasses: search-results
+        }
+        advanced {
+            htmlDomId: LogApi
+        }
+        reportLayout {
+            numberOfRows: 300
+        }
+        componentAppearance {
+            template: @media-list
+            templateOptions: [
+                #DEFAULT#
+                u-colors
+                t-MediaList--stack
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        messages {
+            whenNoDataFound: "No hay datos aun "
+        }
+
+        column ICON_CLASS (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Icon Class
+            }
+            layout {
+                sequence: 90
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column ICON_COLOR_CLASS (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Icon Color Class
+            }
+            layout {
+                sequence: 110
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column ID_LOG (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: "Acción "
+                alignment: center
+            }
+            layout {
+                sequence: 40
+                columnAlignment: center
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LINK (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Link
+            }
+            layout {
+                sequence: 210
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LINK_ATTR (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Link Attr
+            }
+            layout {
+                sequence: 100
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LINK_CLASS (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Link Class
+            }
+            layout {
+                sequence: 70
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LIST_BADGE (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            heading {
+                heading: List Badge
+            }
+            layout {
+                sequence: 150
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LIST_CLASS (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: List Class
+            }
+            layout {
+                sequence: 120
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LIST_TEXT (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: List Text
+            }
+            layout {
+                sequence: 190
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LIST_TEXT_2 (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            heading {
+                heading: List Text 2
+            }
+            layout {
+                sequence: 200
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LIST_TITLE (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            heading {
+                heading: List Title
+            }
+            layout {
+                sequence: 180
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region name-api (
+        name: Name_api
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <h1><pre class="container-name"></pre></h1>
+                
+                <script>
+                  
+                    document.addEventListener('DOMContentLoaded', function() {
+                      
+                        var itemValue = $v('P26_NAME_API');
+                        
+                     
+                        document.querySelector('.container-name').textContent = itemValue;
+                    });
+                </script>
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @detail
+            slot: regionBody
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: [
+                #DEFAULT#
+                t-Form--standardPadding
+                t-Form--xlarge
+                margin-left-md
+            ]
+        }
+    )
+
+    region search (
+        name: Search
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: leftColumn
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: #DEFAULT#
+            cssClasses: [
+                search-region
+                padding-md
+            ]
+        }
+    )
+
+    region view-json (
+        name: View_json
+        title: Visualización de JSON
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <div class="json-buttons-container">
+                  <button id="expandBtn" class="json-button fa fa-expand ">Expandir JSON</button>
+                  <button id="collapseBtn" class="json-button fa fa-compress">Colapsar JSON</button>
+                 
+                </div>
+                
+                <pre class="my_json_item"></pre>
+                
+                ```
+        }
+        layout {
+            sequence: 50
+            slot: dialogsDrawersAndPopups
+        }
+        appearance {
+            template: @inline-dialog
+            templateOptions: [
+                #DEFAULT#
+                js-dialog-size720x480
+            ]
+            cssClasses: .jsonview
+        }
+        advanced {
+            htmlDomId: json_result
+            customAttributes: data-resize="true"
+        }
+    )
+
+    pageItem P26_BUSQUEDA (
+        type: textField
+        label {
+            label: Busqueda
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @search
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @hidden
+            templateOptions: #DEFAULT#
+            icon: fa-search
+            width: 30
+            valuePlaceholder: Buscar
+        }
+    )
+
+    pageItem P26_LOG (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    pageItem P26_NAME_API (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    pageItem P26_VL (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    pageItem P26_VL_PARAMETERS (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    dynamicAction busqueda-api (
+        name: Busqueda API
+        execution {
+            sequence: 90
+        }
+        when {
+            event: keyup
+            selectionType: items
+            items: P26_BUSQUEDA
+        }
+        clientSideCondition {
+            type: jsExpression
+            javaScriptExpression: this.browserEvent.which === apex.jQuery.ui.keyCode.ENTER
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: items
+                items: P26_BUSQUEDA
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction openjsonview (
+        name: OpenJsonView
+        execution {
+            sequence: 10
+            eventScope: dynamic
+            staticContainer: #Detail_r
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .cc-clear-btn
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    (function () {
+                      var parameterValue = $v("P26_VL_PARAMETERS");
+                    
+                      $(".my_json_item").empty(); // Limpiar contenido previo
+                    
+                      if (!parameterValue || parameterValue.trim() === "") {
+                        document.querySelector(".my_json_item").textContent = "No se usaron parámetros.";
+                        
+                      } else {
+                        document.querySelector(".my_json_item").textContent = parameterValue;
+                        $("cc-clear-btn").hide();
+                        try {
+                          var json = JSON.parse(parameterValue);
+                    
+                        
+                          $(".my_json_item").JSONView(json, { collapsed: true }); 
+                    
+                          
+                          $("#expandBtn").on("click", function (event) {
+                            event.preventDefault(); 
+                            $(".my_json_item").JSONView('expand'); // Expande todo el JSON
+                          });
+                    
+                     
+                          $("#collapseBtn").on("click", function (event) {
+                            event.preventDefault(); 
+                            $(".my_json_item").JSONView('collapse'); // Colapsa todo el JSON
+                          });
+                         
+                        } catch (e) {
+                          console.error("El valor no es un JSON válido:", e);
+                        }
+                      }
+                    })();
+                    
+                    ```
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-javascript-code-2 (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    (function() {
+                      var parameterValue = $v("P26_VL_PARAMETERS");
+                    
+                      $(".my_json_item").empty();
+                    
+                    
+                      if (!parameterValue || parameterValue.trim() === "") {
+                        document.querySelector(".my_json_item").textContent = "No se usaron parámetros.";
+                      } else {
+                        // Asigna el valor a la región <pre>
+                        document.querySelector(".my_json_item").textContent = parameterValue;
+                    
+                        try {
+                          // Intentar formatear el JSON
+                          var json = JSON.parse(parameterValue);
+                          $(".my_json_item").JSONView(json, { collapsed: false });
+                        } catch (e) {
+                          console.error("El valor no es un JSON válido:", e);
+                        }
+                      }
+                    })();
+                    
+                    ```
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+            serverSideCondition {
+                type: never
+            }
+        )
+
+        action native-open-region (
+            action: openRegion
+            affectedElements {
+                selectionType: region
+                region: @view-json
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression:
+                    ```javascript-browser
+                    $(this.triggeringElement).data('id');
+                    
+                    ```
+            }
+            affectedElements {
+                selectionType: items
+                items: P26_LOG
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+        action native-set-value-2 (
+            action: setValue
+            settings {
+                type: sqlQuery
+                sqlQuery: SELECT VL_PARAMETERS FROM VL_LOGS WHERE ID_LOG = :P26_LOG
+                itemsToSubmit: [
+                    P26_VL_PARAMETERS
+                    P26_LOG
+                ]
+                escapeSpecialChars: false
+            }
+            affectedElements {
+                selectionType: items
+                items: P26_VL_PARAMETERS
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+    )
+
+    dynamicAction refrescarparametros (
+        name: RefrescarParametros
+        execution {
+            sequence: 100
+        }
+        when {
+            selectionType: items
+            items: P26_LOG
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: items
+                items: P26_VL_PARAMETERS
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction refreshitemvlparameters (
+        name: RefreshItemVlParameters
+        execution {
+            sequence: 60
+        }
+        when {
+            selectionType: items
+            items: P26_LOG
+        }
+        serverSideCondition {
+            type: never
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: items
+                items: P26_VL_PARAMETERS
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction refreshnameapi (
+        name: RefreshNameAPI
+        execution {
+            sequence: 80
+        }
+        when {
+            selectionType: items
+            items: P26_NAME_API
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @name-api
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction refreshreportdetail (
+        name: RefreshReportDetail
+        execution {
+            sequence: 70
+        }
+        when {
+            selectionType: items
+            items: P26_VL
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @detail
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh-2 (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @name-api
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh-3 (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @detail
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

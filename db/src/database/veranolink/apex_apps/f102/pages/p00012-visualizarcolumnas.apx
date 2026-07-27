@@ -1,0 +1,1488 @@
+page 12 (
+    name: Visualizar columnas
+    alias: VISUALIZARCOLUMNAS
+    title: Visualizar columnas
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    css {
+        inline:
+            ```css
+            .table_name{
+                height: auto;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region columnas-seleccionadas (
+        name: Columnas seleccionadas
+        type: classicReport
+        source {
+            location: localDatabase
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                
+                
+                BEGIN
+                return :P12_COLUMNS;
+                
+                END;
+                ```
+            pageItemsToSubmit: P12_COLUMNS
+            useGenericColumnNames: true
+            genericColumnCount: 80
+        }
+        layout {
+            sequence: 90
+            slot: body
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+                t-Region-orderBy--center
+            ]
+        }
+        reportLayout {
+            numberOfRows: 10
+        }
+        componentAppearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+            displayPosition: topLeft
+        }
+        messages {
+            whenNoDataFound: a
+        }
+        heading {
+            type: columnNames
+        }
+
+        column COL01 (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Col01
+            }
+            layout {
+                sequence: 10
+            }
+        )
+
+        column COL02 (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Col02
+            }
+            layout {
+                sequence: 20
+            }
+        )
+
+        column COL03 (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Col03
+            }
+            layout {
+                sequence: 30
+            }
+        )
+
+        column COL04 (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Col04
+            }
+            layout {
+                sequence: 40
+            }
+        )
+
+        column COL05 (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Col05
+            }
+            layout {
+                sequence: 50
+            }
+        )
+
+        column COL06 (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Col06
+            }
+            layout {
+                sequence: 60
+            }
+        )
+
+        column COL07 (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Col07
+            }
+            layout {
+                sequence: 70
+            }
+        )
+
+        column COL08 (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            heading {
+                heading: Col08
+            }
+            layout {
+                sequence: 80
+            }
+        )
+
+        column COL09 (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: Col09
+            }
+            layout {
+                sequence: 90
+            }
+        )
+
+        column COL10 (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            heading {
+                heading: Col10
+            }
+            layout {
+                sequence: 100
+            }
+        )
+
+        column COL11 (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            heading {
+                heading: Col11
+            }
+            layout {
+                sequence: 110
+            }
+        )
+
+        column COL12 (
+            reportColumnQueryId: 12
+            derivedColumn: N
+            heading {
+                heading: Col12
+            }
+            layout {
+                sequence: 120
+            }
+        )
+
+        column COL13 (
+            reportColumnQueryId: 13
+            derivedColumn: N
+            heading {
+                heading: Col13
+            }
+            layout {
+                sequence: 130
+            }
+        )
+
+        column COL14 (
+            reportColumnQueryId: 14
+            derivedColumn: N
+            heading {
+                heading: Col14
+            }
+            layout {
+                sequence: 140
+            }
+        )
+
+        column COL15 (
+            reportColumnQueryId: 15
+            derivedColumn: N
+            heading {
+                heading: Col15
+            }
+            layout {
+                sequence: 150
+            }
+        )
+
+        column COL16 (
+            reportColumnQueryId: 16
+            derivedColumn: N
+            heading {
+                heading: Col16
+            }
+            layout {
+                sequence: 160
+            }
+        )
+
+        column COL17 (
+            reportColumnQueryId: 17
+            derivedColumn: N
+            heading {
+                heading: Col17
+            }
+            layout {
+                sequence: 170
+            }
+        )
+
+        column COL18 (
+            reportColumnQueryId: 18
+            derivedColumn: N
+            heading {
+                heading: Col18
+            }
+            layout {
+                sequence: 180
+            }
+        )
+
+        column COL19 (
+            reportColumnQueryId: 19
+            derivedColumn: N
+            heading {
+                heading: Col19
+            }
+            layout {
+                sequence: 190
+            }
+        )
+
+        column COL20 (
+            reportColumnQueryId: 20
+            derivedColumn: N
+            heading {
+                heading: Col20
+            }
+            layout {
+                sequence: 200
+            }
+        )
+
+        column COL21 (
+            reportColumnQueryId: 21
+            derivedColumn: N
+            heading {
+                heading: Col21
+            }
+            layout {
+                sequence: 210
+            }
+        )
+
+        column COL22 (
+            reportColumnQueryId: 22
+            derivedColumn: N
+            heading {
+                heading: Col22
+            }
+            layout {
+                sequence: 220
+            }
+        )
+
+        column COL23 (
+            reportColumnQueryId: 23
+            derivedColumn: N
+            heading {
+                heading: Col23
+            }
+            layout {
+                sequence: 230
+            }
+        )
+
+        column COL24 (
+            reportColumnQueryId: 24
+            derivedColumn: N
+            heading {
+                heading: Col24
+            }
+            layout {
+                sequence: 240
+            }
+        )
+
+        column COL25 (
+            reportColumnQueryId: 25
+            derivedColumn: N
+            heading {
+                heading: Col25
+            }
+            layout {
+                sequence: 250
+            }
+        )
+
+        column COL26 (
+            reportColumnQueryId: 26
+            derivedColumn: N
+            heading {
+                heading: Col26
+            }
+            layout {
+                sequence: 260
+            }
+        )
+
+        column COL27 (
+            reportColumnQueryId: 27
+            derivedColumn: N
+            heading {
+                heading: Col27
+            }
+            layout {
+                sequence: 270
+            }
+        )
+
+        column COL28 (
+            reportColumnQueryId: 28
+            derivedColumn: N
+            heading {
+                heading: Col28
+            }
+            layout {
+                sequence: 280
+            }
+        )
+
+        column COL29 (
+            reportColumnQueryId: 29
+            derivedColumn: N
+            heading {
+                heading: Col29
+            }
+            layout {
+                sequence: 290
+            }
+        )
+
+        column COL30 (
+            reportColumnQueryId: 30
+            derivedColumn: N
+            heading {
+                heading: Col30
+            }
+            layout {
+                sequence: 300
+            }
+        )
+
+        column COL31 (
+            reportColumnQueryId: 31
+            derivedColumn: N
+            heading {
+                heading: Col31
+            }
+            layout {
+                sequence: 310
+            }
+        )
+
+        column COL32 (
+            reportColumnQueryId: 32
+            derivedColumn: N
+            heading {
+                heading: Col32
+            }
+            layout {
+                sequence: 320
+            }
+        )
+
+        column COL33 (
+            reportColumnQueryId: 33
+            derivedColumn: N
+            heading {
+                heading: Col33
+            }
+            layout {
+                sequence: 330
+            }
+        )
+
+        column COL34 (
+            reportColumnQueryId: 34
+            derivedColumn: N
+            heading {
+                heading: Col34
+            }
+            layout {
+                sequence: 340
+            }
+        )
+
+        column COL35 (
+            reportColumnQueryId: 35
+            derivedColumn: N
+            heading {
+                heading: Col35
+            }
+            layout {
+                sequence: 350
+            }
+        )
+
+        column COL36 (
+            reportColumnQueryId: 36
+            derivedColumn: N
+            heading {
+                heading: Col36
+            }
+            layout {
+                sequence: 360
+            }
+        )
+
+        column COL37 (
+            reportColumnQueryId: 37
+            derivedColumn: N
+            heading {
+                heading: Col37
+            }
+            layout {
+                sequence: 370
+            }
+        )
+
+        column COL38 (
+            reportColumnQueryId: 38
+            derivedColumn: N
+            heading {
+                heading: Col38
+            }
+            layout {
+                sequence: 380
+            }
+        )
+
+        column COL39 (
+            reportColumnQueryId: 39
+            derivedColumn: N
+            heading {
+                heading: Col39
+            }
+            layout {
+                sequence: 390
+            }
+        )
+
+        column COL40 (
+            reportColumnQueryId: 40
+            derivedColumn: N
+            heading {
+                heading: Col40
+            }
+            layout {
+                sequence: 400
+            }
+        )
+
+        column COL41 (
+            reportColumnQueryId: 41
+            derivedColumn: N
+            heading {
+                heading: Col41
+            }
+            layout {
+                sequence: 410
+            }
+        )
+
+        column COL42 (
+            reportColumnQueryId: 42
+            derivedColumn: N
+            heading {
+                heading: Col42
+            }
+            layout {
+                sequence: 420
+            }
+        )
+
+        column COL43 (
+            reportColumnQueryId: 43
+            derivedColumn: N
+            heading {
+                heading: Col43
+            }
+            layout {
+                sequence: 430
+            }
+        )
+
+        column COL44 (
+            reportColumnQueryId: 44
+            derivedColumn: N
+            heading {
+                heading: Col44
+            }
+            layout {
+                sequence: 440
+            }
+        )
+
+        column COL45 (
+            reportColumnQueryId: 45
+            derivedColumn: N
+            heading {
+                heading: Col45
+            }
+            layout {
+                sequence: 450
+            }
+        )
+
+        column COL46 (
+            reportColumnQueryId: 46
+            derivedColumn: N
+            heading {
+                heading: Col46
+            }
+            layout {
+                sequence: 460
+            }
+        )
+
+        column COL47 (
+            reportColumnQueryId: 47
+            derivedColumn: N
+            heading {
+                heading: Col47
+            }
+            layout {
+                sequence: 470
+            }
+        )
+
+        column COL48 (
+            reportColumnQueryId: 48
+            derivedColumn: N
+            heading {
+                heading: Col48
+            }
+            layout {
+                sequence: 480
+            }
+        )
+
+        column COL49 (
+            reportColumnQueryId: 49
+            derivedColumn: N
+            heading {
+                heading: Col49
+            }
+            layout {
+                sequence: 490
+            }
+        )
+
+        column COL50 (
+            reportColumnQueryId: 50
+            derivedColumn: N
+            heading {
+                heading: Col50
+            }
+            layout {
+                sequence: 500
+            }
+        )
+
+        column COL51 (
+            reportColumnQueryId: 51
+            derivedColumn: N
+            heading {
+                heading: Col51
+            }
+            layout {
+                sequence: 510
+            }
+        )
+
+        column COL52 (
+            reportColumnQueryId: 52
+            derivedColumn: N
+            heading {
+                heading: Col52
+            }
+            layout {
+                sequence: 520
+            }
+        )
+
+        column COL53 (
+            reportColumnQueryId: 53
+            derivedColumn: N
+            heading {
+                heading: Col53
+            }
+            layout {
+                sequence: 530
+            }
+        )
+
+        column COL54 (
+            reportColumnQueryId: 54
+            derivedColumn: N
+            heading {
+                heading: Col54
+            }
+            layout {
+                sequence: 540
+            }
+        )
+
+        column COL55 (
+            reportColumnQueryId: 55
+            derivedColumn: N
+            heading {
+                heading: Col55
+            }
+            layout {
+                sequence: 550
+            }
+        )
+
+        column COL56 (
+            reportColumnQueryId: 56
+            derivedColumn: N
+            heading {
+                heading: Col56
+            }
+            layout {
+                sequence: 560
+            }
+        )
+
+        column COL57 (
+            reportColumnQueryId: 57
+            derivedColumn: N
+            heading {
+                heading: Col57
+            }
+            layout {
+                sequence: 570
+            }
+        )
+
+        column COL58 (
+            reportColumnQueryId: 58
+            derivedColumn: N
+            heading {
+                heading: Col58
+            }
+            layout {
+                sequence: 580
+            }
+        )
+
+        column COL59 (
+            reportColumnQueryId: 59
+            derivedColumn: N
+            heading {
+                heading: Col59
+            }
+            layout {
+                sequence: 590
+            }
+        )
+
+        column COL60 (
+            reportColumnQueryId: 60
+            derivedColumn: N
+            heading {
+                heading: Col60
+            }
+            layout {
+                sequence: 600
+            }
+        )
+
+        column COL61 (
+            reportColumnQueryId: 61
+            derivedColumn: N
+            heading {
+                heading: Col61
+            }
+            layout {
+                sequence: 610
+            }
+        )
+
+        column COL62 (
+            reportColumnQueryId: 62
+            derivedColumn: N
+            heading {
+                heading: Col62
+            }
+            layout {
+                sequence: 620
+            }
+        )
+
+        column COL63 (
+            reportColumnQueryId: 63
+            derivedColumn: N
+            heading {
+                heading: Col63
+            }
+            layout {
+                sequence: 630
+            }
+        )
+
+        column COL64 (
+            reportColumnQueryId: 64
+            derivedColumn: N
+            heading {
+                heading: Col64
+            }
+            layout {
+                sequence: 640
+            }
+        )
+
+        column COL65 (
+            reportColumnQueryId: 65
+            derivedColumn: N
+            heading {
+                heading: Col65
+            }
+            layout {
+                sequence: 650
+            }
+        )
+
+        column COL66 (
+            reportColumnQueryId: 66
+            derivedColumn: N
+            heading {
+                heading: Col66
+            }
+            layout {
+                sequence: 660
+            }
+        )
+
+        column COL67 (
+            reportColumnQueryId: 67
+            derivedColumn: N
+            heading {
+                heading: Col67
+            }
+            layout {
+                sequence: 670
+            }
+        )
+
+        column COL68 (
+            reportColumnQueryId: 68
+            derivedColumn: N
+            heading {
+                heading: Col68
+            }
+            layout {
+                sequence: 680
+            }
+        )
+
+        column COL69 (
+            reportColumnQueryId: 69
+            derivedColumn: N
+            heading {
+                heading: Col69
+            }
+            layout {
+                sequence: 690
+            }
+        )
+
+        column COL70 (
+            reportColumnQueryId: 70
+            derivedColumn: N
+            heading {
+                heading: Col70
+            }
+            layout {
+                sequence: 700
+            }
+        )
+
+        column COL71 (
+            reportColumnQueryId: 71
+            derivedColumn: N
+            heading {
+                heading: Col71
+            }
+            layout {
+                sequence: 710
+            }
+        )
+
+        column COL72 (
+            reportColumnQueryId: 72
+            derivedColumn: N
+            heading {
+                heading: Col72
+            }
+            layout {
+                sequence: 720
+            }
+        )
+
+        column COL73 (
+            reportColumnQueryId: 73
+            derivedColumn: N
+            heading {
+                heading: Col73
+            }
+            layout {
+                sequence: 730
+            }
+        )
+
+        column COL74 (
+            reportColumnQueryId: 74
+            derivedColumn: N
+            heading {
+                heading: Col74
+            }
+            layout {
+                sequence: 740
+            }
+        )
+
+        column COL75 (
+            reportColumnQueryId: 75
+            derivedColumn: N
+            heading {
+                heading: Col75
+            }
+            layout {
+                sequence: 750
+            }
+        )
+
+        column COL76 (
+            reportColumnQueryId: 76
+            derivedColumn: N
+            heading {
+                heading: Col76
+            }
+            layout {
+                sequence: 760
+            }
+        )
+
+        column COL77 (
+            reportColumnQueryId: 77
+            derivedColumn: N
+            heading {
+                heading: Col77
+            }
+            layout {
+                sequence: 770
+            }
+        )
+
+        column COL78 (
+            reportColumnQueryId: 78
+            derivedColumn: N
+            heading {
+                heading: Col78
+            }
+            layout {
+                sequence: 780
+            }
+        )
+
+        column COL79 (
+            reportColumnQueryId: 79
+            derivedColumn: N
+            heading {
+                heading: Col79
+            }
+            layout {
+                sequence: 790
+            }
+        )
+
+        column COL80 (
+            reportColumnQueryId: 80
+            derivedColumn: N
+            heading {
+                heading: Col80
+            }
+            layout {
+                sequence: 800
+            }
+        )
+
+    )
+
+    region nombre-de-la-tabla (
+        name: Nombre de la tabla
+        type: staticContent
+        layout {
+            sequence: 120
+            slot: body
+        }
+        appearance {
+            template: @inline-popup
+            templateOptions: [
+                #DEFAULT#
+                js-dialog-autoheight
+                js-popup-callout
+                js-dialog-size600x400
+                js-popup-pos-after
+            ]
+            cssClasses: table_name
+            renderComponents: belowContent
+        }
+        advanced {
+            htmlDomId: table_name
+            customAttributes: data-parent-element="#savetable"
+        }
+    )
+
+    pageItem P12_COLUMNS (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 70
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P12_COLUMNS_VIEW (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        source {
+            type: item
+            item: VIEW_QUERY
+            used: always
+        }
+    )
+
+    pageItem P12_CREATE_RESPONSE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            region: @nombre-de-la-tabla
+            slot: regionBody
+        }
+    )
+
+    pageItem P12_ID_API (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+    )
+
+    pageItem P12_ITEM_FOR_PREVENT_SUBMIT (
+        type: textField
+        label {
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 110
+            slot: body
+            alignment: left
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            customAttributes: style="display:none"
+        }
+        source {
+            used: always
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    pageItem P12_NAME_TABLE (
+        type: textField
+        label {
+            label: Nombre para la tabla
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 10
+            region: @nombre-de-la-tabla
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            used: always
+        }
+        security {
+            encryptSessionState: false
+        }
+    )
+
+    pageItem P12_NAME_VIEW (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    button guardar (
+        buttonName: Guardar
+        label: Guardar como tabla
+        layout {
+            sequence: 10
+            region: @columnas-seleccionadas
+            slot: edit
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+        advanced {
+            htmlDomId: savetable
+        }
+    )
+
+    button save (
+        buttonName: save
+        label: Guardar y visualizar tabla
+        layout {
+            sequence: 40
+            region: @nombre-de-la-tabla
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 10
+            region: @columnas-seleccionadas
+            slot: copy
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-create-table (
+        name: DA_CREATE_TABLE
+        execution {
+            sequence: 40
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @save
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    validator number;
+                    BEGIN
+                    
+                    
+                    select COUNT(*) INTO VALIDATOR from all_tables where owner = :GET_COMPANY_NAME AND TABLE_NAME = UPPER(:P12_NAME_TABLE);
+                    
+                    
+                    IF REGEXP_LIKE(:P12_NAME_TABLE,'^[a-zA-Z_-]*$') THEN 
+                    IF validator = 0 THEN 
+                        :P12_CREATE_RESPONSE := 0;
+                    ELSE
+                        :P12_CREATE_RESPONSE := 1;
+                     END IF;
+                    
+                     ELSE 
+                     :P12_CREATE_RESPONSE := 2;
+                     END IF;
+                    END;
+                    ```
+                itemsToSubmit: P12_NAME_TABLE
+                itemsToReturn: P12_CREATE_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: P12_CREATE_RESPONSE
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                    VL_PKG_TABLE_FROM_VIEW.CREATE_TABLE(:P12_ID_API,:GET_COMPANY_NAME,upper(:P12_NAME_TABLE),TO_CLOB(:P12_COLUMNS),:P12_NAME_VIEW,:GET_ID,:GET_JSON_REQUEST,:APPLICATION_ENVIRONMENT);
+                    
+                    -- EXCEPTION
+                    
+                    
+                    --       WHEN OTHERS THEN IF SQLCODE = -00903 then 
+                    --       :P12_CREATE_RESPONSE := 3;
+                    --       end if;
+                    
+                    END;
+                    ```
+                itemsToSubmit: [
+                    GET_COMPANY_NAME
+                    P12_NAME_TABLE
+                    P12_COLUMNS
+                    P12_NAME_VIEW
+                ]
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 0
+            }
+        )
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 18
+                }
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Esta tabla ya existe
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: El nombre no puede tener espacios ni numeros
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 2
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-3 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Nombre de tabla inválido
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 3
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-4 (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Tabla creada exitosamente!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P12_CREATE_RESPONSE
+                value: 0
+            }
+        )
+
+    )
+
+    dynamicAction da-open-region-save (
+        name: DA_OPEN_REGION_SAVE
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @guardar
+        }
+
+        action native-open-region (
+            action: openRegion
+            affectedElements {
+                selectionType: region
+                region: @nombre-de-la-tabla
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-set-query (
+        name: DA_SET_QUERY
+        execution {
+            sequence: 20
+        }
+        when {
+            event: ready
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    v_query varchar2(4000);
+                    BEGIN
+                    v_query:= 'select "' || REPLACE ( :P12_COLUMNS_VIEW ,':','","')||'" ' ||' from '||'"VERANOLINK"."'||:P12_NAME_VIEW||'" ';
+                    :P12_COLUMNS :=v_query ;
+                    
+                    
+                    
+                    
+                    
+                    END;
+                    
+                    
+                    ```
+                itemsToSubmit: [
+                    P12_COLUMNS_VIEW
+                    P12_NAME_VIEW
+                ]
+                itemsToReturn: P12_COLUMNS
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @columnas-seleccionadas
+            }
+            execution {
+                sequence: 40
+            }
+        )
+
+    )
+
+    dynamicAction da-to-back (
+        name: DA_TO_BACK
+        execution {
+            sequence: 60
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @volver
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: window.history.back();
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

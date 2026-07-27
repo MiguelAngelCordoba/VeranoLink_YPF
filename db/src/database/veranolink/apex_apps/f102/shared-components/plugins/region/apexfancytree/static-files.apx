@@ -1,0 +1,20 @@
+file LICENSE (
+    mimeType: application/octet-stream
+    charSet: utf-8
+)
+
+file LICENSE4LIBS (
+    mimeType: application/octet-stream
+    charSet: utf-8
+)
+
+file fancytree.pkgd.min.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file fancytree.pkgd.min.js (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+

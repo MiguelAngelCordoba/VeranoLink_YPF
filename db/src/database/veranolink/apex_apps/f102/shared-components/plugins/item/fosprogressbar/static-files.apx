@@ -1,0 +1,40 @@
+file "css/style.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "css/style.css.map" (
+    mimeType: application/json
+    charSet: utf-8
+)
+
+file "css/style.min.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "js/script.js" (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+
+file "js/script.js.map" (
+    mimeType: application/json
+    charSet: utf-8
+)
+
+file "js/script.min.js" (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+
+file "progressbarjs/js/progressbar.min.js" (
+    mimeType: application/javascript
+    charSet: utf-8
+)
+
+file "progressbarjs/js/progressbar.min.js.map" (
+    mimeType: application/octet-stream
+    charSet: utf-8
+)
+

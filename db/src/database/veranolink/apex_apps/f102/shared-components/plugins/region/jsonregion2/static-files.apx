@@ -1,0 +1,20 @@
+file json-region.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file json-region.js (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+
+file json-region.min.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file json-region.min.js (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+

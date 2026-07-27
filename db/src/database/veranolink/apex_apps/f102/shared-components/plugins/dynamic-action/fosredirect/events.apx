@@ -1,0 +1,4 @@
+event fos-url-redirect-error (
+    name: FOS - Redirect - Error
+)
+

@@ -1,0 +1,253 @@
+page 4 (
+    name: Compañías
+    alias: COMPAÑÍAS
+    title: Compañías
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region compañías (
+        name: Compañías
+        type: interactiveReport
+        source {
+            location: localDatabase
+            tableName: VL_COMPANIES
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: #DEFAULT#
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 7
+                items: {
+                    P7_VL_ID_COMPANY: \#VL_ID_COMPANY#\
+                }
+                action: resetPagination
+            }
+            linkIcon: <span role="img" aria-label="Edit"><span class="fa fa-edit" aria-hidden="true" title="Edit"></span></span>
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        advanced {
+            savedReportMappingIdentifier: 4093077953173210
+        }
+
+        column CREATED_DATE (
+            type: plainText
+            heading {
+                heading: Fecha de creación
+            }
+            layout {
+                sequence: 30
+            }
+            appearance {
+                formatMask: SINCE
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column NAME (
+            type: plainText
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column SHORT_NAME (
+            type: plainText
+            heading {
+                heading: Alias
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column VL_ID_COMPANY (
+            type: hidden
+            heading {
+                heading: Vl Id Company
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column VL_ID_COUNTRY (
+            type: plainTextBasedOnLov
+            heading {
+                heading: País
+                alignment: end
+            }
+            lov {
+                lov: @vl-countries-name
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Compañías
+        }
+
+        savedReport 41257 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED_DATE (
+                sequence: 3
+            )
+
+            displayColumn NAME (
+                sequence: 2
+            )
+
+            displayColumn SHORT_NAME (
+                sequence: 5
+            )
+
+            displayColumn VL_ID_COMPANY (
+                sequence: 1
+            )
+
+            displayColumn VL_ID_COUNTRY (
+                sequence: 4
+            )
+
+        )
+
+    )
+
+    button crear (
+        buttonName: Crear
+        label: Crear
+        layout {
+            sequence: 10
+            region: @compañías
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 7
+                clearCache: 7
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-editreport-dialog-closed (
+        name: DA_EditReport-Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosecanceldialog
+            selectionType: region
+            region: @compañías
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @compañías
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

@@ -1,0 +1,270 @@
+customAttribute attribute_01 (
+    apexlangName: configjson
+    attribute: 1
+    name: ConfigJSON
+    type: javaScriptCode
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    default {
+        value:
+            ```
+            {
+              "animationDuration": 200,
+              "autoExpand2Level": 0,
+              "checkbox": "fa-square-o",
+              "checkboxSelected": "fa-check-square",
+              "checkboxUnknown": "fa-square",
+              "enableCheckBox": true,
+              "forceSelectionSet": true,
+              "forceRefreshEventOnStart": false,
+              "iconExpanderOpen": "fa-caret-down",
+              "iconExpanderClosed": "fa-caret-right",
+              "markNodesWithChildren": false,
+              "markerModifier": "fam-plus fam-is-info",
+              "openParentOfActiveNode": true,
+              "openParentOfSelected": true,
+              "refresh": 0,
+              "search": {
+                "autoExpand": true,
+                "leavesOnly": false,
+                "highlight": true,
+                "counter": true,
+                "hideUnmatched": true,
+                "debounce": {
+                  "enabled": true,
+                  "time": 400
+                }
+              },
+              "selectMode": 2,
+              "setActiveNode": true,
+              "setItemsOnInit": false,
+              "typeSettings": [
+                {
+                  "id": 10,
+                  "storeItem": "P15_TYPE_10",
+                  "icon": "fa-folder-o"
+                }, {
+                  "id": 20,
+                  "storeItem": "P15_TYPE_20",
+                  "icon": "fa-file-o"
+                }
+              ]
+            }
+            ```
+    }
+    help {
+        helpText:
+            ```
+            <pre>
+            {
+              "animationDuration": 200,
+              "autoExpand2Level": 0,
+              "checkbox": "fa-square-o",
+              "checkboxSelected": "fa-check-square",
+              "checkboxUnknown": "fa-square",
+              "enableCheckBox": true,
+              "forceSelectionSet": true,
+              "forceRefreshEventOnStart": false,
+              "iconExpanderOpen": "fa-caret-down",
+              "iconExpanderClosed": "fa-caret-right",
+              "markNodesWithChildren": false,
+              "markerModifier": "fam-plus fam-is-info",
+              "openParentOfActiveNode": true,
+              "openParentOfSelected": true,
+              "refresh": 0,
+              "search": {
+                "autoExpand": true,
+                "leavesOnly": false,
+                "highlight": true,
+                "counter": true,
+                "hideUnmatched": true,
+                "debounce": {
+                  "enabled": true,
+                  "time": 400
+                }
+              },
+              "selectMode": 2,
+              "setActiveNode": true,
+              "setItemsOnInit": false,
+              "typeSettings": [
+                {
+                  "id": 10,
+                  "storeItem": "P15_TYPE_10",
+                  "icon": "fa-folder-o"
+                }, {
+                  "id": 20,
+                  "storeItem": "P15_TYPE_20",
+                  "icon": "fa-file-o"
+                }
+              ]
+            }
+            </pre>
+            ```
+    }
+    examples {
+        examples:
+            ```
+            <br>
+            <h3>Explanation:</h3>
+            <ul>
+            <li><b>animationDuration (number): </b>set duration in ms of animations (when set 0 then animations are off)</li>
+            <li><b>autoExpand2Level (number): </b>set how many levels are expanded on startup, if 0 or null then tree is not expanded</li>
+            <li><b>checkbox (string)</b>: default icon of checkboxes when unchecked</li>
+            <li><b>checkboxSelected (string): </b>default icon of the checkboxes when selected</li>
+            <li><b>checkboxUnknown (string): </b>default icon of the checkboxes when unknown</li>
+            <li><b>enableCheckBox (boolean): </b>used to en- or disable checkboxen by default</li>
+            <li><b>forceSelectionSet (boolean): </b>Used to set which values should be set when use select mode 3. Only top parents are set as values to items when selected. Because logically the childrens are included when select a parent. If children also should be set to item this settings need so be set to false</li>
+            <li><b>forceRefreshEventOnStart (boolean): </b>The tree also supports apexbeforerefresh and apexafterefresh event that are available in dynamic actions. On default these events are triggered only on refresh. Set this attribute true to force it also on first load.</li>
+            <li><b>iconExpanderOpen (string): </b>Icon for the expander when open</li>
+            <li><b>iconExpanderClosed (string): </b>Icon for the expander when closed</li>
+            <li><b>markNodesWithChildren (boolean): </b>add fa-apex modifier to parent nodes with selected children or the active node - Feature only avail when using font-apex icons</li>
+            <li><b>markerModifier (string): </b>set modifier class for markNodesWithChildren feature</li>
+            <li><b>openParentOfActiveNode(boolean): </b>expand parents of active node on init</li>
+            <li><b>openParentOfSelected (boolean): </b> open parents of selected nodes on init</li>
+            <li><b>refresh (number): </b>set auto refresh of the tree region in seconds. When 0 then autorefresh is off</li>
+            <li><b>search (object):</b>
+            <ul>
+            <li><b>autoExpand (boolean): </b>Expand all branches that contain matches<b><br /></b></li>
+            <li><b>leavesOnly (boolean): </b>Search only leaves<b><br /></b></li>
+            <li><b>highlight (boolean): </b>Highlight matches<b><br /></b></li>
+            <li><b>counter (boolean): </b>show a badge with number of contained matches<b><br /></b></li>
+            <li><b>hideUnmatched (boolean):</b> hide or grayout unmatched items</li>
+            <li><b>debounce(object):</b>
+            <ul>
+            <li><b>enabled (boolean)</b>: enable debounce of search input</b></li>
+            <li><b>time (number): </b>: wait time before executing search after input</li>
+            </ul>
+            </li>
+            </ul>
+            <li><b>selectMode (number): 1</b> - single selection; 2 - multi-selection; 3 - for hierarchical selection</li>
+            <li><b>setActiveNode (boolean):</b> enable when click on node that Active Node item is set with value of the node. An item has to be set in Active Node ID attribute of the plug-in</li>
+            <li><b>setItemsOnInit (boolean): </b>set values of items that are configured in typeSettings on load. So every node that is set as selected in sql src will be add as value to the items</li>
+            <li><b>typeSettings[i] (object):</b>
+            <ul>
+            <li><b>id (string)</b>: in sql source are types defined. This value is used for mapping of type value in sql source and in this config json</li>
+            <li><b>storeItem (string): </b>: in sql source are types defined. This value is used to define the item name where the values from sql are stored</li>
+            <li><b>icon (string): </b>: in sql source are types defined. This value is used to set an icon for the type when nothing is defined in sql source</li>
+            </ul>
+            </li>
+            </ul>
+            ```
+    }
+)
+
+customAttribute attribute_02 (
+    apexlangName: searchItem
+    attribute: 2
+    name: Search Item
+    type: pageItem
+    appearance {
+        sequence: 20
+    }
+    help {
+        helpText: Set a textfield item that is used to search in tree
+    }
+)
+
+customAttribute attribute_03 (
+    apexlangName: whenErrorOccured
+    attribute: 3
+    name: When Error occured
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 30
+    }
+    builder {
+        translatable: true
+    }
+    default {
+        value: Error occured! Please check browser console for more information.
+    }
+    help {
+        helpText: This message is shown when any error is occured. Please check Browser console for debug information when this text is shown.
+    }
+)
+
+customAttribute attribute_04 (
+    apexlangName: activeNodeId
+    attribute: 4
+    name: Active Node ID
+    type: pageItem
+    appearance {
+        sequence: 21
+    }
+    help {
+        helpText: Set Item which value is active node id
+    }
+)
+
+customAttribute attribute_05 (
+    apexlangName: useClientSideCaching
+    attribute: 5
+    name: Use Client Side Caching
+    type: yesNo
+    appearance {
+        sequence: 50
+    }
+    help {
+        helpText:
+            ```
+            The Plug-in is able to store the received data from SQL Source in Client. To share local cache use the same static region id for the Plug-in Region. The cache can be cleared by doing the following:
+            <ul>
+            <li>Browser Tab is closed</li>
+            <li>New APEX session</li>
+            <li>Fire region refresh by Dynamic Action</li>
+            <li>Version that is given by following function is different to last version that was set to client</li>
+            ```
+    }
+)
+
+customAttribute attribute_06 (
+    apexlangName: clientSideCacheVersion
+    attribute: 6
+    name: Client Side Cache Version
+    type: plsqlFunctionBodyReturningVarchar2
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 60
+    }
+    default {
+        value: RETURN 'V1';
+    }
+    dependingOn {
+        attribute: @attribute_05/component
+        conditionType: =
+        value: Y
+    }
+    help {
+        helpText: Used to set a function that returns the version of the client cache. This is used to expire the client side cache if the version changes. The function is executed on page render and validates the stored version number in client with the version that is returned by this function.
+    }
+    examples {
+        examples:
+            ```
+            <pre>
+            RETURN 'V1';
+            </pre>
+            ```
+    }
+)
+
+customAttribute attribute_07 (
+    apexlangName: expandedNodes
+    attribute: 7
+    name: Expanded Nodes
+    type: pageItem
+    appearance {
+        sequence: 22
+    }
+    help {
+        helpText: Set Item where expanded Nodes are saved.
+    }
+)
+

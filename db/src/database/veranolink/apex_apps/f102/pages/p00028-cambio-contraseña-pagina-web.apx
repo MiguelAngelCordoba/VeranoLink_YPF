@@ -1,0 +1,254 @@
+page 28 (
+    name: Cambio contraseña Pagina WEB
+    alias: CAMBIO-CONTRASEÑA-PAGINA-WEB
+    title: Cambio contraseña para usuario: RESTAPIUSER
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword2(){
+                  var input = document.getElementById("P28_OLD_PASS");
+                  var icon = document.getElementById("ojo2");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+              function showPassword3(){
+                  var input = document.getElementById("P28_NEW_PASS");
+                  var icon = document.getElementById("ojo3");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region cambio-contraseña-para-usuario-restapiuser (
+        name: Cambio contraseña para usuario: RESTAPIUSER
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P28_NEW_PASS (
+        type: password
+        label {
+            label: Nueva  contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @cambio-contraseña-para-usuario-restapiuser
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword3()" style="padding:0">
+                <span id="ojo3" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+    )
+
+    pageItem P28_NOTI (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @cambio-contraseña-para-usuario-restapiuser
+            slot: regionBody
+        }
+    )
+
+    pageItem P28_OLD_PASS (
+        type: password
+        label {
+            label: Contraseña anterior
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @cambio-contraseña-para-usuario-restapiuser
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword2()" style="padding:0">
+                <span id="ojo2" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+    )
+
+    button cambiar (
+        buttonName: Cambiar
+        label: Cambiar
+        layout {
+            sequence: 10
+            region: @cambio-contraseña-para-usuario-restapiuser
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-change-pass (
+        name: DA_CHANGE_PASS
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cambiar
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                     IF APEX_UTIL.IS_LOGIN_PASSWORD_VALID (
+                            p_username=>'RESTAPIUSER',
+                            p_password=>:P28_OLD_PASS)  THEN 
+                          VL_PKG_PROCESS_CUSTOM_REPORT.RUN_UPDATE_PW_USER(:P28_OLD_PASS,:P28_NEW_PASS);
+                          :P28_NOTI := 1;
+                            ELSe
+                            :P28_NOTI :=0;
+                            END IF;
+                    
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P28_OLD_PASS
+                    P28_NEW_PASS
+                ]
+                itemsToReturn: P28_NOTI
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-set-notification (
+        name: DA_SET_NOTIFICATION
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P28_NOTI
+        }
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: La contraseña anterior es incorrecta, espere 10 segundos para volver a intentar.
+                showProgressBar: true
+                preventDuplicates: true
+                extendedTimeout: 10000
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P28_NOTI
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Contraseña cambiada exitosamente!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P28_NOTI
+                value: 1
+            }
+        )
+
+    )
+
+)
+

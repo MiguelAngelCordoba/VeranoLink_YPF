@@ -1,0 +1,203 @@
+page 2 (
+    name: Nueva contraseña
+    alias: NUEVA-CONTRASEÑA
+    title: Nueva contraseña
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword2(){
+                  var input = document.getElementById("P2_NEW_PASS");
+                  var icon = document.getElementById("ojo2");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region nueva-contraseña (
+        name: Nueva Contraseña
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P2_NEW_PASS (
+        type: password
+        label {
+            label: Nueva Contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @nueva-contraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword2()" style="padding:0">
+                <span id="ojo2" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P2_VL_ID_USER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+    )
+
+    button actualizar (
+        buttonName: Actualizar
+        label: Actualizar
+        layout {
+            sequence: 10
+            region: @nueva-contraseña
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    validation vldt-format-pass (
+        name: VLDT_FORMAT_PASS
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                  -- Verificar si la contraseña es nula o vacía
+                  IF :P2_NEW_PASS IS NULL OR TRIM(:P2_NEW_PASS) = '' THEN
+                    RETURN 'Es necesario proporcionar una contraseña para continuar.';
+                  END IF;
+                
+                  -- Verificar la longitud de la contraseña
+                  IF LENGTH(:P2_NEW_PASS) >= 8 AND LENGTH(:P2_NEW_PASS) <= 15 THEN
+                    -- Verificar si contiene un número
+                    IF REGEXP_LIKE(:P2_NEW_PASS, '[0-9]') THEN
+                      -- Verificar si contiene una letra minúscula
+                      IF REGEXP_LIKE(:P2_NEW_PASS, '[a-z]', 'c') THEN
+                        -- Verificar si contiene una letra mayúscula
+                        IF REGEXP_LIKE(:P2_NEW_PASS, '[A-Z]', 'c') THEN
+                          -- Verificar si contiene un carácter especial
+                          IF REGEXP_LIKE(:P2_NEW_PASS, '[,.!@#$%^&*()_]', 'c') THEN
+                            RETURN ''; -- Contraseña válida
+                          ELSE
+                            RETURN 'La contraseña debe contener al menos un carácter especial, como uno de los siguientes: [,.!@#$%^&*()_]';
+                          END IF;
+                        ELSE
+                          RETURN 'La contraseña debe contener al menos una letra mayúscula.';
+                        END IF;
+                      ELSE
+                        RETURN 'La contraseña debe contener al menos una letra minúscula.';
+                      END IF;
+                    ELSE
+                      RETURN 'La contraseña debe contener al menos un número.';
+                    END IF;
+                  ELSE
+                    RETURN 'La contraseña debe tener entre 8 y 15 caracteres. El tamaño actual es: ' || LENGTH(:P2_NEW_PASS);
+                  END IF;
+                END;
+                ```
+            alwaysExecute: true
+        }
+        error {
+            associatedItem: @P2_NEW_PASS
+        }
+    )
+
+    process apclosedialog (
+        name: apCloseDialog
+        type: closeDialog
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 2249057639742734
+        }
+        serverSideCondition {
+            whenButtonPressed: @actualizar
+        }
+    )
+
+    process spupdateuserpass (
+        name: spUpdateUserPass
+        type: executeCode
+        source {
+            plsqlCode: VL_PKG_CRUD_USER.UPDATE_USER_PASS(:P2_NEW_PASS,:P2_VL_ID_USER);
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Contraseña actualizada
+        }
+        advanced {
+            executionMappingIdentifier: 3206896805819549
+        }
+        serverSideCondition {
+            whenButtonPressed: @actualizar
+        }
+    )
+
+)
+

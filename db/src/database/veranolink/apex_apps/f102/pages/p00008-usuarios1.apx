@@ -1,0 +1,320 @@
+page 8 (
+    name: Usuarios
+    alias: USUARIOS1
+    title: Usuarios
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region usuarios (
+        name: Usuarios
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                Declare
+                   v_sql varchar2(4000);
+                Begin
+                   If :GET_ROL = 2 then
+                      v_sql := 'select VL_ID_USER,
+                    U.NAME AS NOMBRE,
+                    C.NAME AS COMPAÑIA,
+                       EMAIL,
+                       U.CREATED_DATE + INTERVAL ''5'' HOUR AS CREATED_DATE,
+                     R.NAME AS ROL,
+                       CASE WHEN STATE = 1 THEN ''ACTIVO'' ELSE ''INACTIVO'' END ESTADO
+                  from VL_USERS U INNER JOIN VL_COMPANIES C ON U.VL_ID_COMPANY = C.VL_ID_COMPANY
+                                   INNER JOIN VL_ROLES R ON U.VL_ID_ROL = R.VL_ID_ROL
+                                    WHERE VL_ID_USER != :GET_ID AND U.VL_ID_ROL != 1 AND U.VL_ID_COMPANY = :GET_COMPANY;';
+                   Else
+                     v_sql := 'select VL_ID_USER,
+                    U.NAME AS NOMBRE,
+                    C.NAME AS COMPAÑIA,
+                       EMAIL,
+                       U.CREATED_DATE + INTERVAL ''5'' HOUR AS CREATED_DATE,
+                     R.NAME AS ROL,
+                       CASE WHEN STATE = 1 THEN ''ACTIVO'' ELSE ''INACTIVO'' END ESTADO
+                  from VL_USERS U INNER JOIN VL_COMPANIES C ON U.VL_ID_COMPANY = C.VL_ID_COMPANY
+                                   INNER JOIN VL_ROLES R ON U.VL_ID_ROL = R.VL_ID_ROL
+                                    WHERE VL_ID_USER != :GET_ID;';
+                   End If;
+                
+                Return v_sql;
+                End;
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: #DEFAULT#
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 9
+                items: {
+                    P9_VL_ID_USER: \#VL_ID_USER#\
+                }
+                action: resetPagination
+            }
+            linkIcon: <span role="img" aria-label="Edit"><span class="fa fa-edit" aria-hidden="true" title="Edit"></span></span>
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        advanced {
+            savedReportMappingIdentifier: 3202445151819505
+        }
+
+        column COMPAÑIA (
+            type: plainText
+            heading {
+                heading: Compañia
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column CREATED_DATE (
+            type: plainText
+            heading {
+                heading: Fecha de creación
+            }
+            layout {
+                sequence: 60
+            }
+            appearance {
+                formatMask: SINCE
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column EMAIL (
+            type: plainText
+            heading {
+                heading: Email
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column ESTADO (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column ROL (
+            type: plainText
+            heading {
+                heading: Rol
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column VL_ID_USER (
+            type: hidden
+            heading {
+                heading: Vl Id User
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Usuarios
+        }
+
+        savedReport 32152 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn COMPAÑIA (
+                sequence: 5
+            )
+
+            displayColumn CREATED_DATE (
+                sequence: 6
+            )
+
+            displayColumn EMAIL (
+                sequence: 3
+            )
+
+            displayColumn ESTADO (
+                sequence: 7
+            )
+
+            displayColumn NOMBRE (
+                sequence: 2
+            )
+
+            displayColumn ROL (
+                sequence: 4
+            )
+
+            displayColumn VL_ID_USER (
+                sequence: 1
+            )
+
+        )
+
+    )
+
+    button crear (
+        buttonName: Crear
+        label: Crear
+        layout {
+            sequence: 10
+            region: @usuarios
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 9
+                clearCache: 9
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-editreportdialogclosed (
+        name: DA_EditReportDialogClosed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosecanceldialog
+            selectionType: region
+            region: @usuarios
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @usuarios
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

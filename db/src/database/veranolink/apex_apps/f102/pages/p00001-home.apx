@@ -1,0 +1,128 @@
+page 1 (
+    name: Home
+    alias: HOME
+    title: Verano Link
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .t-HeroRegion-icon {
+                //background-image: url(#APP_FILES#3534138.png);
+                //background-size: cover !important;
+                background-color: transparent;
+                
+            }
+            
+            .imagen{
+                width: 100px;
+                height: 100px;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region aplicaciones (
+        name: Aplicaciones
+        type: cards
+        source {
+            location: localDatabase
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                Declare
+                   v_sql varchar2(500);
+                Begin
+                   If :GET_ROL = 2 then
+                      v_sql := 'SELECT A.ID_VL_SOURCE_APPLICATION, A.NAME, VL_APPLICATION_IMG AS ICON FROM VL_SOURCE_APPLICATIONS A INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B 
+                ON A.ID_VL_SOURCE_APPLICATION = B.ID_VL_SOURCE_APPLICATION WHERE B.VL_ID_COMPANY = :GET_COMPANY  AND B.VL_STATE = 1 ';
+                   ELSIF :GET_ROL = 3 THEN
+                     v_sql := 'SELECT DISTINCT( D.ID_VL_SOURCE_APPLICATION), D.NAME ,VL_APPLICATION_IMG AS ICON FROM VL_SOURCES A 
+                
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS C ON A.ID_VL_COMPANY_APPLICATION = C.ID_VL_COMPANY_APPLICATION
+                INNER JOIN VL_SOURCE_APPLICATIONS D ON C.ID_VL_SOURCE_APPLICATION = D.ID_VL_SOURCE_APPLICATION
+                INNER JOIN VL_SOURCE_ASSIGNS B ON A.ID_VL_SOURCE = B.ID_VL_SOURCE_ENVIRONMENT 
+                WHERE A.VL_SOURCE_STATE = 1 AND B.ID_VL_USER= :GET_ID;';
+                
+                
+                ELSE   
+                v_sql :='SELECT A.ID_VL_SOURCE_APPLICATION, (A.NAME||'' ''||C.SHORT_NAME) AS NAME, VL_APPLICATION_IMG AS ICON FROM VL_SOURCE_APPLICATIONS A INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B 
+                ON A.ID_VL_SOURCE_APPLICATION = B.ID_VL_SOURCE_APPLICATION
+                INNER JOIN VL_COMPANIES C ON B.VL_ID_COMPANY = C.VL_ID_COMPANY;';
+                
+                
+                   End If;
+                
+                Return v_sql;
+                End;
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+            startNewRow: false
+            column: 3
+            columnSpan: 8
+        }
+        appearance {
+            template: @cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--styleB
+            ]
+        }
+        componentAppearance {
+            gridColumns: 2
+        }
+        title {
+            column: NAME
+        }
+        iconAndBadge {
+            iconSource: imageUrl
+            imageUrl: &ICON.
+            iconCssClasses: imagen
+        }
+
+        action action (
+            type: fullCard
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 6
+                    items: {
+                        P6_ID_APP: &ID_VL_SOURCE_APPLICATION.
+                    }
+                }
+            }
+        )
+
+    )
+
+    region verano-link-get-company-name (
+        name: Verano Link  &GET_COMPANY_NAME.
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+)
+

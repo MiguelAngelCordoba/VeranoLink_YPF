@@ -1,0 +1,10 @@
+file toastr.min.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file toastr.min.js (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+

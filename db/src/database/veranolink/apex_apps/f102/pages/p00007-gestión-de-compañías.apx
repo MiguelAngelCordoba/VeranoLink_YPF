@@ -1,0 +1,701 @@
+page 7 (
+    name: Gestión de compañías
+    alias: GESTIÓN-DE-COMPAÑÍAS
+    title: Gestión de compañías
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region botones (
+        name: Botones
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region gestión-de-compañías (
+        name: Gestión de compañías
+        type: form
+        source {
+            location: localDatabase
+            tableName: VL_COMPANIES
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P7_ALIAS (
+        type: textField
+        label {
+            label: Nombre corto o Alias
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @gestión-de-compañías
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P7_VL_ID_COMPANY
+        }
+    )
+
+    pageItem P7_MESSAGE_RESPONSE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @botones
+            slot: regionBody
+        }
+    )
+
+    pageItem P7_NAME (
+        type: textField
+        label {
+            label: Nombre completo de la compañía
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 20
+            region: @gestión-de-compañías
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 100
+        }
+        source {
+            formRegion: @gestión-de-compañías
+            column: NAME
+            dataType: varchar2
+        }
+    )
+
+    pageItem P7_SHORT_NAME (
+        type: displayOnly
+        label {
+            label: Nombre corto o Alias
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @gestión-de-compañías
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @gestión-de-compañías
+            column: SHORT_NAME
+            dataType: varchar2
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P7_VL_ID_COMPANY
+        }
+    )
+
+    pageItem P7_VL_ID_COMPANY (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @gestión-de-compañías
+            slot: regionBody
+        }
+        source {
+            formRegion: @gestión-de-compañías
+            column: VL_ID_COMPANY
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P7_VL_ID_COUNTRY (
+        type: selectList
+        label {
+            label: País
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @vl-countries-name
+            nullDisplayValue: Seleccione el pais...
+        }
+        layout {
+            sequence: 30
+            region: @gestión-de-compañías
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @gestión-de-compañías
+            column: VL_ID_COUNTRY
+            dataType: number
+        }
+    )
+
+    button actualizar (
+        buttonName: Actualizar
+        label: Actualizar
+        layout {
+            sequence: 30
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P7_VL_ID_COMPANY
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancelar
+        layout {
+            sequence: 20
+            region: @botones
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button crear (
+        buttonName: Crear
+        label: Crear
+        layout {
+            sequence: 40
+            region: @botones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P7_VL_ID_COMPANY
+        }
+    )
+
+    button eliminar (
+        buttonName: Eliminar
+        label: Eliminar
+        layout {
+            sequence: 20
+            region: @botones
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+            executeValidations: false
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: ¿Seguro que deseas eliminar esta compañía?
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P7_VL_ID_COMPANY
+        }
+    )
+
+    dynamicAction da-cancel-dialog (
+        name: DA_CANCEL_DIALOG
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-close-region (
+        name: DA_CLOSE_REGION
+        execution {
+            sequence: 50
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @actualizar
+        }
+
+        action native-submit-page (
+            action: submitPage
+            settings {
+                requestButtonName: Actualizar
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-create-company (
+        name: DA_CREATE_COMPANY
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @crear
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    VALIDATOR NUMBER;
+                    BEGIN
+                    SELECT COUNT(*) INTO VALIDATOR FROM VL_COMPANIES WHERE SHORT_NAME = UPPER(:P7_ALIAS);
+                    
+                    IF VALIDATOR = 0 THEN
+                    
+                    VL_PKG_CRUD_COMPANY.NEW_COMPANY(:P7_NAME, :P7_VL_ID_COUNTRY, :P7_ALIAS);
+                    :P7_MESSAGE_RESPONSE := 1;
+                    
+                    ELSE 
+                    :P7_MESSAGE_RESPONSE := 0;
+                    END IF;
+                    
+                    exception WHEN OTHERS THEN  
+                    IF SQLCODE = -01920 THEN 
+                    :P7_MESSAGE_RESPONSE := 2;
+                    DELETE FROM VL_COMPANIES WHERE SHORT_NAME = UPPER(:P7_ALIAS);
+                    END IF;
+                    
+                    END;
+                    
+                    ```
+                itemsToSubmit: [
+                    P7_NAME
+                    P7_VL_ID_COUNTRY
+                    P7_ALIAS
+                ]
+                itemsToReturn: P7_MESSAGE_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-delete-company (
+        name: DA_DELETE_COMPANY
+        execution {
+            sequence: 20
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @eliminar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                    
+                        VL_PKG_CRUD_COMPANY.DELETE_COMPANY(:P7_VL_ID_COMPANY,:P7_SHORT_NAME);
+                    
+                    END;
+                    ```
+                itemsToSubmit: P7_VL_ID_COMPANY
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                text: Compañía eliminada
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notificacion (
+        name: DA_NOTIFICACION
+        execution {
+            sequence: 40
+        }
+        when {
+            selectionType: items
+            items: P7_MESSAGE_RESPONSE
+        }
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Empresa creada correctamente
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P7_MESSAGE_RESPONSE
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Este alias ya esta registrado!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P7_MESSAGE_RESPONSE
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-3 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Este alias ya esta registrado!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P7_MESSAGE_RESPONSE
+                value: 2
+            }
+        )
+
+    )
+
+    validation vldt-espacios (
+        name: VLDT_ESPACIOS
+        execution {
+            sequence: 40
+        }
+        validation {
+            type: itemContainsNoSpaces
+            item: P7_ALIAS
+        }
+        error {
+            errorMessage: El alias no puede tener espacios
+            associatedItem: @P7_ALIAS
+        }
+    )
+
+    validation vldt-nombre (
+        name: VLDT_NOMBRE
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P7_NAME
+        }
+        error {
+            errorMessage: Ingresa un nombre
+            associatedItem: @P7_NAME
+        }
+    )
+
+    validation vldt-nulo (
+        name: VLDT_NULO
+        execution {
+            sequence: 30
+        }
+        validation {
+            type: itemIsNotNull
+            item: P7_ALIAS
+        }
+        error {
+            errorMessage: Ingrese un alias
+            associatedItem: @P7_ALIAS
+        }
+    )
+
+    validation vldt-pais (
+        name: VLDT_PAIS
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: itemIsNotNull
+            item: P7_VL_ID_COUNTRY
+        }
+        error {
+            errorMessage: Selecciona un país
+            associatedItem: @P7_VL_ID_COUNTRY
+        }
+    )
+
+    process apclose-dialog (
+        name: apClose Dialog
+        type: closeDialog
+        settings {
+            showSuccessMessages: false
+        }
+        execution {
+            sequence: 40
+        }
+        advanced {
+            executionMappingIdentifier: 3166632765890896
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: Crear,SAVE,Eliminar,Actualizar
+        }
+    )
+
+    process initialize-form-gestión-de-compañías (
+        name: Initialize form Gestión de compañías
+        type: formInitialization
+        formRegion: @gestión-de-compañías
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 3165857790890897
+        }
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                
+                    VL_PKG_CRUD_COMPANY.DELETE_COMPANY(:P7_VL_ID_COMPANY,:P7_SHORT_NAME);
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 2381618447365409
+        }
+        serverSideCondition {
+            whenButtonPressed: @eliminar
+        }
+    )
+
+    process spgestión-de-compañías (
+        name: spGestión de compañías
+        type: formAutoRowProcessing
+        formRegion: @gestión-de-compañías
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 3166233155890896
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+    process spgestión-de-compañías-2 (
+        name: spGestión de compañías_1
+        type: executeCode
+        source {
+            plsqlCode: VL_PKG_CRUD_COMPANY.NEW_COMPANY(:P7_NAME,:P7_VL_ID_COUNTRY,:P7_ALIAS);
+        }
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 2381442478365407
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+    process spupdatecompany (
+        name: spUpdateCompany
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                
+                VL_PKG_CRUD_COMPANY.UPDATE_COMPANY(:P7_NAME, :P7_VL_ID_COUNTRY , :P7_VL_ID_COMPANY, :P7_SHORT_NAME);
+                END;
+                ```
+        }
+        execution {
+            sequence: 30
+        }
+        successMessage {
+            successMessage: Compañía actualizada
+        }
+        advanced {
+            executionMappingIdentifier: 3204939949819530
+        }
+        serverSideCondition {
+            whenButtonPressed: @actualizar
+            type: expression
+            plsqlExpression: :REQUEST IN ('Actualizar')
+        }
+    )
+
+)
+

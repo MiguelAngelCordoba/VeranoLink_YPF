@@ -1,0 +1,66 @@
+appItem APPLICATION_ENVIRONMENT (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem CUSTOM_REPORT_COMPLETE_QUERY (
+)
+
+appItem CUSTOM_REPORT_DESCRIP (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem CUSTOM_REPORT_FROM_QUERY (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem CUSTOM_REPORT_NAME (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem GET_COMPANY (
+)
+
+appItem GET_COMPANY_NAME (
+)
+
+appItem GET_ID (
+)
+
+appItem GET_JSON_REQUEST (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem GET_ROL (
+)
+
+appItem ID_PARAMETER (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem QUERY_CUSTOM_REPORT (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+
+appItem TOTAL_API (
+)
+
+appItem VIEW_QUERY (
+    security {
+        sessionStateProtection: unrestricted
+    }
+)
+

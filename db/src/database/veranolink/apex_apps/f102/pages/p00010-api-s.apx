@@ -1,0 +1,208 @@
+page 10 (
+    name: API's
+    alias: API-S
+    title: API's
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .t-HeroRegion-icon {
+                //background-image: url(#APP_FILES#3534138.png);
+                //background-size: cover !important;
+                background-color: transparent;
+                /* height: 100%; */
+            }
+            
+            .imagen{
+                width: 85px;
+                height: 100%;
+            }
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region api-s-p10-name-collection (
+        name: API'S -  &P10_NAME_COLLECTION.
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#Apis_icon.png
+        }
+    )
+
+    region colecciones (
+        name: Colecciones
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT ID_VL_PATH_CONTEXT,
+                       CASE WHEN STATE = 0 THEN NAME || ' (Desactivado)'
+                            ELSE NAME
+                            END AS NAME,
+                       PATH_CONTEXT,
+                       CASE WHEN ID_VL_CALL_TYPE = 1 THEN 'https://i.postimg.cc/mgGB9JVw/GET-icon.png'
+                            WHEN ID_VL_CALL_TYPE = 2 OR ID_VL_CALL_TYPE = 4 THEN 'https://i.postimg.cc/jqmsxL7B/POST-icon.png' 
+                            WHEN ID_VL_CALL_TYPE = 3 THEN 'https://i.postimg.cc/QdksJmyr/PUT-icon.png' 
+                            END AS ICON,
+                       PATH_DESCRIPTION,
+                       CREATED_DATE
+                FROM VL_PATH_CONTEXTS 
+                WHERE ID_VL_SOURCE_COLLECTION = :P10_COLLECTION 
+                AND (STATE = 1 OR (:GET_ID = 141 AND STATE IN (0, 1)))
+                ORDER BY ID_VL_PATH_CONTEXT ASC;
+                
+                ```
+            pageItemsToSubmit: P10_COLLECTION
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @cards-container
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            layout: horizontal
+        }
+        title {
+            column: NAME
+        }
+        iconAndBadge {
+            iconSource: imageUrl
+            imageUrl: &ICON.
+            iconCssClasses: imagen
+        }
+
+        action action (
+            type: fullCard
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 15
+                    items: {
+                        P15_COD_API: &ID_VL_PATH_CONTEXT.
+                    }
+                }
+            }
+        )
+
+    )
+
+    pageItem P10_APPLICATION (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+    )
+
+    pageItem P10_COLLECTION (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P10_FATHER_SOURCE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+    )
+
+    pageItem P10_NAME_COLLECTION (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 10
+            region: @api-s-p10-name-collection
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--small
+                t-Button--iconLeft
+            ]
+            icon: fa-arrow-left
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 11
+                items: {
+                    P11_SON: &P10_FATHER_SOURCE.
+                    P11_APPLICATION: &P10_APPLICATION.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process set-name (
+        name: SET_NAME
+        type: executeCode
+        source {
+            plsqlCode: SELECT NAME_COLLECTION INTO :P10_NAME_COLLECTION FROM VL_SOURCE_COLLECTIONS WHERE ID_VL_SOURCE_COLLECTION = :P10_COLLECTION;
+        }
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 6664392624816024
+        }
+    )
+
+)
+

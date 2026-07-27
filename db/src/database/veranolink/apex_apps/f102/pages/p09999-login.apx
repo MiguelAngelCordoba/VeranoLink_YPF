@@ -1,0 +1,428 @@
+page 9999 (
+    name: Login Page
+    alias: LOGIN
+    title: Verano Link - Log In
+    appearance {
+        pageTemplate: @login
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword(){
+                  var input = document.getElementById("P9999_PASSWORD");
+                  var icon = document.getElementById("ojo");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            
+            ```
+    }
+    css {
+        inline:
+            ```css
+            .t-Login-logo {
+               
+                background-color: transparent;
+                width: auto;
+                height: 100px;
+            
+            }
+            
+            .t-Login-container {
+                background: url(#APP_FILES#VBG.png) no-repeat fixed !important;
+                background-size: cover !important;
+                background-position: center bottom !important; /* Ajusta la posición del fondo */
+                
+            }
+            .t-Login-region{
+                border-radius: 10px !important; /* Aplica el border-radius solo en las esquinas */
+                border: 2px solid #ccc; /* Agrega un borde opcional */
+                box-shadow: 0px 4px 8px rgba(67, 3, 3, 0.2);
+                
+                justify-content: center;
+                align-items: center;
+                
+            }
+            
+            ```
+    }
+    security {
+        authentication: public
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region verano-link (
+        name: Verano Link
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @login
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+    pageItem P9999_PASSWORD (
+        type: password
+        label {
+            label: Password
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @verano-link
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @hidden
+            templateOptions: #DEFAULT#
+            icon: fa-key
+            width: 40
+            valuePlaceholder: Contraseña
+        }
+        validation {
+            maxLength: 100
+        }
+        advanced {
+            customAttributes: autocomplete="current-password"
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword()" style="padding:0">
+                <span id="ojo" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    pageItem P9999_PERSISTENT_AUTH (
+        type: checkbox
+        label {
+            label: Remember me
+            alignment: right
+        }
+        layout {
+            sequence: 30
+            region: @verano-link
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @hidden
+            templateOptions: #DEFAULT#
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: apex_authentication.persistent_auth_enabled
+        }
+    )
+
+    pageItem P9999_REMEMBER (
+        type: checkbox
+        label {
+            label: Recordar correo
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @verano-link
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @hidden
+            templateOptions: #DEFAULT#
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: apex_authentication.persistent_cookies_enabled and not apex_authentication.persistent_auth_enabled
+        }
+    )
+
+    pageItem P9999_USERNAME (
+        type: textField
+        label {
+            label: Username
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 10
+            region: @verano-link
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @hidden
+            templateOptions: #DEFAULT#
+            icon: fa-user
+            width: 40
+            valuePlaceholder: Correo Electrónico
+        }
+        validation {
+            maxLength: 100
+        }
+        advanced {
+            customAttributes: autocomplete="username"
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    button ingresar (
+        buttonName: Ingresar
+        label: Ingresar
+        layout {
+            sequence: 40
+            region: @verano-link
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button recuperar-contraseña (
+        buttonName: Recuperar_contraseña
+        label: Recuperar Contraseña
+        layout {
+            sequence: 10
+            region: @verano-link
+            slot: edit
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: [
+                #DEFAULT#
+                t-Button--small
+                t-Button--noUI
+            ]
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 3
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: never
+        }
+    )
+
+    validation vldt-format-username (
+        name: VLDT_FORMAT_USERNAME
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemMatchesRegexp
+            item: P9999_USERNAME
+            regexp: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+            alwaysExecute: true
+        }
+        error {
+            errorMessage: Correo no válido.
+            associatedItem: @P9999_USERNAME
+        }
+    )
+
+    validation vldt-null-password (
+        name: VLDT_NULL_PASSWORD
+        execution {
+            sequence: 30
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9999_PASSWORD
+            alwaysExecute: true
+        }
+        error {
+            errorMessage: La contraseña no puede estar vacía.
+            associatedItem: @P9999_PASSWORD
+        }
+    )
+
+    validation vldt-null-username (
+        name: VLDT_NULL_USERNAME
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: itemIsNotNull
+            item: P9999_USERNAME
+            alwaysExecute: true
+        }
+        error {
+            errorMessage: El correo no puede estar vacío.
+            associatedItem: @P9999_USERNAME
+        }
+    )
+
+    process authentication (
+        name: Authentication
+        type: executeCode
+        source {
+            plsqlCode: VL_PKG_SECURITY.LOGEADO(:P9999_USERNAME, :P9999_PASSWORD, :APP_ID);
+        }
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 2360014083790514
+        }
+    )
+
+    process clear-page-s-cache (
+        name: Clear Page(s) Cache
+        type: clearSessionState
+        execution {
+            sequence: 40
+        }
+        advanced {
+            executionMappingIdentifier: 2740688819868683
+        }
+    )
+
+    process get-username-cookie (
+        name: Get Username Cookie
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                :P9999_USERNAME := apex_authentication.get_login_username_cookie;
+                :P9999_REMEMBER := case when :P9999_USERNAME is not null then 'Y' end;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 2740214909868683
+        }
+    )
+
+    process login (
+        name: Login
+        type: invokeApi
+        invoke {
+            package: APEX_AUTHENTICATION
+            procedureOrFunction: LOGIN
+        }
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 2736860632868686
+        }
+        serverSideCondition {
+            type: never
+        }
+
+        parameter p_password (
+            value {
+                type: item
+                item: P9999_PASSWORD
+            }
+            advanced {
+                displaySequence: 2
+            }
+        )
+
+        parameter p_set_persistent_auth (
+            parameter {
+                dataType: boolean
+                hasDefault: true
+            }
+            value {
+                type: item
+                item: P9999_PERSISTENT_AUTH
+            }
+            advanced {
+                displaySequence: 3
+            }
+        )
+
+        parameter p_username (
+            value {
+                type: item
+                item: P9999_USERNAME
+            }
+            advanced {
+                displaySequence: 1
+            }
+        )
+
+    )
+
+    process set-username-cookie (
+        name: Set Username Cookie
+        type: invokeApi
+        invoke {
+            package: APEX_AUTHENTICATION
+            procedureOrFunction: SEND_LOGIN_USERNAME_COOKIE
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 2738702334868683
+        }
+
+        parameter p_consent (
+            parameter {
+                dataType: boolean
+            }
+            value {
+                type: item
+                item: P9999_REMEMBER
+            }
+            advanced {
+                displaySequence: 2
+            }
+        )
+
+        parameter p_username (
+            value {
+                type: expression
+                plsqlExpression: lower( :P9999_USERNAME )
+            }
+            advanced {
+                displaySequence: 1
+            }
+        )
+
+    )
+
+)
+

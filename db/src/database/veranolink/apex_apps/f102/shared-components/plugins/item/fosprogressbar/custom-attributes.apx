@@ -1,0 +1,597 @@
+customAttribute attribute_01 (
+    apexlangName: defaultMessage
+    attribute: 1
+    name: Default Message
+    scope: app
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    builder {
+        translatable: true
+    }
+    default {
+        value: Loading...
+    }
+    help {
+        helpText: <p>Enter the default text you would like to display when the progress bar message attribute is enabled but no value is provided.</p>
+    }
+)
+
+customAttribute attribute_01 (
+    apexlangName: shape
+    attribute: 1
+    name: Shape
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    default {
+        value: line
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>Select the shape of the progress bar.</p>
+    }
+
+    entry circle (
+        sequence: 20
+        display: Circle
+        return: circle
+        help {
+            helpText: <p>A round shaped progress bar.</p>
+        }
+    )
+
+    entry custom (
+        sequence: 40
+        display: Custom
+        return: custom
+        help {
+            helpText: <p>Custom shape, based on the provided SVG.</p>
+        }
+    )
+
+    entry line (
+        sequence: 10
+        display: Line
+        return: line
+        help {
+            helpText: <p>The default progress bar.</p>
+        }
+    )
+
+    entry semiCircle (
+        sequence: 30
+        display: Semi-circle
+        return: semi-circle
+        help {
+            helpText: <p>A semi-circle shaped progress bar.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_02 (
+    apexlangName: customSvgPath
+    attribute: 2
+    name: Custom SVG Path
+    type: html
+    appearance {
+        sequence: 20
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: =
+        value: custom
+    }
+    help {
+        helpText:
+            ```
+            <p>Provide your custom SVG element, which must contain 1 or 2 <i>"path"</i> element(s). You can use the substitutions #COLOR# and #TRAIL_COLOR# to substitute the chosen plug-in color values.</p>
+            <p><strong>Note:</strong> the plug-in will assign an <i>"id"</i> to the <i>"path"</i> element, so any provided value will be overwritten.</p>
+            ```
+    }
+    examples {
+        examples:
+            ```
+            <pre><svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 100 100">
+                <path fill-opacity="0" stroke-width="1" stroke="#TRAIL_COLOR#" d="M81.495,13.923c-11.368-5.261-26.234-0.311-31.489,11.032C44.74,13.612,29.879,8.657,18.511,13.923  C6.402,19.539,0.613,33.883,10.175,50.804c6.792,12.04,18.826,21.111,39.831,37.379c20.993-16.268,33.033-25.344,39.819-37.379  C99.387,33.883,93.598,19.539,81.495,13.923z"/>
+                <path id="heart-path" fill-opacity="0" stroke-width="3" stroke="#COLOR#" d="M81.495,13.923c-11.368-5.261-26.234-0.311-31.489,11.032C44.74,13.612,29.879,8.657,18.511,13.923  C6.402,19.539,0.613,33.883,10.175,50.804c6.792,12.04,18.826,21.111,39.831,37.379c20.993-16.268,33.033-25.344,39.819-37.379  C99.387,33.883,93.598,19.539,81.495,13.923z"/>
+            </svg>
+            </pre>
+            ```
+    }
+)
+
+customAttribute attribute_03 (
+    apexlangName: style
+    attribute: 3
+    name: Style
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 30
+    }
+    default {
+        value: solid
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>The color style of the progress bar.</p>
+    }
+
+    entry gradient (
+        sequence: 30
+        display: Gradient
+        return: gradient
+        help {
+            helpText: <p>The progress bar transitions between two colors.</p>
+        }
+    )
+
+    entry solid (
+        sequence: 10
+        display: Solid
+        return: solid
+        help {
+            helpText: <p>A solid progress bar, with one color.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_04 (
+    apexlangName: color
+    attribute: 4
+    name: Color
+    type: color
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 40
+    }
+    default {
+        value: #00A02D
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>The main color of the progress bar.</p>
+    }
+)
+
+customAttribute attribute_05 (
+    apexlangName: trailColor
+    attribute: 5
+    name: Trail Color
+    type: color
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 50
+    }
+    default {
+        value: #eee
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>The background color of the progress bar.</p>
+    }
+)
+
+customAttribute attribute_06 (
+    apexlangName: endColor
+    attribute: 6
+    name: End Color
+    type: color
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 60
+    }
+    default {
+        value: #CC2525
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_03/component
+        conditionType: =
+        value: gradient
+    }
+    help {
+        helpText: <p>The end color of the progress bar.</p>
+    }
+)
+
+customAttribute attribute_07 (
+    apexlangName: animation
+    attribute: 7
+    name: Animation
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 70
+    }
+    default {
+        value: ease-in
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>The animation of the progress bar.</p>
+    }
+
+    entry bounce (
+        sequence: 50
+        display: Bounce
+        return: bounce
+        help {
+            helpText: <p>A bounce animation.</p>
+        }
+    )
+
+    entry easeIn (
+        sequence: 10
+        display: Ease-in
+        return: ease-in
+        help {
+            helpText: <p>The animation has a slow start.</p>
+        }
+    )
+
+    entry easeInOut (
+        sequence: 30
+        display: Ease-In-Out
+        return: ease-in-out
+        help {
+            helpText: <p>The animation has a slow start, then fast, before it ends slow.</p>
+        }
+    )
+
+    entry easeOut (
+        sequence: 20
+        display: Ease-out
+        return: ease-out
+        help {
+            helpText: <p>The animation has a slow end.</p>
+        }
+    )
+
+    entry linear (
+        sequence: 40
+        display: Linear
+        return: linear
+        help {
+            helpText: <p>A linear animation.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_08 (
+    apexlangName: duration
+    attribute: 8
+    name: Duration
+    type: number
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 80
+    }
+    builder {
+        unit: ms
+    }
+    default {
+        value: 1000
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>The duration of the animation in milliseconds.</p>
+    }
+)
+
+customAttribute attribute_09 (
+    apexlangName: showPercentage
+    attribute: 9
+    name: Show Percentage
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 90
+    }
+    default {
+        value: on-element
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>Select whether the percentage should be displayed or not.</p>
+    }
+
+    entry aboveElement (
+        sequence: 30
+        display: Above Element
+        return: above-element
+        help {
+            helpText: <p>The percentage is displayed above the element.</p>
+        }
+    )
+
+    entry belowElement (
+        sequence: 40
+        display: Below Element
+        return: below-element
+        help {
+            helpText: <p>The percentage is displayed below the element.</p>
+        }
+    )
+
+    entry no (
+        sequence: 10
+        display: No
+        return: no
+        help {
+            helpText: <p>The percentage is hidden.</p>
+        }
+    )
+
+    entry onElement (
+        sequence: 20
+        display: On Element
+        return: on-element
+        help {
+            helpText: <p>The percentage is displayed on the progress bar element. (Does not supported with <i>"Shape"</i> set to <i>"Custom"</i>)</p>
+        }
+    )
+
+)
+
+customAttribute attribute_10 (
+    apexlangName: showMessage
+    attribute: 10
+    name: Show Message
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 100
+    }
+    default {
+        value: on-element
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>Set whether a message should be displayed or not.</p>
+    }
+
+    entry aboveElement (
+        sequence: 30
+        display: Above Element
+        return: above-element
+        help {
+            helpText: <p>The message is displayed above the progress bar element.</p>
+        }
+    )
+
+    entry belowElement (
+        sequence: 40
+        display: Below Element
+        return: below-element
+        help {
+            helpText: <p>The message is displayed below the progress bar element.</p>
+        }
+    )
+
+    entry no (
+        sequence: 10
+        display: No
+        return: no
+        help {
+            helpText: <p>No message is displayed.</p>
+        }
+    )
+
+    entry onElement (
+        sequence: 20
+        display: On Element
+        return: on-element
+        help {
+            helpText: <p>The message is displayed on the progress bar element. (It does not supported with <i>"Shape"</i> set to <i>"Custom"</i>.)</p>
+        }
+    )
+
+)
+
+customAttribute attribute_11 (
+    apexlangName: options
+    attribute: 11
+    name: Options
+    type: checkboxes
+    appearance {
+        sequence: 110
+    }
+    supports {
+        components: pageItems
+    }
+    help {
+        helpText: <p>Extra options to control the Progress Bar.</p>
+    }
+
+    entry addTimer (
+        sequence: 20
+        display: Add Timer
+        return: add-timer
+        help {
+            helpText: <p>Refresh the progress bar within a specified interval.</p>
+        }
+    )
+
+    entry queueAnimations (
+        sequence: 10
+        display: Queue Animations
+        return: queue-animations
+        help {
+            helpText: <p>If enabled, the animations will be added to the effect queue, ie. every animation will finish completely, before the next one. Otherwise, the animation will begin immediately</p>
+        }
+    )
+
+)
+
+customAttribute attribute_12 (
+    apexlangName: interval
+    attribute: 12
+    name: Interval
+    type: number
+    appearance {
+        sequence: 120
+    }
+    builder {
+        unit: ms
+    }
+    default {
+        value: 1000
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_11/component
+        conditionType: inList
+        list: add-timer
+    }
+    help {
+        helpText: <p>The auto-refresh interval in milliseconds.</p>
+    }
+)
+
+customAttribute attribute_13 (
+    apexlangName: repetitions
+    attribute: 13
+    name: Repetitions
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 130
+    }
+    default {
+        value: progress-is-complete
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_11/component
+        conditionType: inList
+        list: add-timer
+    }
+    help {
+        helpText: <p>Choose the repetition type. It can either be a maximum number of repetitions or indefinitely until progress is complete i.e. 100%</p>
+    }
+
+    entry maximumNumberOfRepetitions (
+        sequence: 30
+        display: Maximum Number of Repetitions
+        return: number-of-repetitions
+        help {
+            helpText: The maximum number of iterations the timer will fire for e.g. 10 if the progress is completed before this number is reached the timer is removed.
+        }
+    )
+
+    entry untilProgressIsComplete (
+        sequence: 10
+        display: Until Progress is Complete
+        return: progress-is-complete
+        help {
+            helpText: <p>The timer stops when the progress is complete, ie. reaches 100%.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_14 (
+    apexlangName: numberOfRepetitions
+    attribute: 14
+    name: Number of Repetitions
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 140
+    }
+    builder {
+        unit: s
+    }
+    default {
+        value: 15
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_13/component
+        conditionType: =
+        value: number-of-repetitions
+    }
+    help {
+        helpText: <p>Enter the number of iterations you want the timer to fire for e.g. 1.</p>
+    }
+)
+
+customAttribute attribute_15 (
+    apexlangName: pageItemsToSubmit
+    attribute: 15
+    name: Page Items to Submit
+    type: pageItems
+    appearance {
+        sequence: 150
+    }
+    supports {
+        components: pageItems
+    }
+    dependingOn {
+        attribute: @attribute_11/component
+        conditionType: inList
+        list: add-timer
+    }
+    help {
+        helpText: <p>Enter the page items submitted to the server, and therefore, available for use within your SQL or PL/SQL Code.</p>
+    }
+)
+

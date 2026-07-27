@@ -1,0 +1,6 @@
+actionPosition link (
+    name: Link
+    staticId: LINK
+    sequence: 10
+)
+

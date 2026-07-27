@@ -1,0 +1,63 @@
+authorization administration-rights (
+    name: Administration Rights
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody: return true;
+    }
+    error {
+        errorMessage: Insufficient privileges, user is not an Administrator
+    }
+)
+
+authorization adminview (
+    name: adminView
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            DECLARE
+            ROL NUMBER;
+            BEGIN
+             SELECT VL_ID_ROL INTO ROL FROM VL_USERS WHERE VL_ID_USER= :GET_ID;
+            
+              IF ROL = 1 OR ROL = 2 THEN
+               RETURN TRUE;
+             ELSE 
+              RETURN FALSE;
+            
+            END IF ;
+            
+            END;
+            ```
+    }
+    advanced {
+        evaluationType: perSession
+    }
+)
+
+authorization superadmin (
+    name: superAdmin
+    type: plSqlFunctionBody
+    settings {
+        plsqlFunctionBody:
+            ```plsql
+            DECLARE
+            ROL NUMBER;
+            BEGIN
+             SELECT VL_ID_ROL INTO ROL FROM VL_USERS WHERE VL_ID_USER= :GET_ID;
+            
+              IF ROL = 1  THEN
+               RETURN TRUE;
+             ELSE 
+              RETURN FALSE;
+            
+            END IF ;
+            
+            END;
+            ```
+    }
+    advanced {
+        evaluationType: perSession
+    }
+)
+

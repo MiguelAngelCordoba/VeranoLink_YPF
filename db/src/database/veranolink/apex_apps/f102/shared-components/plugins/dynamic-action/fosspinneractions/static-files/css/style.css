@@ -1,0 +1,57 @@
+.fos-sa-overlay-body {
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 794;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.fos-sa-region-has-overlay,
+.fos-sa-region-has-spinner {
+    position: relative;
+}
+
+.fos-sa-overlay-region {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    visibility: visible;
+    top: 0;
+    left: 0;
+    z-index: 794;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.u-Processing.fos-sa-spinner-default {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+}
+
+.u-Processing.fos-sa-spinner {
+    background-color: unset !important;
+    backdrop-filter: unset !important;
+    margin-left: 0;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+}
+
+.u-Processing.fos-sa-spinner > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.u-Processing.fos-sa-spinner > .fos-sa-heart {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.fos-spinner-actions-custom {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+}

@@ -1,0 +1,417 @@
+/**
+* FOS - Spinner Actions predefines spinner styles
+*  
+* Source: https://loading.io/css/
+*
+**/
+
+/* Circle */
+.fos-sa-circle {
+  display: inline-block;
+  transform: translateZ(1px);
+}
+.fos-sa-circle > div {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  /* margin: 8px; */
+  border-radius: 50%;
+  /* background: #fff; */
+  animation: fos-sa-circle 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+@keyframes fos-sa-circle {
+  0%, 100% {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
+  }
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(1800deg);
+    animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
+  }
+  100% {
+    transform: rotateY(3600deg);
+  }
+}
+
+/* Dual Ring */
+.fos-sa-dual-ring {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+}
+.fos-sa-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 48px;
+  height: 48px;
+  /* margin: 8px; */
+  border-radius: 50%;
+  border-width: 6px;
+  border-style: solid;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  /* border-color: #fff transparent #fff transparent; */
+  animation: fos-sa-dual-ring 1.2s linear infinite;
+}
+@keyframes fos-sa-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Heart */
+.fos-sa-heart {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  transform: rotate(45deg);
+  transform-origin: 40px 40px;
+}
+.fos-sa-heart div {
+  top: 32px;
+  left: 32px;
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  /* background: #fff; */
+  animation: fos-sa-heart 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.fos-sa-heart div:after,
+.fos-sa-heart div:before {
+  content: " ";
+  position: absolute;
+  display: block;
+  width: 32px;
+  height: 32px;
+  /* background: #fff; */
+}
+.fos-sa-heart div:before {
+  left: -24px;
+  border-radius: 50% 0 0 50%;
+}
+.fos-sa-heart div:after {
+  top: -24px;
+  border-radius: 50% 50% 0 0;
+}
+@keyframes fos-sa-heart {
+  0% {
+    transform: scale(0.95);
+  }
+  5% {
+    transform: scale(1.1);
+  }
+  39% {
+    transform: scale(0.85);
+  }
+  45% {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(0.9);
+  }
+}
+
+/* Ring */
+.fos-sa-ring {
+  display: inline-block;
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+.fos-sa-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  /* margin: 8px; */
+  /* border: 8px solid #fff; */
+  /* border: 8px solid; */
+  border-width: 8px;
+  border-style: solid;
+  border-radius: 50%;
+  animation: fos-sa-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  /* border-color: #fff transparent transparent transparent; */
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+.fos-sa-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.fos-sa-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.fos-sa-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes fos-sa-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Roller */
+.fos-sa-roller {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.fos-sa-roller div {
+  animation: fos-sa-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  transform-origin: 40px 40px;
+}
+.fos-sa-roller div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  /* background: #fff; */
+  margin: -4px 0 0 -4px;
+}
+.fos-sa-roller div:nth-child(1) {
+  animation-delay: -0.036s;
+}
+.fos-sa-roller div:nth-child(1):after {
+  top: 63px;
+  left: 63px;
+}
+.fos-sa-roller div:nth-child(2) {
+  animation-delay: -0.072s;
+}
+.fos-sa-roller div:nth-child(2):after {
+  top: 68px;
+  left: 56px;
+}
+.fos-sa-roller div:nth-child(3) {
+  animation-delay: -0.108s;
+}
+.fos-sa-roller div:nth-child(3):after {
+  top: 71px;
+  left: 48px;
+}
+.fos-sa-roller div:nth-child(4) {
+  animation-delay: -0.144s;
+}
+.fos-sa-roller div:nth-child(4):after {
+  top: 72px;
+  left: 40px;
+}
+.fos-sa-roller div:nth-child(5) {
+  animation-delay: -0.18s;
+}
+.fos-sa-roller div:nth-child(5):after {
+  top: 71px;
+  left: 32px;
+}
+.fos-sa-roller div:nth-child(6) {
+  animation-delay: -0.216s;
+}
+.fos-sa-roller div:nth-child(6):after {
+  top: 68px;
+  left: 24px;
+}
+.fos-sa-roller div:nth-child(7) {
+  animation-delay: -0.252s;
+}
+.fos-sa-roller div:nth-child(7):after {
+  top: 63px;
+  left: 17px;
+}
+.fos-sa-roller div:nth-child(8) {
+  animation-delay: -0.288s;
+}
+.fos-sa-roller div:nth-child(8):after {
+  top: 56px;
+  left: 12px;
+}
+@keyframes fos-sa-roller {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ellipsis */
+.fos-sa-ellipsis {
+   display: inline-block;
+   position: relative;
+   width: 80px;
+   height: 80px;
+ }
+ .fos-sa-ellipsis div {
+   position: absolute;
+   top: 33px;
+   width: 13px;
+   height: 13px;
+   border-radius: 50%;
+   background: currentColor;
+   animation-timing-function: cubic-bezier(0, 1, 1, 0);
+ }
+ .fos-sa-ellipsis div:nth-child(1) {
+   left: 8px;
+   animation: fos-sa-ellipsis1 0.6s infinite;
+ }
+ .fos-sa-ellipsis div:nth-child(2) {
+   left: 8px;
+   animation: fos-sa-ellipsis2 0.6s infinite;
+ }
+ .fos-sa-ellipsis div:nth-child(3) {
+   left: 32px;
+   animation: fos-sa-ellipsis2 0.6s infinite;
+ }
+ .fos-sa-ellipsis div:nth-child(4) {
+   left: 56px;
+   animation: fos-sa-ellipsis3 0.6s infinite;
+ }
+ @keyframes fos-sa-ellipsis1 {
+   0% {
+     transform: scale(0);
+   }
+   100% {
+     transform: scale(1);
+   }
+ }
+ @keyframes fos-sa-ellipsis3 {
+   0% {
+     transform: scale(1);
+   }
+   100% {
+     transform: scale(0);
+   }
+ }
+ @keyframes fos-sa-ellipsis2 {
+   0% {
+     transform: translate(0, 0);
+   }
+   100% {
+     transform: translate(24px, 0);
+   }
+ }
+
+/* Grid */
+.fos-sa-grid {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.fos-sa-grid div {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* background: #fff; */
+  animation: fos-sa-grid 1.2s linear infinite;
+}
+.fos-sa-grid div:nth-child(1) {
+  top: 8px;
+  left: 8px;
+  animation-delay: 0s;
+}
+.fos-sa-grid div:nth-child(2) {
+  top: 8px;
+  left: 32px;
+  animation-delay: -0.4s;
+}
+.fos-sa-grid div:nth-child(3) {
+  top: 8px;
+  left: 56px;
+  animation-delay: -0.8s;
+}
+.fos-sa-grid div:nth-child(4) {
+  top: 32px;
+  left: 8px;
+  animation-delay: -0.4s;
+}
+.fos-sa-grid div:nth-child(5) {
+  top: 32px;
+  left: 32px;
+  animation-delay: -0.8s;
+}
+.fos-sa-grid div:nth-child(6) {
+  top: 32px;
+  left: 56px;
+  animation-delay: -1.2s;
+}
+.fos-sa-grid div:nth-child(7) {
+  top: 56px;
+  left: 8px;
+  animation-delay: -0.8s;
+}
+.fos-sa-grid div:nth-child(8) {
+  top: 56px;
+  left: 32px;
+  animation-delay: -1.2s;
+}
+.fos-sa-grid div:nth-child(9) {
+  top: 56px;
+  left: 56px;
+  animation-delay: -1.6s;
+}
+@keyframes fos-sa-grid {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Hourglass */
+.fos-sa-hourglass {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.fos-sa-hourglass:after {
+  content: " ";
+  display: block;
+  border-radius: 50%;
+  width: 0;
+  height: 0;
+  margin: 8px;
+  box-sizing: border-box;
+  /* border: 32px solid #fff; */
+  /* border: 32px solid; */
+  border-width: 32px;
+  border-style: solid;
+  /* border-color: #fff transparent #fff transparent; */
+  border-right-color: transparent;
+  border-left-color: transparent;
+  animation: fos-sa-hourglass 1.2s infinite;
+  position: absolute;
+  /* left: -16px;
+  top: -16px; */
+}
+@keyframes fos-sa-hourglass {
+  0% {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+  50% {
+    transform: rotate(900deg);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  100% {
+    transform: rotate(1800deg);
+  }
+}

@@ -1,0 +1,97 @@
+appProcess download-json (
+    name: DOWNLOAD_JSON
+    type: executeCode
+    source {
+        plsqlCode:
+            ```plsql
+            DECLARE 
+            v_filename VARCHAR2(200):='File.json';
+            
+            BEGIN
+                FOR file IN (SELECT ID_LOG,
+                                    V_filename,
+                                    VL_PARAMETER,
+                                    VL_MIMETYPE   
+                             FROM VL_LOGS WHERE ID_LOG = TO_NUMBER(:ID_PARAMETER)
+                    ) LOOP
+                    -- Inicializar la respuesta HTTP
+                    sys.htp.init;
+                    sys.owa_util.mime_header(file.VL_MIMETYPE, FALSE);
+            
+                    -- Incluir la longitud del archivo y el nombre en el encabezado
+                    sys.htp.p('Content-length: ' || sys.dbms_lob.getlength(file.VL_PARAMETER));
+                    sys.htp.p('Content-Disposition: attachment; filename="' || file.v_filename || '"');
+                    sys.htp.p('Cache-Control: max-age=3600');  -- Indicar al navegador que guarde en caché por 1 hora
+            
+                    
+                    sys.owa_util.http_header_close;
+                    sys.wpg_docload.download_file(file.VL_PARAMETER);
+                END LOOP;
+            END;
+            ```
+    }
+    execution {
+        sequence: 1
+        point: ajaxCallback
+    }
+)
+
+appProcess get-company (
+    name: GET_COMPANY
+    type: executeCode
+    source {
+        plsqlCode: SELECT VL_ID_COMPANY INTO :GET_COMPANY FROM VL_USERS WHERE VL_ID_USER = :GET_ID;
+    }
+    execution {
+        sequence: 3
+        point: afterAuthentication
+    }
+)
+
+appProcess get-company-name (
+    name: GET_COMPANY_NAME
+    type: executeCode
+    source {
+        plsqlCode: SELECT C.SHORT_NAME INTO :GET_COMPANY_NAME FROM VL_COMPANIES C WHERE C.VL_ID_COMPANY = :GET_COMPANY;
+    }
+    execution {
+        sequence: 4
+        point: afterAuthentication
+    }
+)
+
+appProcess id (
+    name: ID
+    type: executeCode
+    source {
+        plsqlCode: SELECT VL_ID_USER INTO :GET_ID FROM VL_USERS WHERE EMAIL= :APP_USER;
+    }
+    execution {
+        sequence: 1
+        point: afterAuthentication
+    }
+)
+
+appProcess rol (
+    name: ROL
+    type: executeCode
+    source {
+        plsqlCode: SELECT VL_ID_ROL INTO :GET_ROL FROM VL_USERS WHERE VL_ID_USER= :GET_ID;
+    }
+    execution {
+        sequence: 2
+        point: afterAuthentication
+    }
+)
+
+appProcess set-total (
+    name: SET_TOTAL
+    type: executeCode
+    source {
+        plsqlCode: select trim(to_char(count(*),'999G999G999G999G990')) into :TOTAL_API from VL_APU_TABLES where ID_USER=:GET_ID;
+    }
+    execution {
+        sequence: 1
+    }
+)
+

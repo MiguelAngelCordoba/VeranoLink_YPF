@@ -1,0 +1,811 @@
+page 23 (
+    name: Custom Report - Step 4
+    alias: CUSTOM-REPORT-STEP-4
+    title: Crear Reporte Personalizado
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        attributes: closeOnEscape:false
+        chained: false
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword(){
+                  var input = document.getElementById("P23_PASS_API_USER");
+                  var icon = document.getElementById("ojo");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            function showPassword2(){
+                  var input = document.getElementById("P23_OLD_PASSWORD");
+                  var icon = document.getElementById("ojo2");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            function showPassword3(){
+                  var input = document.getElementById("P23_NEW_PASSWORD");
+                  var icon = document.getElementById("ojo3");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            
+            ```
+        executeWhenPageLoads:
+            ```javascript-browser
+            var button = parent.$('.ui-dialog-titlebar-close'); //get the button
+            button.hide(); //hide the button
+            console.log(button)
+            ```
+    }
+    css {
+        inline:
+            ```css
+            #P23_INFO_EXIST_PASS{
+               border: none;
+            }
+            .t-Dialog-bodyWrapperIn{
+                overflow: hidden !important;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region cambiar-contraseña (
+        name: Cambiar Contraseña
+        type: staticContent
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+        appearance {
+            template: @inline-popup
+            templateOptions: [
+                #DEFAULT#
+                js-dialog-nosize
+            ]
+            cssClasses: pop_pass
+        }
+        advanced {
+            htmlDomId: pop_pass
+        }
+    )
+
+    region contenido-del-usuario (
+        name: Contenido del usuario
+        type: staticContent
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region lista-de-progreso (
+        name: Lista de progreso
+        type: list
+        source {
+            list: @flow-custom-report
+        }
+        layout {
+            sequence: 10
+            slot: dialogHeader
+        }
+        appearance {
+            template: @blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    region mostrar-contraseña-existente (
+        name: Mostrar Contraseña Existente
+        type: staticContent
+        layout {
+            sequence: 30
+            parentRegion: @contenido-del-usuario
+            slot: regionBody
+            column: 3
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        headerAndFooter {
+            headerText: <p style="font-size:15px">Ya tienes una contraseña creada para el usuario, si la deseas cambiar da clic: </p>
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                counter number;
+                BEGIN
+                SELECT COUNT(*) INTO counter FROM APEX_WORKSPACE_APEX_USERS WHERE WORKSPACE_NAME = 'VERANOLINK' AND USER_NAME = 'API_USER_'||:GET_COMPANY_NAME;
+                
+                IF counter = 0 then 
+                    return false;
+                    else 
+                    return true;
+                    end if;
+                END;
+                ```
+        }
+    )
+
+    region show-user-info (
+        name: show_user_info
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <br>
+                <br>
+                <p style="font-size: 20px">Usuario para consumo de API: <strong>&P23_API_USER. </strong> </p>
+                <br>
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @contenido-del-usuario
+            slot: regionBody
+            column: 3
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--hiddenOverflow
+            ]
+        }
+    )
+
+    pageItem P23_API_USER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT 'API_USER_'||:GET_COMPANY_NAME FROM DUAL;
+            used: always
+        }
+    )
+
+    pageItem P23_CHANGE_NOTI (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @cambiar-contraseña
+            slot: regionBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P23_NEW_PASSWORD (
+        type: password
+        label {
+            label: Contraseña nueva:
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @cambiar-contraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword3()" style="padding:0">
+                <span id="ojo3" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P23_OLD_PASSWORD (
+        type: password
+        label {
+            label: Contraseña anterior:
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @cambiar-contraseña
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword2()" style="padding:0">
+                <span id="ojo2" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P23_PASS_API_USER (
+        type: password
+        label {
+            label: Nueva contraseña
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @contenido-del-usuario
+            slot: regionBody
+            alignment: left
+            column: 1
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            postText:
+                ```html
+                <button class="t-Button t-Button--noLabel t-Button--icon t-Button--large t-Button--noUI" type="button" onclick="showPassword()" style="padding:0">
+                <span id="ojo" class="t-Icon t-Icon--left fa fa-eye" style="font-size: 14px; margin-top: 0.5px;" aria-hidden="true">
+                </span>
+                </button>
+                ```
+        }
+        source {
+            used: always
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                counter number;
+                BEGIN
+                SELECT COUNT(*) INTO counter FROM APEX_WORKSPACE_APEX_USERS WHERE WORKSPACE_NAME = 'VERANOLINK' AND USER_NAME = 'API_USER_'||:GET_COMPANY_NAME;
+                
+                IF counter = 0 then 
+                    return true;
+                    else 
+                    return false;
+                    end if;
+                END;
+                ```
+        }
+    )
+
+    button cambiar (
+        buttonName: Cambiar
+        label: Cambiar
+        layout {
+            sequence: 40
+            region: @cambiar-contraseña
+            slot: regionBody
+            column: 9
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button cambiar-contraseña (
+        buttonName: cambiar_contraseña
+        label: Cambiar Contraseña
+        layout {
+            sequence: 10
+            region: @mostrar-contraseña-existente
+            slot: regionBody
+            column: 4
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button cancelar (
+        buttonName: Cancelar
+        label: Cancelar
+        layout {
+            sequence: 20
+            region: @contenido-del-usuario
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button publicar (
+        buttonName: Publicar
+        label: Publicar
+        layout {
+            sequence: 20
+            region: @contenido-del-usuario
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-arrow-circle-up
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 10
+            region: @contenido-del-usuario
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-arrow-left
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-cancel-dalete (
+        name: DA_CANCEL-DALETE
+        execution {
+            sequence: 60
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    BEGIN
+                    EXECUTE IMMEDIATE 'DROP VIEW '||:GET_COMPANY_NAME||'.VIEW_'||UPPER(:CUSTOM_REPORT_NAME);
+                    COMMIT;
+                    EXCEPTION WHEN OTHERS THEN 
+                    NULL;
+                    END;
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-chage-password (
+        name: DA_CHAGE_PASSWORD
+        execution {
+            sequence: 40
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cambiar
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    BEGIN
+                     IF APEX_UTIL.IS_LOGIN_PASSWORD_VALID (
+                            p_username=>:P23_API_USER,
+                            p_password=>:P23_OLD_PASSWORD)  THEN 
+                          VL_PKG_PROCESS_CUSTOM_REPORT.RUN_UPDATE_USER_PASS(:P23_API_USER,:P23_OLD_PASSWORD,:P23_NEW_PASSWORD);
+                          :P23_CHANGE_NOTI := 1;
+                            ELSe
+                            :P23_CHANGE_NOTI :=0;
+                            END IF;
+                    
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P23_API_USER
+                    P23_OLD_PASSWORD
+                    P23_NEW_PASSWORD
+                ]
+                itemsToReturn: P23_CHANGE_NOTI
+                showProcessing: true
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-notification (
+        name: DA_NOTIFICATION
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: P23_CHANGE_NOTI
+        }
+
+        action native-close-region (
+            action: closeRegion
+            affectedElements {
+                selectionType: region
+                region: @cambiar-contraseña
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P23_CHANGE_NOTI
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Contraseña cambiada exitosamente
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P23_CHANGE_NOTI
+                value: 1
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications-2 (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Contraseña anterior es incorrecta, espere 10 segundos
+                showProgressBar: true
+                preventDuplicates: true
+                timeout: 14000
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P23_CHANGE_NOTI
+                value: 0
+            }
+        )
+
+    )
+
+    dynamicAction da-notify-password (
+        name: DA_NOTIFY_PASSWORD
+        execution {
+            sequence: 20
+        }
+        when {
+            event: ready
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                counter number;
+                BEGIN
+                SELECT COUNT(*) INTO counter FROM APEX_WORKSPACE_APEX_USERS WHERE WORKSPACE_NAME = 'VERANOLINK' AND USER_NAME = 'API_USER_'||:GET_COMPANY_NAME;
+                
+                IF counter = 0 then 
+                    return true;
+                    else 
+                    return false;
+                    end if;
+                END;
+                ```
+        }
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                text: <strong>Este es tu primer reporte personalizado, establece una clave al usuario para consumir y usar la API.</strong>
+                showCloseButton: false
+                preventDuplicates: true
+                timeout: 7000
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction da-open-pop-change-pass (
+        name: DA_OPEN_POP_CHANGE_PASS
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cambiar-contraseña
+        }
+
+        action native-open-region (
+            action: openRegion
+            affectedElements {
+                selectionType: region
+                region: @cambiar-contraseña
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-to-back (
+        name: DA_TO_BACK
+        execution {
+            sequence: 70
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @volver
+        }
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 22
+                }
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation vldt-password (
+        name: VLDT_PASSWORD
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P23_PASS_API_USER
+        }
+        error {
+            errorMessage: Debe asignar una contraseña
+            associatedItem: @P23_PASS_API_USER
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                counter number;
+                BEGIN
+                SELECT COUNT(*) INTO counter FROM APEX_WORKSPACE_APEX_USERS WHERE WORKSPACE_NAME = 'VERANOLINK' AND USER_NAME = 'API_USER_'||:GET_COMPANY_NAME;
+                
+                IF counter = 0 then 
+                    return true;
+                    else 
+                    return false;
+                    end if;
+                END;
+                ```
+        }
+    )
+
+    process spcreateapi (
+        name: spCreateApi
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                VL_PKG_PROCESS_CUSTOM_REPORT.CREATE_TEMPLATE_HANDLER(:GET_COMPANY_NAME,:CUSTOM_REPORT_NAME,:CUSTOM_REPORT_FROM_QUERY,:CUSTOM_REPORT_DESCRIP,:GET_ID);
+                END;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 16341272695820032
+        }
+    )
+
+    process spcreategroupuser (
+        name: spCreateGroupUser
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                VL_PKG_PROCESS_CUSTOM_REPORT.RUN_CREATE_USER(:GET_COMPANY_NAME,:P23_API_USER,:P23_PASS_API_USER);
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Publicado correctamente!
+        }
+        advanced {
+            executionMappingIdentifier: 16338961339820009
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                counter number;
+                BEGIN
+                SELECT COUNT(*) INTO counter FROM APEX_WORKSPACE_APEX_USERS WHERE WORKSPACE_NAME = 'VERANOLINK' AND USER_NAME = 'API_USER'||:GET_COMPANY_NAME;
+                
+                IF counter = 0 then 
+                    return true;
+                    else 
+                    return false;
+                    end if;
+                END;
+                ```
+        }
+    )
+
+    branch (
+        name: Go To Page 24
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 24
+                items: {
+                    P24_API_USER: &P23_API_USER.
+                }
+            }
+        }
+    )
+
+)
+

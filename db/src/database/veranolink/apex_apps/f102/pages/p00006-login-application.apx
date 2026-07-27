@@ -1,0 +1,534 @@
+page 6 (
+    name: Login application
+    alias: LOGIN-APPLICATION
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function showPassword(){
+                  var input = document.getElementById("P6_PASSWORD");
+                  var icon = document.getElementById("ojo");
+                  if(input.type == "password"){
+                      input.type = "text";
+                      icon.classList.remove("fa-eye");
+                      icon.classList.add("fa-eye-slash");
+                  }else{
+                      input.type = "password";
+                      icon.classList.add("fa-eye");
+                      icon.classList.remove("fa-eye-slash");
+                  }
+              }
+            
+            ```
+    }
+    css {
+        inline:
+            ```css
+            .t-Region-title {
+                text-align: center;
+            }
+            .titulo{
+                align-items: center;
+                font-size: 25px;
+            }
+            
+            #P6_USER{
+                border-radius: 20px;
+            }
+            #P6_PASSWORD{
+                border-radius: 20px;
+            }
+            #P6_ENVIRONMENT{
+                border-radius: 20px;
+            }
+            
+            .loginbut{
+                background-color: black;
+                color: white;
+                border-radius: 40px;
+                font-size: 15px;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region login (
+        name: Login
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <style>
+                    .center {
+                        background: white;
+                         margin-left: auto;
+                        margin-right: auto;
+                        display: block;
+                        width: 10rem;
+                        
+                    }
+                </style>
+                </head>
+                <body>
+                    <img src="&P6_IMG."  class="center">
+                </body>
+                ```
+        }
+        layout {
+            sequence: 70
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region span-class-titulo-p6-name-span (
+        name: <span class= "titulo" >&P6_NAME.</span>
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @login
+            slot: subRegions
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P6_ENVIRONMENT (
+        type: selectList
+        label {
+            label: Seleccione tipo de ambiente:
+            alignment: left
+        }
+        lov {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                
+                
+                BEGIN
+                IF :GET_ROL =3 THEN 
+                    RETURN 'SELECT A.TYPE_ENVIRONMENT, A.ID_VL_TYPE_ENVIRONMENT FROM VL_TYPES_ENVIRONMENT A 
+                INNER JOIN VL_SOURCES B ON  A.ID_VL_TYPE_ENVIRONMENT = B.ID_VL_TYPE_ENVIRONMENT 
+                INNER JOIN VL_SOURCE_ASSIGNS C ON B.ID_VL_SOURCE = C.ID_VL_SOURCE_ENVIRONMENT
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS D ON B.ID_VL_COMPANY_APPLICATION = D.ID_VL_COMPANY_APPLICATION
+                WHERE D.ID_VL_SOURCE_APPLICATION = :P6_ID_APP 
+                AND B.VL_SOURCE_STATE = 1 AND C.ID_VL_USER= :GET_ID';
+                ELSE 
+                RETURN 'SELECT A.TYPE_ENVIRONMENT, A.ID_VL_TYPE_ENVIRONMENT FROM VL_TYPES_ENVIRONMENT A 
+                INNER JOIN VL_SOURCES B ON  A.ID_VL_TYPE_ENVIRONMENT = B.ID_VL_TYPE_ENVIRONMENT 
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS D ON B.ID_VL_COMPANY_APPLICATION = D.ID_VL_COMPANY_APPLICATION
+                WHERE D.ID_VL_SOURCE_APPLICATION = :P6_ID_APP
+                AND B.VL_SOURCE_STATE = 1  AND D.VL_ID_COMPANY = :GET_COMPANY';
+                
+                END IF;
+                END;
+                ```
+            displayExtraValues: false
+            nullDisplayValue: --Selecciona un ambiente--
+        }
+        layout {
+            sequence: 10
+            region: @span-class-titulo-p6-name-span
+            slot: regionBody
+            alignment: left
+            column: 3
+            columnSpan: 8
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            cssClasses: selectenvi
+            height: 1
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P6_ID_APP (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+    )
+
+    pageItem P6_ID_ENVIROMENT_APP (
+        type: hidden
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P6_IMG (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+    )
+
+    pageItem P6_NAME (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+    )
+
+    pageItem P6_PARENT_FOLDER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT ID_VL_SOURCE_COLLECTION FROM VL_SOURCE_COLLECTIONS WHERE ID_VL_SOURCE_APPLICATION = :P6_ID_APP AND ID_PARENT_COLLECTION is null;
+            used: always
+        }
+    )
+
+    pageItem P6_RESPONSE (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+        source {
+            used: always
+        }
+    )
+
+    button entrar (
+        buttonName: Entrar
+        label: Entrar
+        layout {
+            sequence: 50
+            region: @span-class-titulo-p6-name-span
+            slot: regionBody
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+            cssClasses: loginbut
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction da-login-app (
+        name: DA_LOGIN_APP
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @entrar
+        }
+        clientSideCondition {
+            type: jsExpression
+            javaScriptExpression: "apex.item('P6_ENVIRONMENT').getValue() !==\"\" "
+        }
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    GET_ALIAS VARCHAR2(50);
+                    VALIDATOR CLOB;
+                    BEGIN
+                    
+                    
+                    SELECT ALIAS INTO GET_ALIAS FROM VL_SOURCE_APPLICATIONS WHERE ID_VL_SOURCE_APPLICATION = :P6_ID_APP;
+                    
+                    
+                    select VL_PKG_REST_SERVICES.VL_FN_REST_GETTOKEN(GET_ALIAS,:GET_COMPANY_NAME,:P6_ENVIRONMENT) INTO VALIDATOR from dual;
+                    
+                    -- IF VALIDATOR != '401' OR VALIDATOR != '500' THEN
+                    --     :P6_RESPONSE := 1;
+                    --  ELSE 
+                    --     :P6_RESPONSE := 0;
+                    
+                    --  END IF;
+                    
+                    IF VALIDATOR = '401' OR VALIDATOR = '500' THEN 
+                         :P6_RESPONSE := 0;
+                    ELSE 
+                        :P6_RESPONSE := 1;
+                    END IF;
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P6_ID_APP
+                    P6_ENVIRONMENT
+                ]
+                itemsToReturn: P6_RESPONSE
+                showProcessing: true
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                spinnerType: hourglass
+                accessibilityText: Processing
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                text: Seleccione un ambiente
+                showProgressBar: true
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-response-notificacion (
+        name: DA_RESPONSE_NOTIFICACION
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P6_RESPONSE
+        }
+
+        action plugin-com-fos-redirect (
+            action: plugin/fosRedirect
+            settings {
+                targetPageUrl: {
+                    page: 11
+                    items: {
+                        P11_APPLICATION: &P6_ID_APP.
+                        P11_PARENT: &P6_PARENT_FOLDER.
+                        APPLICATION_ENVIRONMENT: &P6_ENVIRONMENT.
+                    }
+                    action: clearRegions
+                }
+                options: submitPageItemsBeforeRedirect
+                pageItemsToSubmit: [
+                    P6_ENVIRONMENT
+                    P6_ID_APP
+                    P6_PARENT_FOLDER
+                ]
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P6_RESPONSE
+                value: 1
+            }
+        )
+
+        action plugin-com-fos-spinner-actions (
+            action: plugin/fosSpinnerActions
+            settings {
+                action: removeSpinner
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P6_RESPONSE
+                value: 0
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: error
+                text: Credenciales incorrectas!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+            clientSideCondition {
+                type: item=value
+                item: P6_RESPONSE
+                value: 0
+            }
+        )
+
+    )
+
+    validation vldt-envio-null (
+        name: VLDT_ENVIO_NULL
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: itemIsNotNull
+            item: P6_ENVIRONMENT
+        }
+        error {
+            errorMessage: Seleccione un ambiente
+            associatedItem: @P6_ENVIRONMENT
+        }
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                encode_64 varchar2(1000);
+                fk_ca number;
+                GET_ALIAS VARCHAR2(50);
+                VALIDATOR CLOB;
+                BEGIN
+                select vl_pkg_utl_base64.vl_fn_encode_base64("SYS"."UTL_RAW"."CAST_TO_RAW"(:P6_USER||':'||:P6_PASSWORD)) into encode_64 from dual;                
+                
+                SELECT ID_VL_COMPANY_APPLICATION INTO FK_CA FROM VL_COMPANIES_SOURCE_APPLICATIONS WHERE VL_ID_COMPANY = :GET_COMPANY 
+                AND ID_VL_SOURCE_APPLICATION = :P6_ID_APP;
+                
+                SELECT ALIAS INTO GET_ALIAS FROM VL_SOURCE_APPLICATIONS WHERE ID_VL_SOURCE_APPLICATION = :P6_ID_APP;
+                
+                UPDATE VL_SOURCES SET SOURCE_AUTHENTICATION = ENCODE_64 WHERE ID_VL_COMPANY_APPLICATION = FK_CA; 
+                
+                select VL_PKG_REST_SERVICES.VL_FN_REST_GETTOKEN(GET_ALIAS,:GET_COMPANY_NAME,:P6_ENVIRONMENT) INTO VALIDATOR from dual;
+                
+                IF VALIDATOR != '401' THEN
+                    :P6_RESPONSE := 'ENTRA';
+                 ELSE 
+                    :P6_RESPONSE := 'NO ENTRA';
+                
+                 END IF;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: actualizado
+        }
+        advanced {
+            executionMappingIdentifier: 5641750685413311
+        }
+        serverSideCondition {
+            whenButtonPressed: @entrar
+            type: never
+        }
+    )
+
+    process set-img (
+        name: set_img
+        type: executeCode
+        source {
+            plsqlCode: SELECT VL_APPLICATION_IMG INTO :P6_IMG  FROM VL_SOURCE_APPLICATIONS WHERE ID_VL_SOURCE_APPLICATION = :P6_ID_APP;
+        }
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 5074924323907150
+        }
+    )
+
+    process set-name (
+        name: SET_NAME
+        type: executeCode
+        source {
+            plsqlCode: SELECT NAME INTO :P6_NAME FROM VL_SOURCE_APPLICATIONS WHERE ID_VL_SOURCE_APPLICATION = :P6_ID_APP;
+        }
+        execution {
+            sequence: 20
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 5641357970413307
+        }
+    )
+
+)
+

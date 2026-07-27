@@ -1,0 +1,161 @@
+page 18 (
+    name: Mis tablas
+    alias: MIS-TABLAS
+    title: Mis tablas
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region mis-tablas (
+        name: Mis Tablas
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT OBJECT_NAME AS VER, OBJECT_NAME, CREATED
+                  FROM dba_objects WHERE OWNER = :GET_COMPANY_NAME AND OBJECT_TYPE = 'TABLE' AND OBJECT_NAME IN (SELECT TABLE_NAME FROM VL_SAVED_TABLES WHERE ID_USER=:GET_ID);;
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 12337748940584016
+        }
+
+        column CREATED (
+            type: plainText
+            heading {
+                heading: Fecha de creación
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: CY
+            }
+        )
+
+        column OBJECT_NAME (
+            type: plainText
+            heading {
+                heading: Nombre de tabla
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: CX
+            }
+        )
+
+        column VER (
+            type: link
+            heading {
+                heading: VER TABLA
+                alignment: center
+            }
+            layout {
+                sequence: 10
+            }
+            link {
+                target: {
+                    page: 17
+                    items: {
+                        P17_NAME_TABLE: #VER#
+                    }
+                    clearCache: 17
+                    action: resetRegions
+                }
+                linkText: Ver tabla
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: CW
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: my_tables
+        }
+
+        savedReport 123792 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREATED (
+                sequence: 3
+            )
+
+            displayColumn OBJECT_NAME (
+                sequence: 2
+            )
+
+            displayColumn VER (
+                sequence: 1
+            )
+
+        )
+
+    )
+
+)
+

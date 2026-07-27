@@ -1,0 +1,477 @@
+page 25 (
+    name: edit_api
+    alias: EDIT-API
+    title: Editar API
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region editar-api (
+        name: Editar Api
+        type: form
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery: SELECT ID_VL_APU_TABLE,API_TABLE_NAME, API_TABLE_DESCRIPTION,API_ENDPOINT, API_TABLE_QUERY FROM VL_APU_TABLES WHERE ID_VL_APU_TABLE = :P25_ID_VL_APU_TABLE;
+            pageItemsToSubmit: P25_ID_VL_APU_TABLE
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P25_API_ENDPOINT (
+        type: displayOnly
+        label {
+            label: ENDPOINT
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @editar-api
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @editar-api
+            column: API_ENDPOINT
+            dataType: varchar2
+        }
+    )
+
+    pageItem P25_API_TABLE_DESCRIPTION (
+        type: displayOnly
+        label {
+            label: Descripción
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @editar-api
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @editar-api
+            column: API_TABLE_DESCRIPTION
+            dataType: varchar2
+        }
+    )
+
+    pageItem P25_API_TABLE_NAME (
+        type: displayOnly
+        label {
+            label: Nombre de reporte
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @editar-api
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @editar-api
+            column: API_TABLE_NAME
+            dataType: varchar2
+        }
+    )
+
+    pageItem P25_API_TABLE_QUERY (
+        type: textarea
+        label {
+            label: Consulta del reporte
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @editar-api
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 15
+        }
+        source {
+            formRegion: @editar-api
+            column: API_TABLE_QUERY
+            dataType: clob
+        }
+        sessionState {
+            dataType: clob
+        }
+    )
+
+    pageItem P25_ID_VL_APU_TABLE (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @editar-api
+            slot: regionBody
+        }
+        source {
+            formRegion: @editar-api
+            column: ID_VL_APU_TABLE
+            dataType: number
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    button cancelar (
+        buttonName: Cancelar
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @editar-api
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button eliminar (
+        buttonName: Eliminar
+        label: Eliminar
+        layout {
+            sequence: 10
+            region: @editar-api
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-trash-o
+        }
+        behavior {
+            action: definedByDynamicAction
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: ¿Seguro desea eliminar este reporte?
+            style: warning
+        }
+    )
+
+    button guardar (
+        buttonName: Guardar
+        label: Guardar
+        layout {
+            sequence: 10
+            region: @editar-api
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-save-as
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-close-dialog (
+        name: DA_CLOSE_DIALOG
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction da-delete-template (
+        name: DA_DELETE_TEMPLATE
+        execution {
+            sequence: 20
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @eliminar
+        }
+
+        action native-alert (
+            action: alert
+            settings {
+                message: Reporte eliminado exitosamente!
+                style: success
+                okLabel: Aceptar
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-dialog-close (
+            action: closeDialog
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    module_id number;
+                    template_id NUMBER;
+                    v_encode VARCHAR2(3000);
+                    BEGIN
+                    
+                    SELECT ID into module_id
+                      FROM USER_ORDS_MODULES where NAME = 'MODULE_'||:GET_COMPANY_NAME;
+                    v_encode:= VL_PKG_UTL_BASE64.ENCODE_NUMBER_TO_BASE64(:GET_ID);
+                    SELECT ID into template_id
+                      FROM USER_ORDS_TEMPLATES B WHERE B.MODULE_ID= module_id AND B.URI_TEMPLATE = LOWER(v_encode)||'/'||:P25_API_TABLE_NAME;
+                    BEGIN
+                    DELETE FROM USER_ORDS_TEMPLATES WHERE ID = template_id;
+                    COMMIT;
+                    END;
+                      delete from vl_apu_tables where id_vl_apu_table = :P25_ID_VL_APU_TABLE;
+                      commit;
+                    END;
+                    ```
+                itemsToSubmit: [
+                    P25_API_TABLE_NAME
+                    P25_ID_VL_APU_TABLE
+                ]
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action plugin-de-danielh-toastrnotifications (
+            action: plugin/toastrNotifications
+            settings {
+                type: success
+                text: Reporte eliminado exitosamente!
+                preventDuplicates: true
+                showDuration: 300
+                hideDuration: 1000
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation vldt-error (
+        name: VLDT_ERROR
+        execution {
+            sequence: 20
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                   v_query VARCHAR2(20000);
+                --    v_formatted_query VARCHAR2(20);
+                 l_report_cursor INTEGER         := NULL;
+                BEGIN
+                  EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = '||:GET_COMPANY_NAME;
+                commit;
+                   v_query := :P25_API_TABLE_QUERY;
+                  
+                  EXECUTE IMMEDIATE v_query;
+                -- l_report_cursor := SYS.DBMS_SQL.OPEN_CURSOR;
+                --   sys.DBMS_SQL.parse(c             => l_report_cursor,
+                --                      statement     => 'BEGIN EXECUTE IMMEDIATE ''CREATE OR REPLACE VIEW VIEW_'||:CUSTOM_REPORT_NAME||' AS ('||:P25_SQLQUERY||'); END;',
+                --                      language_flag => sys.DBMS_SQL.native,
+                --                      schema        => :GET_COMPANY_NAME);
+                l_report_cursor := SYS.DBMS_SQL.OPEN_CURSOR;
+                  sys.DBMS_SQL.parse(c             => l_report_cursor,
+                                     statement     => :P25_API_TABLE_QUERY,
+                                     language_flag => sys.DBMS_SQL.native,
+                                     schema        => :GET_COMPANY_NAME);
+                
+                  exception when others then
+                    return SQLERRM;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P25_API_TABLE_QUERY
+        }
+    )
+
+    validation vldt-from (
+        name: VLDT_FROM
+        execution {
+            sequence: 30
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                BEGIN
+                EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = '||:GET_COMPANY_NAME;
+                commit;
+                EXECUTE IMMEDIATE 'CREATE OR REPLACE VIEW VIEW_'||:CUSTOM_REPORT_NAME||' AS ('||:P25_API_TABLE_QUERY ||')';
+                
+                
+                EXCEPTION WHEN OTHERS THEN 
+                RETURN SQLERRM;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P25_API_TABLE_QUERY
+        }
+    )
+
+    validation vldt-select (
+        name: VLDT_SELECT
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                   v_query VARCHAR2(4000);
+                BEGIN
+                   -- Tu string
+                   v_query := :P25_API_TABLE_QUERY;
+                
+                   -- Validar utilizando INSTR
+                   IF INSTR(UPPER(v_query), 'SELECT') = 0 THEN
+                      RETURN 'La consulta debe iniciar con SELECT';
+                   END IF;
+                END;
+                ```
+        }
+        error {
+            associatedItem: @P25_API_TABLE_QUERY
+        }
+    )
+
+    process initialize-form-edit-api (
+        name: Initialize form edit_api
+        type: formInitialization
+        formRegion: @editar-api
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 7504013570224608
+        }
+    )
+
+    process spupdatequery (
+        name: spUpdateQuery
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                VL_PKG_PROCESS_CUSTOM_REPORT.UPDATE_TEMPLATE_HANDLER(:GET_COMPANY_NAME,:P25_API_TABLE_NAME,:P25_API_TABLE_QUERY,:P25_ID_VL_APU_TABLE);
+                END;
+                
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Reporte actualizado existosamente
+        }
+        advanced {
+            executionMappingIdentifier: 7504867727224616
+        }
+        serverSideCondition {
+            whenButtonPressed: @guardar
+        }
+    )
+
+    branch (
+        name: BackToAfterPage
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 19
+            }
+        }
+    )
+
+)
+

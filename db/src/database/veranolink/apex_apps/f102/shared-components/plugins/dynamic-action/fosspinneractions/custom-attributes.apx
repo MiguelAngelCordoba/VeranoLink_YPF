@@ -1,0 +1,399 @@
+customAttribute attribute_01 (
+    apexlangName: action
+    attribute: 1
+    name: Action
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    default {
+        value: show-spinner
+    }
+    help {
+        helpText: <p>The action to be executed.</p>
+    }
+
+    entry convertDefault (
+        sequence: 30
+        display: Convert Default
+        return: convert-default
+        help {
+            helpText: <p>Override the default APEX spinner.To replace all spinners application-wide, run it on the Global Page on Page Load.</p>
+        }
+    )
+
+    entry removeSpinner (
+        sequence: 20
+        display: Remove Spinner
+        return: remove-spinner
+        help {
+            helpText: <p>Remove a spinner from the selected <strong>Affected Element</strong>.</p>
+        }
+    )
+
+    entry showSpinner (
+        sequence: 10
+        display: Show Spinner
+        return: show-spinner
+        help {
+            helpText: <p>Display a spinner on the selected <strong>Affected Element</strong></p>
+        }
+    )
+
+)
+
+customAttribute attribute_02 (
+    apexlangName: spinnerType
+    attribute: 2
+    name: Spinner Type
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 20
+    }
+    default {
+        value: default
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: inList
+        list: [
+            show-spinner
+            convert-default
+        ]
+    }
+    help {
+        helpText: <p>The spinner type; select one from the list or create your own.</p>
+    }
+
+    entry circle (
+        sequence: 20
+        display: Circle
+        return: def-circle
+        help {
+            helpText: <p>A circle shaped spinner.</p>.
+        }
+    )
+
+    entry custom (
+        sequence: 100
+        display: Custom
+        return: custom
+        help {
+            helpText: <p>Write your own HTML and CSS to create the spinner element.</p>
+        }
+    )
+
+    entry default (
+        sequence: 10
+        display: Default
+        return: default
+        help {
+            helpText: <p>The native APEX Spinner.</p>
+        }
+    )
+
+    entry dualRing (
+        sequence: 30
+        display: Dual Ring
+        return: def-dual-ring
+        help {
+            helpText: <p>A dual-ring shaped spinner.</p>
+        }
+    )
+
+    entry ellipsis (
+        sequence: 60
+        display: Ellipsis
+        return: def-ellipsis
+        help {
+            helpText: <p>Spinner with an ellipsis animation.</p>
+        }
+    )
+
+    entry grid (
+        sequence: 90
+        display: Grid
+        return: def-grid
+        help {
+            helpText: <p>A grid shaped spinner.</p>
+        }
+    )
+
+    entry heart (
+        sequence: 80
+        display: Heart
+        return: def-heart
+        help {
+            helpText: <p>A heart shaped spinner.</p>
+        }
+    )
+
+    entry hourglass (
+        sequence: 70
+        display: Hourglass
+        return: def-hourglass
+        help {
+            helpText: <p>A hourglass shaped spinner.</p>
+        }
+    )
+
+    entry none (
+        sequence: 100
+        display: None
+        return: none
+        help {
+            helpText: <p>No spinner will be displayed. Use this option if you only want to mask a region, without a spinner item.</p>
+        }
+    )
+
+    entry ring (
+        sequence: 40
+        display: Ring
+        return: def-ring
+        help {
+            helpText: <p>A ring shaped spinner.</p>
+        }
+    )
+
+    entry roller (
+        sequence: 50
+        display: Roller
+        return: def-roller
+        help {
+            helpText: <p>Spinner with a roller animation.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_03 (
+    apexlangName: spinnerHtml
+    attribute: 3
+    name: Spinner HTML
+    type: html
+    appearance {
+        sequence: 30
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: =
+        value: custom
+    }
+    help {
+        helpText: <p>Provide the custom spinner HTML.</p>
+    }
+    examples {
+        examples:
+            ```
+            <pre>
+            <div class="my-custom-spinner">
+                <span class="fa fa-apex" aria-hidden="true"></span>
+            </div>
+            </pre>
+            ```
+    }
+)
+
+customAttribute attribute_04 (
+    apexlangName: spinnerCss
+    attribute: 4
+    name: Spinner CSS
+    type: textarea
+    appearance {
+        sequence: 40
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: =
+        value: custom
+    }
+    help {
+        helpText: <p>Your custom spinner probably requires some fancy CSS. This is the place for it.</p>
+    }
+    examples {
+        examples:
+            ```
+            <pre>
+            .my-custom-spinner {
+                width: 10px;
+                height: 10px;
+                background-color: red;
+            }
+            </pre>
+            ```
+    }
+)
+
+customAttribute attribute_05 (
+    apexlangName: overlay
+    attribute: 5
+    name: Overlay
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 50
+    }
+    default {
+        value: on-page
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: !=
+        value: remove-spinner
+    }
+    help {
+        helpText: <p>Type of the overlay effect.</p>
+    }
+
+    entry none (
+        sequence: 10
+        display: None
+        return: none
+        help {
+            helpText: <p>No overlay element will be rendered.</p>
+        }
+    )
+
+    entry onElement (
+        sequence: 20
+        display: On Element
+        return: on-element
+        help {
+            helpText: <p>The mask will cover only the element selected in the <strong>Affected Elements</strong> attribute.</p>
+        }
+    )
+
+    entry onPage (
+        sequence: 30
+        display: On Page
+        return: on-page
+        help {
+            helpText: <p>The whole page will be covered, no scrolling allowed.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_06 (
+    apexlangName: overlayColor
+    attribute: 6
+    name: Overlay Color
+    type: color
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 60
+    }
+    default {
+        value: #f2f5f3
+    }
+    dependingOn {
+        attribute: @attribute_05/component
+        conditionType: !=
+        value: none
+    }
+    help {
+        helpText: <p> The color of the overlay element.</p>
+    }
+)
+
+customAttribute attribute_07 (
+    apexlangName: overlayOpacity
+    attribute: 7
+    name: Overlay Opacity
+    type: number
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 70
+    }
+    default {
+        value: 50
+    }
+    dependingOn {
+        attribute: @attribute_05/component
+        conditionType: !=
+        value: none
+    }
+    help {
+        helpText: <p>The opacity of the overlay element.<br> 0 - 100, where 100 is not transparent at all and 0 is completely transparent.</p>
+    }
+)
+
+customAttribute attribute_08 (
+    apexlangName: accessibilityText
+    attribute: 8
+    name: Accessibility Text
+    appearance {
+        sequence: 80
+    }
+    default {
+        value: Processing
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: !=
+        value: none
+    }
+    help {
+        helpText: <p>Alert text visually hidden, but available to Assistive Technologies. Defaults to "Processing".</p>
+    }
+)
+
+customAttribute attribute_09 (
+    apexlangName: spinnerClass
+    attribute: 9
+    name: Spinner Class
+    appearance {
+        sequence: 90
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: notInList
+        list: [
+            custom
+            none
+        ]
+    }
+    help {
+        helpText: <p>Adds a custom class to the outer SPAN element for custom styling.</p>
+    }
+)
+
+customAttribute attribute_10 (
+    apexlangName: spinnerColor
+    attribute: 10
+    name: Spinner Color
+    type: color
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 25
+    }
+    default {
+        value: #959595eb
+    }
+    dependingOn {
+        attribute: @attribute_02/component
+        conditionType: notInList
+        list: [
+            custom
+            none
+        ]
+    }
+    help {
+        helpText: <p>The color of the spinner element.</p>
+    }
+)
+

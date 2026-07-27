@@ -1,0 +1,270 @@
+customAttribute attribute_01 (
+    apexlangName: urlSource
+    attribute: 1
+    name: URL Source
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 10
+    }
+    default {
+        value: static
+    }
+    help {
+        helpText: <p>Define how the url is obtained e.g. either by "Static Text" or from a "PL/SQL Expression"</p>
+    }
+
+    entry plSqlExpression (
+        sequence: 20
+        display: PL/SQL Expression
+        return: plsql-expression
+        help {
+            helpText: <p>The URL will be defined from a PL/SQL expression with page item substitution support within the expression itself and on the result.</p>
+        }
+    )
+
+    entry static (
+        sequence: 10
+        display: Static
+        return: static
+        help {
+            helpText: <p>The URL will be defined using static text with page item substitution support.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_02 (
+    apexlangName: targetPageUrl
+    attribute: 2
+    name: Target Page/URL
+    type: linkToTargetPageUrl
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 20
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: =
+        value: static
+    }
+    help {
+        helpText: <p>The link to the target page or URL.</p>
+    }
+)
+
+customAttribute attribute_03 (
+    apexlangName: urlPlSqlExpression
+    attribute: 3
+    name: URL PL/SQL Expression
+    type: plsqlExpressionReturningVarchar2
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 30
+    }
+    dependingOn {
+        attribute: @attribute_01/component
+        conditionType: =
+        value: plsql-expression
+    }
+    help {
+        helpText: <p>Enter a PL/SQL expression that will return your URL e.g.</p>
+    }
+)
+
+customAttribute attribute_04 (
+    apexlangName: options
+    attribute: 4
+    name: Options
+    type: checkboxes
+    appearance {
+        sequence: 40
+    }
+    help {
+        helpText: <p>Choose from the available options:</p>
+    }
+
+    entry executePlSqlBeforeRedirect (
+        sequence: 20
+        display: Execute PL/SQL Before Redirect
+        return: execute-plsql
+        help {
+            helpText: <p>You can choose to submit any items on the page and execute some PL/SQL logic before performing the redirect. If any of the page items are used in the URL as substitutions, the URL will be updated and (optionally) prepare_url will be called.</p>
+        }
+    )
+
+    entry forModalDialogsRedirectParentPage (
+        sequence: 30
+        display: "[for Modal Dialogs] Redirect Parent Page"
+        return: redirect-parent
+        help {
+            helpText: <p>Check this option when you are using this action on a modal dialog page and you want to redirect the main page, and not redirect the page open in the dialog.</p>
+        }
+    )
+
+    entry submitPageItemsBeforeRedirect (
+        sequence: 10
+        display: Submit Page Items Before Redirect
+        return: update-session-state
+        help {
+            helpText: <p>You can submit any items on the page before performing the redirect. If any of the page items are used in the URL as substitutions, the URL will be updated and (optionally) prepare_url will be called.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_05 (
+    apexlangName: executePlSql
+    attribute: 5
+    name: Execute PL/SQL
+    type: plsqlCode
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 50
+    }
+    dependingOn {
+        attribute: @attribute_04/component
+        conditionType: =
+        value: execute-plsql
+    }
+    help {
+        helpText: <p>Enter the PL/SQL code you would like to execute before the redirect occurs.</p>
+    }
+)
+
+customAttribute attribute_06 (
+    apexlangName: pageItemsToSubmit
+    attribute: 6
+    name: Page Items to Submit
+    type: pageItems
+    appearance {
+        sequence: 60
+    }
+    dependingOn {
+        attribute: @attribute_04/component
+        conditionType: inList
+        list: [
+            update-session-state
+            execute-plsql
+        ]
+    }
+    help {
+        helpText:
+            ```
+            <p>Enter the uppercase page items submitted to the server, and therefore, available for use within your <strong>PL/SQL Code</strong>.</p>
+            <p>You can type in the item name or pick from the list of available items.
+            If you pick from the list and there is already text entered then a comma is placed at the end of the existing text, followed by the item name returned from the list.</p>
+            ```
+    }
+)
+
+customAttribute attribute_07 (
+    apexlangName: documentContext
+    attribute: 7
+    name: Document Context
+    type: selectList
+    validation {
+        required: true
+    }
+    appearance {
+        sequence: 70
+    }
+    default {
+        value: parent
+    }
+    dependingOn {
+        attribute: @attribute_04/component
+        conditionType: inList
+        list: redirect-parent
+    }
+    help {
+        helpText: <p>This setting only applies for (Non Modal/Modal) Dialogs. You can choose to redirect the <strong>parent</strong> page (the page that opened the dialog) or the <strong>top</strong> level document if you have multiple dialogs open. <strong>Note:</strong> It's most likely that top = parent in the majority of cases.</p>
+    }
+
+    entry parentPage (
+        sequence: 10
+        display: Parent Page
+        return: parent
+        help {
+            helpText: <p>You can choose to redirect the <strong>parent</strong> page i.e. the one that opened the dialog.</p>
+        }
+    )
+
+    entry topPage (
+        sequence: 20
+        display: Top Page
+        return: top
+        help {
+            helpText: <p>You can choose to redirect the <strong>top</strong> level document i.e. if you have multiple dialogs open.</p>
+        }
+    )
+
+)
+
+customAttribute attribute_08 (
+    apexlangName: openTargetInNewWindow
+    attribute: 8
+    name: Open Target in New Window
+    type: yesNo
+    appearance {
+        sequence: 80
+    }
+    dependingOn {
+        attribute: @attribute_04/component
+        conditionType: notInList
+        list: redirect-parent
+    }
+    help {
+        helpText: "<p>Choose this option when you want the URL to be opened in a new browser window/tab depending upon the default behaviour of the browser.</p> "
+    }
+)
+
+customAttribute attribute_09 (
+    apexlangName: prepareUrl
+    attribute: 9
+    name: Prepare URL
+    type: yesNo
+    appearance {
+        sequence: 35
+    }
+    default {
+        value: true
+    }
+    help {
+        helpText:
+            ```
+            <p>Enable this option to call APEX_UTIL.PREPARE_URL, which will append checksums to the URL or transform the URL into a Javascript dialog.open call if you are redirecting to a Dialog page.</p>
+            <p>You would most likely disable this option in the circumstance that APEX_UTIL.PREPARE_URL has already been called in your PL/SQL expression that returns the URL.</p>
+            ```
+    }
+)
+
+customAttribute attribute_10 (
+    apexlangName: showSpinner
+    attribute: 10
+    name: Show Spinner
+    type: yesNo
+    appearance {
+        sequence: 65
+    }
+    default {
+        value: true
+    }
+    dependingOn {
+        attribute: @attribute_04/component
+        conditionType: inList
+        list: execute-plsql
+    }
+    help {
+        helpText: <p>Enable/toggle this option to show a spinner when you are executing PLSQL prior to performing the page redirect.</p>
+    }
+)
+

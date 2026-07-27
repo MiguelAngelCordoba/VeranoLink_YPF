@@ -1,0 +1,572 @@
+page 11 (
+    name: Colecciones
+    alias: COLECCIONES
+    title: Colecciones
+    appearance {
+        pageTemplate: @standard
+        templateOptions: #DEFAULT#
+        cssClasses: btn-front
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .t-HeroRegion-icon {
+                
+                background-color: transparent;
+                
+            }
+            
+            .imagen{
+                width: 90px;
+                height: 100%;
+            }
+            
+            #P11_BUSQUEDA{
+                align-items: flex-start;
+                border-radius: 10px;
+                padding: 1px;
+                
+            }
+            
+            .search_tex{
+                justify-content: flex-end;
+            }
+            
+            .badge-item{
+                background-color: #f1efed;
+                border-color: black;
+                color: black;
+            }
+            
+            /* Asegúrate de que el botón esté al frente */
+            .btn-front {
+              position: relative; /* O absolute, dependiendo de cómo se comporte tu página */
+              z-index: 9999; /* Asegura que el botón esté por encima del contenido */
+            }
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region colecciones (
+        name: Colecciones
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+        advanced {
+            htmlDomId: coleccion
+        }
+    )
+
+    region colecciones-hijo (
+        name: Colecciones_HIJO
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                -- SELECT ROW_NUMBER() OVER (ORDER BY NAME_COLLECTION) AS COUNTER,
+                --        "ID_VL_SOURCE_COLLECTION",
+                --        "ID_PARENT_COLLECTION",
+                --        "NAME_COLLECTION",
+                --        "ID_VL_SOURCE_APPLICATION"
+                -- FROM "VL_SOURCE_COLLECTIONS" 
+                -- WHERE ID_VL_SOURCE_APPLICATION = :P11_APPLICATION 
+                --   AND ID_PARENT_COLLECTION = :P11_SON 
+                -- ORDER BY NAME_COLLECTION
+                SELECT 
+                    m."ID_VL_SOURCE_COLLECTION",
+                    m."ID_PARENT_COLLECTION",
+                    m."NAME_COLLECTION",
+                    m."ID_VL_SOURCE_APPLICATION",
+                    (SELECT COUNT(*) 
+                     FROM "VL_PATH_CONTEXTS" p
+                     WHERE p."ID_VL_SOURCE_COLLECTION" = m."ID_VL_SOURCE_COLLECTION" AND p."STATE" = 1) AS CHILD_COUNT
+                FROM 
+                    "VL_SOURCE_COLLECTIONS" m
+                WHERE 
+                    m."ID_VL_SOURCE_APPLICATION" = :P11_APPLICATION
+                    AND m."ID_PARENT_COLLECTION" = :P11_SON
+                ORDER BY 
+                    m."NAME_COLLECTION"; 
+                ```
+            pageItemsToSubmit: [
+                P11_APPLICATION
+                P11_SON
+                P11_PARENT
+            ]
+        }
+        layout {
+            sequence: 90
+            slot: body
+        }
+        appearance {
+            template: @cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--styleA
+            ]
+        }
+        advanced {
+            htmlDomId: VALOR
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P11_SON
+        }
+        componentAppearance {
+            gridColumns: 4
+        }
+        title {
+            column: NAME_COLLECTION
+        }
+        iconAndBadge {
+            iconSource: imageUrl
+            imageUrl: #APP_FILES#path2.png
+            iconCssClasses: imagen
+            badgeColumn: CHILD_COUNT
+            badgeCssClasses: badge-item
+        }
+
+        action action (
+            type: fullCard
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 11
+                    items: {
+                        P11_SON: &ID_VL_SOURCE_COLLECTION.
+                        P11_APPLICATION: &ID_VL_SOURCE_APPLICATION.
+                    }
+                }
+            }
+            serverSideCondition {
+                type: functionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    DECLARE
+                    VALIDATOR NUMBER;
+                    
+                    BEGIN 
+                    SELECT COUNT (*) INTO VALIDATOR  FROM VL_SOURCE_COLLECTIONS WHERE ID_PARENT_COLLECTION = :ID_VL_SOURCE_COLLECTION ;
+                    
+                    IF VALIDATOR = 0 OR VALIDATOR IS NULL THEN 
+                    RETURN FALSE;
+                    ELSE
+                    RETURN TRUE;
+                    END IF;
+                    END;
+                    ```
+            }
+        )
+
+        action action-2 (
+            type: fullCard
+            layout {
+                sequence: 20
+            }
+            behavior {
+                target: {
+                    page: 10
+                    items: {
+                        P10_COLLECTION: &ID_VL_SOURCE_COLLECTION.
+                        P10_APPLICATION: &ID_VL_SOURCE_APPLICATION.
+                        P10_FATHER_SOURCE: &P11_SON.
+                    }
+                }
+            }
+            serverSideCondition {
+                type: functionBody
+                plsqlFunctionBody:
+                    ```plsql
+                    DECLARE
+                    VALIDATOR NUMBER;
+                    
+                    BEGIN 
+                    SELECT COUNT (*) INTO VALIDATOR  FROM VL_SOURCE_COLLECTIONS WHERE ID_PARENT_COLLECTION = :ID_VL_SOURCE_COLLECTION ;
+                    
+                    IF VALIDATOR = 0 OR VALIDATOR IS NULL THEN 
+                    RETURN true;
+                    ELSE
+                    RETURN FALSE;
+                    END IF;
+                    END;
+                    ```
+            }
+        )
+
+    )
+
+    region colecciones-padre (
+        name: Colecciones_PADRE
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select "ID_VL_SOURCE_COLLECTION",
+                       "ID_PARENT_COLLECTION",
+                       "NAME_COLLECTION",
+                       "ID_VL_SOURCE_APPLICATION"
+                from "VL_SOURCE_COLLECTIONS" m WHERE ID_VL_SOURCE_APPLICATION = :P11_APPLICATION AND ID_VL_SOURCE_COLLECTION = :P11_PARENT 
+                ```
+            pageItemsToSubmit: [
+                P11_APPLICATION
+                P11_PARENT
+            ]
+        }
+        layout {
+            sequence: 80
+            slot: body
+        }
+        appearance {
+            template: @cards-container
+            templateOptions: #DEFAULT#
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P11_PARENT
+        }
+        componentAppearance {
+            layout: horizontal
+        }
+        title {
+            column: NAME_COLLECTION
+        }
+        iconAndBadge {
+            iconSource: imageUrl
+            imageUrl: #APP_FILES#path2.png
+            iconCssClasses: imagen
+        }
+
+        action action (
+            type: fullCard
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 11
+                    items: {
+                        P11_SON: &ID_VL_SOURCE_COLLECTION.
+                        P11_APPLICATION: &ID_VL_SOURCE_APPLICATION.
+                    }
+                }
+            }
+        )
+
+    )
+
+    pageItem P11_APPLICATION (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P11_FATHER_RETURN (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 60
+            slot: body
+        }
+    )
+
+    pageItem P11_NAME_APLICATION (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 70
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P11_PARENT (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    pageItem P11_SON (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        source {
+            used: always
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 10
+            region: @colecciones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 11
+                items: {
+                    P11_APPLICATION: &P11_APPLICATION.
+                    P11_SON: &P11_FATHER_RETURN.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P11_FATHER_RETURN
+        }
+    )
+
+    button volver-2 (
+        buttonName: Volver_1
+        label: Volver
+        layout {
+            sequence: 20
+            region: @colecciones
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction da-refresh-region (
+        name: DA_REFRESH_REGION
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P11_SON
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @colecciones-hijo
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction dabackbutton (
+        name: DaBackButton
+        execution {
+            sequence: 40
+            eventScope: dynamic
+            staticContainer: #VALOR
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-volver
+        }
+
+        action native-submit-page (
+            action: submitPage
+            settings {
+                requestButtonName: Volver_1
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction darefreshregiononchange (
+        name: DaRefreshRegionOnChange
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P11_NAME_APLICATION
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @colecciones
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction dasetvaluefornameregion (
+        name: DaSetValueForNameRegion
+        execution {
+            sequence: 20
+        }
+        when {
+            event: ready
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    var titulo = $v('P11_NAME_APLICATION');
+                    
+                    
+                    var imagenURL = '#APP_FILES#icons/app-icon-512.png';
+                    
+                    
+                    $('#coleccion').html(
+                      '<div  style="position: relative; z-index: -1;  padding: 1px; display: flex; align-items: center;">' +
+                      '<img src="' + imagenURL + '" alt="Logo" style="width: 50px; height: auto; margin-right: 10px;">' +
+                      '<h2>Colecciones - ' + titulo + '</h2>' +
+                      '</div><button href="#" class="fa fa-arrow-left btn-volver" style="position: absolute;  top: 50px; right: 40px; background-color: #3a3632; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; "><i  style="margin-left: 10px;"></i>Volver</button>'
+                    
+                    );
+                    
+                    ```
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: sqlQuery
+                sqlQuery: SELECT NAME FROM VL_SOURCE_APPLICATIONS vsa WHERE VSA.ID_VL_SOURCE_APPLICATION = :P11_APPLICATION;
+                itemsToSubmit: [
+                    P11_APPLICATION
+                    P11_NAME_APLICATION
+                ]
+                escapeSpecialChars: false
+            }
+            affectedElements {
+                selectionType: items
+                items: P11_NAME_APLICATION
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode: SELECT ID_PARENT_COLLECTION INTO :P11_FATHER_RETURN FROM VL_SOURCE_COLLECTIONS WHERE ID_VL_SOURCE_COLLECTION = :P11_SON;
+        }
+        execution {
+            sequence: 10
+            point: afterHeader
+        }
+        advanced {
+            executionMappingIdentifier: 6664054641816021
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P11_SON
+        }
+    )
+
+    process new-2 (
+        name: New_1
+        type: executeCode
+        source {
+            plsqlCode: null;
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 5147149706308608
+        }
+        serverSideCondition {
+            whenButtonPressed: @volver-2
+        }
+    )
+
+    branch (
+        name: Go To Page 1
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+)
+

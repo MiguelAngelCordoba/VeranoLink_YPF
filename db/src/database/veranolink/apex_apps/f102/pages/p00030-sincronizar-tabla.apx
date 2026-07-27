@@ -1,0 +1,201 @@
+page 30 (
+    name: Sincronizar Tabla
+    alias: SINCRONIZAR-TABLA
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        resizable: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+             .buttonCreate{
+                       
+                        color: #fff;
+                        padding: 10px 20px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        text-transform: uppercase;
+                        font-weight: bold;
+                        margin-top: 20px;
+                    }
+            
+             /* .buttonCreate:hover{
+                       background-color:#1c522b !important;
+                       
+                    } */
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region info-new-job (
+        name: info_new_job
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Información de Sincronización</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f0f0f0;
+                            text-align: center;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh; /* Ocupa toda la altura de la ventana */
+                        }
+                
+                        .container {
+                            background-color: #fff;
+                            padding: 20px;
+                
+                        }
+                
+                        h2 {
+                            color: #333;
+                            margin-bottom: 20px;
+                        }
+                
+                        p {
+                            color: #666;
+                            font-size: 17px;
+                            line-height: 1.5;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Información de Sincronización</h2>
+                        <p>La tabla <strong>&P30_TABLE_NAME.</strong> actualmente no tiene un trabajo activo para la sincronización.</p>
+                        <p>Se creará un trabajo llamado <strong>&P30_NAME_JOB.</strong> para sincronizar la tabla.</p>
+                    </div>
+                </body>
+                </html>
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader
+                t-Region--noUI
+                t-Region--hiddenOverflow
+            ]
+        }
+        serverSideCondition {
+            type: item=value
+            item: P30_RESPONSE_SYNC
+            value: 0
+        }
+    )
+
+    pageItem P30_NAME_JOB (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT 'SYNC_TABLE_'||:P30_TABLE_NAME FROM DUAL;
+            used: always
+        }
+    )
+
+    pageItem P30_RESPONSE_SYNC (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+    )
+
+    pageItem P30_TABLE_NAME (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    button aceptar (
+        buttonName: Aceptar
+        label: Aceptar y Crear
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            cssClasses: buttonCreate
+            icon: fa-chevron-circle-up
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode: null;
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: aasdasda
+        }
+        advanced {
+            executionMappingIdentifier: 4444409532951329
+        }
+    )
+
+    branch (
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 17
+            }
+        }
+    )
+
+)
+

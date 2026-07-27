@@ -1,0 +1,68 @@
+plugin jsonViewer (
+    name: json_viewer
+    staticId: AAK.JSONVIEWER.PLUGIN
+    type: item
+    component {
+        standardAttributes: [
+            sourceAttrs
+            formatMaskDateOnly
+            elementAttrs
+            widthAttrs
+            heightAttr
+            placeholderAttr
+            iconAttr
+            encryptSessionStateAttr
+            link
+            initJavascriptCodeAttr
+        ]
+    }
+    source {
+        plsqlCode:
+            ```plsql
+            procedure render_json_viewer(
+                p_item   in            apex_plugin.t_item,
+                p_plugin in            apex_plugin.t_plugin,
+                p_param  in            apex_plugin.t_item_render_param,
+                p_result in out nocopy apex_plugin.t_item_render_result ) 
+            is
+              l_name          varchar2(30)    := apex_plugin.get_input_name_for_page_item(false);
+              v_html clob;
+            
+            begin
+                       
+            
+            
+            -- load css and javascript
+            apex_javascript.add_library (p_name => 'js/json-viewer' , p_directory => p_plugin.file_prefix); 
+            apex_css.add_file  (p_name => 'css/json-viewer' , p_directory => p_plugin.file_prefix); 
+            
+            htp.p('<div ' || 'id="' || p_item.name ||'" ' 
+                          || 'name="' || l_name ||'" ' 
+                          ||  p_item.element_attributes ||' ></div>');
+            
+            v_html:=v_html || '$("#' || p_item.name || '_LABEL").remove();';
+            v_html:=v_html || '$("#' || p_item.name || '").jsonview(''' || p_param.value || ''');';
+            
+            apex_javascript.add_onload_code(
+                     p_code => v_html,
+                     p_key => NULL);    
+            end;
+            ```
+    }
+    callbacks {
+        apiInterface: procedureWithLegacyAttributes
+        renderProcedureName: render_json_viewer
+    }
+    advanced {
+        substituteAttributeValues: true
+    }
+    information {
+        version: 1.0
+    }
+
+    standardAttributeConfig (
+        name: hasInitJavaScriptCodeAttribute
+    )
+
+)
+

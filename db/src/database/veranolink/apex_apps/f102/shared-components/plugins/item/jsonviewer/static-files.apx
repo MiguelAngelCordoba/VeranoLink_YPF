@@ -1,0 +1,10 @@
+file "css/json-viewer.css" (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file "js/json-viewer.js" (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+
