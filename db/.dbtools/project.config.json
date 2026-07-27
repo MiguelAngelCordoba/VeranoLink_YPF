@@ -6,7 +6,7 @@
     "version" : "26.2.0.0"
   },
   "schemas" : [ "VERANOLINK" ],
-  "lastReleaseVersion" : "",
+  "lastReleaseVersion" : "0.1",
   "apex" : {
     "apexlang" : false
   },
