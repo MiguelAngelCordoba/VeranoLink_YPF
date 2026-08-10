@@ -1,0 +1,23 @@
+# Fin de línea: LF forzado (SQLcl valida por checksum y exige LF)
+* text=auto eol=lf
+
+*.sql        text eol=lf
+*.xml        text eol=lf
+*.apx        text eol=lf
+*.json       text eol=lf
+*.properties text eol=lf
+*.js         text eol=lf
+*.css        text eol=lf
+
+# Binarios de la app APEX: no tocar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.jar binary
