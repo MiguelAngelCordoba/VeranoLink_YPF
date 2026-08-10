@@ -13,7 +13,9 @@ create or replace package body veranolink.vl_pkg_rest_services as
             vci_environment number
         ) is
         select
-            c.source_url || e.path_context source_url,
+            c.source_url                   base_url,                             -- NUEVO: Traemos la URL base separada
+            e.path_context,                                    -- NUEVO: Traemos el path separado
+            c.source_url || e.path_context source_url,         -- Se mantiene intacto para OPU
             c.source_authentication,
             a.id_vl_source_application,
             a.alias,
@@ -70,6 +72,9 @@ create or replace package body veranolink.vl_pkg_rest_services as
         l_content           varchar2(4000) := '';
         e_err_num           number;
         e_err_msg           varchar2(255);
+        l_final_url         varchar2(4000); -- NUEVO: Variable para almacenar la URL construida
+        v_server_url        varchar2(1000); -- NUEVO: Variable para el dominio dinámico
+
         l_audit_log         number := dbms_utility.get_time;
     begin
         open c_geturl(iv_alias, iv_company, iv_environment);
@@ -77,11 +82,30 @@ create or replace package body veranolink.vl_pkg_rest_services as
         l_exists_c_geturl := c_geturl%found;
         close c_geturl;
         if l_exists_c_geturl then
+
+        -- INICIO DE LA LÓGICA DINÁMICA DE URL --
+            if l_geturl.alias = 'OPC' then
+            -- 1. Extraemos el dominio puro (ignorando http:// o https:// y el slash final)
+            -- Ej: "https://primavera-us2.oraclecloud.com/" se convierte en "primavera-us2.oraclecloud.com"
+                v_server_url := regexp_replace(l_geturl.base_url, '^(https?://)?([^/]+)/?.*$', '\2');
+
+            -- 2. Reemplazamos el comodín #SERVER_URL# con el dominio que extrajimos
+                l_final_url := l_geturl.base_url
+                               || replace(l_geturl.path_context, '#SERVER_URL#', v_server_url);
+
+            else
+            -- Para OPU y el resto de los sistemas, la lógica se mantiene exactamente igual
+                l_final_url := l_geturl.source_url;
+            end if;
+        -- FIN DE LA LÓGICA DINÁMICA DE URL --
+
             apex_web_service.g_request_headers.delete();
             apex_web_service.g_request_headers(1).name := 'Authorization';
             apex_web_service.g_request_headers(1).value := 'Basic ' || l_geturl.source_authentication;
+
+        -- NUEVO: Pasamos l_final_url en lugar de l_getURL.SOURCE_URL
             l_resp_buffer := apex_web_service.make_rest_request(
-                p_url         => utl_url.escape(l_geturl.source_url, false, 'UTF-8'),
+                p_url         => utl_url.escape(l_final_url, false, 'UTF-8'),
                 p_http_method => l_geturl.call_name
             );
 
@@ -222,35 +246,37 @@ create or replace package body veranolink.vl_pkg_rest_services as
 
             vl_pkg_rest_services.vl_audit_logs(l_geturl.id_vl_path_context, iv_company, iv_alias, 'T-' || l_audit_log, apex_web_service.g_status_code
             ,
-                                               'Inicio de sesi®n de ' || iv_company, null, systimestamp - interval '5' hour, l_geturl.call_name
-                                               , 'Inicio de sesi®n de ' || iv_company);
+                                               'Inicio de sesión de ' || iv_company, null, systimestamp - interval '5' hour, l_geturl.call_name
+                                               , 'Inicio de sesión de ' || iv_company);
 
         end if;
 
         return l_resp_buffer;
     exception
         when others then
-          --      VL_PKG_REST_SERVICES.VL_AUDIT_LOGS(l_getURL.ID_VL_PATH_CONTEXT, IV_COMPANY, IV_ALIAS, 'T-' || l_AUDIT_LOG, APEX_WEB_SERVICE.g_status_code, 'Error inesperado : Mensaje' || SQLCODE || SQLERRM || ' Programa: ' || $$plsql_unit || ' L?nea ' || $$plsql_line || ' Backtrace: ' || DBMS_UTILITY.FORMAT_ERROR_BACKTRACE, NULL, l_getURL.CALL_NAME,NULL);
             return to_clob('Error inesperado : Mensaje'
                            || sqlcode
                            || sqlerrm
                            || ' Programa: '
                            || $$plsql_unit
-                           || ' L?nea '
+                           || ' Línea '
                            || $$plsql_line
                            || ' Backtrace: ' || dbms_utility.format_error_backtrace);
     end vl_fn_rest_gettoken;
 
     function vl_fn_rest_services (
-        iv_filterurl     in varchar2 default null,
-        iv_bodyrequest   in clob default null,
-        iv_body_blob     in blob default null,
-        iv_projectid     in varchar2 default null,
-        iv_alias         varchar2,
-        iv_company       varchar2,
-        iv_methodcontext number,
-        iv_environment   number
-    ) return clob as
+        iv_filterurl          in varchar2 default null,
+        iv_bodyrequest        in clob default null,
+        iv_body_blob          in blob default null,
+        iv_projectid          in varchar2 default null,
+        iv_alias              in varchar2,
+        iv_company            in varchar2,
+        iv_methodcontext      in number,
+        iv_environment        in number,
+        iv_extra_header_name  in varchar2 default null,   -- NUEVO
+        iv_extra_header_value in varchar2 default null
+    )   -- NUEVO
+     return clob as
 
         pragma autonomous_transaction;
         cursor c_geturl (
@@ -307,7 +333,7 @@ create or replace package body veranolink.vl_pkg_rest_services as
         l_req_length      number;
         l_buffer          varchar2(32767);
         l_offset          number := 1;
-        l_chunk_size      number := 20000; -- Tamao del segmento a leer del BLOB
+        l_chunk_size      number := 20000; -- Tamano del segmento a leer del BLOB
         l_raw             raw(32767);
         l_base64_clob     clob;
         l_amount          number := 32767;
@@ -348,6 +374,13 @@ create or replace package body veranolink.vl_pkg_rest_services as
                 apex_web_service.g_request_headers(6).value := 0;
             end if;
 
+        -- Header adicional opcional (ej. 'filters' para consultas incrementales de OPC).
+        -- Si no se envia, el comportamiento queda identico al original.
+            if iv_extra_header_name is not null then
+                apex_web_service.g_request_headers(7).name := iv_extra_header_name;
+                apex_web_service.g_request_headers(7).value := iv_extra_header_value;
+            end if;
+
             l_resp := apex_web_service.make_rest_request(
                 p_url         => utl_url.escape(l_geturl.full_url
                                         || '/'
@@ -376,6 +409,12 @@ create or replace package body veranolink.vl_pkg_rest_services as
                 if iv_bodyrequest is null then
                     apex_web_service.g_request_headers(6).name := 'Content-Length';
                     apex_web_service.g_request_headers(6).value := 0;
+                end if;
+
+          -- Header adicional opcional (tambien en el reintento tras 401).
+                if iv_extra_header_name is not null then
+                    apex_web_service.g_request_headers(7).name := iv_extra_header_name;
+                    apex_web_service.g_request_headers(7).value := iv_extra_header_value;
                 end if;
 
                 l_resp := apex_web_service.make_rest_request(
@@ -15092,4 +15131,4 @@ end vl_pkg_rest_services;
 /
 
 
--- sqlcl_snapshot {"hash":"27e87ed49c2bd965250b9e3d1dcfcddd5039b4da","type":"PACKAGE_BODY","name":"VL_PKG_REST_SERVICES","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"9571a5fd24518904d819cb99b2be31491f2d40fa","type":"PACKAGE_BODY","name":"VL_PKG_REST_SERVICES","schemaName":"VERANOLINK","sxml":""}

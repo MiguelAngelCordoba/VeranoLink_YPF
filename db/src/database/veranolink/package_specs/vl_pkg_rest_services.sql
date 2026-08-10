@@ -6,15 +6,18 @@ create or replace package veranolink.vl_pkg_rest_services as
     ) return clob;
 
     function vl_fn_rest_services (
-        iv_filterurl     in varchar2 default null,
-        iv_bodyrequest   in clob default null,
-        iv_body_blob     in blob default null,
-        iv_projectid     in varchar2 default null,
-        iv_alias         in varchar2,
-        iv_company       in varchar2,
-        iv_methodcontext in number,
-        iv_environment   in number
-    ) return clob;
+        iv_filterurl          in varchar2 default null,
+        iv_bodyrequest        in clob default null,
+        iv_body_blob          in blob default null,
+        iv_projectid          in varchar2 default null,
+        iv_alias              in varchar2,
+        iv_company            in varchar2,
+        iv_methodcontext      in number,
+        iv_environment        in number,
+        iv_extra_header_name  in varchar2 default null,   -- NUEVO
+        iv_extra_header_value in varchar2 default null
+    )   -- NUEVO
+     return clob;
 
     function vl_extract_api_response (
         iv_param_json   clob,
@@ -59,4 +62,4 @@ end vl_pkg_rest_services;
 /
 
 
--- sqlcl_snapshot {"hash":"10e0e64f257d3b357a49178a66d8099a57b707dc","type":"PACKAGE_SPEC","name":"VL_PKG_REST_SERVICES","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"0a11691279960669703c28f8b5912b429b565425","type":"PACKAGE_SPEC","name":"VL_PKG_REST_SERVICES","schemaName":"VERANOLINK","sxml":""}
