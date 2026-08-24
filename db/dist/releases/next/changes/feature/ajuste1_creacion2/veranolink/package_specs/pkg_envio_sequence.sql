@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1787600192769 stripComments:false  logicalFilePath:feature\ajuste1_creacion2\veranolink\package_specs\pkg_envio_sequence.sql
+-- sqlcl_snapshot db/src/database/veranolink/package_specs/pkg_envio_sequence.sql:null:8e18196f3ed6d2bf2cc508e7dae7ee9117514be4:create
+
 create or replace package veranolink.pkg_envio_sequence as
 
     -- Crea en Ecosys los objetos pendientes (VIEW_SEQUENCE_CREATE).
@@ -17,5 +21,3 @@ create or replace package veranolink.pkg_envio_sequence as
 end pkg_envio_sequence;
 /
 
-
--- sqlcl_snapshot {"hash":"8e18196f3ed6d2bf2cc508e7dae7ee9117514be4","type":"PACKAGE_SPEC","name":"PKG_ENVIO_SEQUENCE","schemaName":"VERANOLINK","sxml":""}
