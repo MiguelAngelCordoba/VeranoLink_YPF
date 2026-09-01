@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1788300192128 stripComments:false  logicalFilePath:fix\6\veranolink\package_bodies\pkg_carga_opc.sql
+-- sqlcl_snapshot db/src/database/veranolink/package_bodies/pkg_carga_opc.sql:null:1ee10b6d13a967d00625ae0b55b9304a0c0852f9:create
+
 create or replace package body veranolink.pkg_carga_opc as
 
     c_id_path_context         constant number := 305; -- endpoint de Proyecto (api/restapi/project, GET) reutilizado
@@ -1970,5 +1974,3 @@ create or replace package body veranolink.pkg_carga_opc as
 end pkg_carga_opc;
 /
 
-
--- sqlcl_snapshot {"hash":"1ee10b6d13a967d00625ae0b55b9304a0c0852f9","type":"PACKAGE_BODY","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}
