@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1787600192852 stripComments:false  logicalFilePath:feature\ajuste1_creacion2\veranolink\views\view_sequence_create.sql
+-- sqlcl_snapshot db/src/database/veranolink/views/view_sequence_create.sql:null:45ea7d3c633048df97d07c64d7f3000e1b03242a:create
+
 create or replace force editionable view veranolink.view_sequence_create (
     project_id,
     contract_number,
@@ -209,5 +213,3 @@ create or replace force editionable view veranolink.view_sequence_create (
                 and l.resultado = 'OK'
         );
 
-
--- sqlcl_snapshot {"hash":"45ea7d3c633048df97d07c64d7f3000e1b03242a","type":"VIEW","name":"VIEW_SEQUENCE_CREATE","schemaName":"VERANOLINK","sxml":""}

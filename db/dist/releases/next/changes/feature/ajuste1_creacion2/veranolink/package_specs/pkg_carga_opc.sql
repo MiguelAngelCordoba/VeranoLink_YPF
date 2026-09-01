@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1787600191956 stripComments:false  logicalFilePath:feature\ajuste1_creacion2\veranolink\package_specs\pkg_carga_opc.sql
+-- sqlcl_snapshot db/src/database/veranolink/package_specs/pkg_carga_opc.sql:null:a2d4ee4d1da6745a6b550124a32a13b8de003bef:create
+
 create or replace package veranolink.pkg_carga_opc as
 
     -- Carga los proyectos marcados con el UDF 'Integracion Sequence' = TRUE.
@@ -25,5 +29,3 @@ create or replace package veranolink.pkg_carga_opc as
 end pkg_carga_opc;
 /
 
-
--- sqlcl_snapshot {"hash":"a2d4ee4d1da6745a6b550124a32a13b8de003bef","type":"PACKAGE_SPEC","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}
