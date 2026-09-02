@@ -58,6 +58,7 @@ not (object_type = 'INDEX' and object_name ='DATABASECHANGELOG_ACTIONS_PK'),
 --not (object_type = 'TABLE' and object_name like 'DM$%' ),
 --not (object_type = 'VIEW' and object_name like 'DM$V%' ),
 object_name not like 'DM$%',      -- covers tables, views, indexes 
+object_name not like 'DBTOOLS$%', -- objetos internos del servidor MCP de SQLcl
 object_name not like 'I_MLOG$%',      -- covers Materialized Views Logs Indexes
 object_name not like 'I_SNAP$%',
 
