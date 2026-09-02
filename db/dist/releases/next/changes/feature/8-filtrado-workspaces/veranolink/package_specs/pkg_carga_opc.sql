@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1788367209990 stripComments:false  logicalFilePath:feature\8-filtrado-workspaces\veranolink\package_specs\pkg_carga_opc.sql
+-- sqlcl_snapshot db/src/database/veranolink/package_specs/pkg_carga_opc.sql:a2d4ee4d1da6745a6b550124a32a13b8de003bef:6f7d6246470e2ef37132638f670e376ff06b3380:alter
+
 create or replace package veranolink.pkg_carga_opc as
 
     -- Reconstruye TBL_WORKSPACES con los espacios de trabajo de OPC que
@@ -30,5 +34,3 @@ create or replace package veranolink.pkg_carga_opc as
 end pkg_carga_opc;
 /
 
-
--- sqlcl_snapshot {"hash":"6f7d6246470e2ef37132638f670e376ff06b3380","type":"PACKAGE_SPEC","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}

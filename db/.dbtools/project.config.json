@@ -44,7 +44,7 @@
   },
   "git" : {
     "protectedBranches" : [ "main", "master" ],
-    "defaultBranch" : "main"
+    "defaultBranch" : "stage"
   },
   "stage" : {
     "excludeObjects" : [ "ALL.user" ],

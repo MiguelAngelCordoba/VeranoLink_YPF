@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+<include file="veranolink/functions/fn_ambiente.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_specs/pkg_carga_opc.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_workspaces.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_workspaces.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_bodies/pkg_carga_opc.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_bodies/pkg_envio_sequence.sql" relativeToChangelogFile="true"/>
+</databaseChangeLog>
