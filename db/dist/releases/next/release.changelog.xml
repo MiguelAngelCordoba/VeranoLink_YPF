@@ -3,8 +3,5 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-<include file="changes/feature/ajuste1_creacion2/stage.changelog.xml" relativeToChangelogFile="true"/>
-<include file="changes/fix/6/stage.changelog.xml" relativeToChangelogFile="true"/>
-<include file="changes/feature/8-filtrado-workspaces/stage.changelog.xml" relativeToChangelogFile="true"/>
 <!--CHANGES-->
 </databaseChangeLog>
