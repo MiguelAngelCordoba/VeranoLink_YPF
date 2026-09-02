@@ -1,3 +1,7 @@
+-- liquibase formatted sql
+-- changeset VERANOLINK:1788300191569 stripComments:false  logicalFilePath:fix\6\veranolink\package_bodies\pkg_envio_sequence.sql
+-- sqlcl_snapshot db/src/database/veranolink/package_bodies/pkg_envio_sequence.sql:null:4d8044cec6381f423ae8944a758489363c11766b:create
+
 create or replace package body veranolink.pkg_envio_sequence as
 
     c_company             constant varchar2(50) := 'YPF';
@@ -849,5 +853,3 @@ create or replace package body veranolink.pkg_envio_sequence as
 end pkg_envio_sequence;
 /
 
-
--- sqlcl_snapshot {"hash":"4d8044cec6381f423ae8944a758489363c11766b","type":"PACKAGE_BODY","name":"PKG_ENVIO_SEQUENCE","schemaName":"VERANOLINK","sxml":""}

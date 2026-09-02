@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+<include file="veranolink/package_specs/pkg_carga_opc.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_specs/pkg_envio_sequence.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/log_opc_sequence.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/log_opc_sequence.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_activity.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_activity.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_activity_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_activity_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_project_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_project_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_wbs.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_wbs.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/tbl_wbs_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/tbl_wbs_baseline.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/tables/vl_sequence_sources.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/comments/vl_sequence_sources.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_bodies/pkg_carga_opc.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/views/view_sequence_create.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/views/view_sequence_update.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/package_bodies/pkg_envio_sequence.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/idx_log_object.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/idx_log_obj_accion.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/idx_log_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/idx_tbl_activity_activity.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/idx_tbl_activity_project.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_act_bl_activity.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_act_bl_prj_bl.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_act_bl_wbs.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_prj_bl_vigente.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_wbs_bl_prj_bl.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_wbs_project_upd.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/indexes/ix_tbl_wbs_wbsid_upd.sql" relativeToChangelogFile="true"/>
+<include file="veranolink/jobs/job_integracion_diaria.sql" relativeToChangelogFile="true"/>
+</databaseChangeLog>
