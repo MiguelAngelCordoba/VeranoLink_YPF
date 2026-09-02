@@ -2,7 +2,7 @@ create or replace package body veranolink.pkg_carga_opc as
 
     c_id_path_context         constant number := 305; -- endpoint de Proyecto (api/restapi/project, GET) reutilizado
     c_company                 constant varchar2(50) := 'YPF';
-    c_environment             constant number := 2;
+    c_environment             constant number := fn_ambiente;
     c_alias                   constant varchar2(10) := 'OPC';
     c_udf_integracion         constant varchar2(100) := 'YPF | UDF_PRY015_Integración Sequence';
     c_udf_contract_number     constant varchar2(100) := 'YPF | UDF_PRY010_Contrato';
@@ -13,6 +13,18 @@ create or replace package body veranolink.pkg_carga_opc as
     -- Endpoint 'View Activities by Project, Code Type, and Code Value'
     -- (PATH_CONTEXT='api/restapi/activity/project', tipo GET / ID_VL_CALL_TYPE=1).
     c_id_path_context_act     constant number := 12;
+
+    -- Endpoint 'View all Workspaces' (PATH_CONTEXT = 'api/restapi/workspace', GET / ID_VL_CALL_TYPE = 1).
+    c_id_path_context_ws      constant number := 309;
+
+    -- Campos minimos solicitados al endpoint de workspaces.
+    c_select_workspace        constant varchar2(200) := 'workspaceId, workspaceCode, workspaceName, isProduction';
+
+    -- Guarda de caida brusca: si el numero de workspaces del ambiente cae por
+    -- debajo de esta fraccion respecto a la corrida anterior, se aborta sin
+    -- tocar la tabla. Protege contra respuestas parciales o perdida de permisos.
+    -- Poner en 0 para desactivar la guarda.
+    c_umbral_caida_ws         constant number := 0;
 
     -- Filtro de fase: solo se cargan las actividades marcadas con 'Construccion'
     c_codetype_id_fase        constant number := 6104;
@@ -154,6 +166,208 @@ create or replace package body veranolink.pkg_carga_opc as
     end f_iso_to_ts;
 
     ------------------------------------------------------------------
+    -- CARGAR_WORKSPACES
+    -- Reconstruye TBL_WORKSPACES con los espacios de trabajo de OPC que
+    -- pertenecen al ambiente actual (FN_AMBIENTE): productivos si estamos en
+    -- Produccion, no productivos si estamos en Stage.
+    --
+    -- TABLA EN VIVO: se borra y se reinserta completa en cada corrida. No hay
+    -- historia. Si un workspace desaparece de OPC o cambia de bandera, al dia
+    -- siguiente simplemente no esta.
+    --
+    -- FAIL-CLOSED: cualquier problema levanta excepcion ANTES del DELETE, de
+    -- modo que la tabla del dia anterior queda intacta y la integracion se
+    -- pausa hasta la corrida siguiente. Nunca se deja la tabla vacia ni a
+    -- medias: un alcance vacio haria que ningun proyecto calificara y pausaria
+    -- toda la integracion en silencio.
+    ------------------------------------------------------------------
+    procedure cargar_workspaces is
+
+        type t_ws_rec is record (
+                workspace_id   number,
+                workspace_code varchar2(60),
+                workspace_name varchar2(255),
+                is_production  varchar2(1)
+        );
+        type t_ws_tab is
+            table of t_ws_rec index by pls_integer;
+        l_ws           t_ws_tab;
+        l_token_seed   clob;
+        l_response     clob;
+        l_count        pls_integer;
+        l_idx          pls_integer := 0;
+        l_header_name  varchar2(30);
+        l_header_value varchar2(200);
+        l_ws_id        number;
+        l_ws_code      varchar2(60);
+        l_ws_name      varchar2(255);
+        l_is_prod_txt  varchar2(20);
+        l_is_prod      varchar2(1);
+        l_esperado     varchar2(1);
+        l_otro_ambito  pls_integer := 0;
+        l_invalidos    pls_integer := 0;
+        l_previos      pls_integer;
+        l_fecha_sync   timestamp;
+    begin
+        -- 'Y' si el ambiente es productivo, 'N' si es de pruebas.
+        l_esperado :=
+            case c_environment
+                when 1 then
+                    'Y'
+                else
+                    'N'
+            end;
+        dbms_output.put_line('Ambiente '
+                             || c_environment
+                             || ' -> se conservan workspaces con IS_PRODUCTION = ' || l_esperado);
+        l_token_seed := vl_pkg_rest_services.vl_fn_rest_gettoken(c_alias, c_company, c_environment);
+        l_header_name := 'select';
+        l_header_value := c_select_workspace;
+        l_response := vl_pkg_rest_services.vl_fn_rest_services(
+            iv_filterurl          => null,
+            iv_bodyrequest        => null,
+            iv_projectid          => null,
+            iv_alias              => c_alias,
+            iv_company            => c_company,
+            iv_methodcontext      => c_id_path_context_ws,
+            iv_environment        => c_environment,
+            iv_extra_header_name  => l_header_name,
+            iv_extra_header_value => l_header_value
+        );
+
+        if l_response is null then
+            raise_application_error(-20051, 'VL_FN_REST_SERVICES devolvio NULL en workspaces - revisar VL_TOKENS, '
+                                            || 'company, environment o ID_VL_PATH_CONTEXT '
+                                            || c_id_path_context_ws
+                                            || '.');
+        elsif l_response in ( '404', '204', '500', '401' ) then
+            raise_application_error(-20052, 'Error al consultar OPC (workspaces): codigo ' || l_response);
+        end if;
+
+        apex_json.parse(l_response);
+        l_count := apex_json.get_count(p_path => '.');
+        for i in 1..l_count loop
+            l_ws_id := apex_json.get_number(
+                p_path => '[%d].workspaceId',
+                p0     => i
+            );
+            l_ws_code := apex_json.get_varchar2(
+                p_path => '[%d].workspaceCode',
+                p0     => i
+            );
+            l_ws_name := apex_json.get_varchar2(
+                p_path => '[%d].workspaceName',
+                p0     => i
+            );
+            l_is_prod_txt := apex_json.get_varchar2(
+                p_path => '[%d].isProduction',
+                p0     => i
+            );
+
+            -- Sin ID o sin bandera no se puede decidir: se descarta.
+            if l_ws_id is null
+               or l_is_prod_txt is null then
+                l_invalidos := l_invalidos + 1;
+                continue;
+            end if;
+
+            -- Se compara en texto para tolerar que el JSON traiga booleano
+            -- (true) o cadena ("true"), que APEX_JSON resuelve igual.
+            l_is_prod :=
+                case
+                    when lower(l_is_prod_txt) = 'true' then
+                        'Y'
+                    else
+                        'N'
+                end;
+
+            -- ESTE es el control real del alcance, no el header.
+            if l_is_prod != l_esperado then
+                l_otro_ambito := l_otro_ambito + 1;
+                continue;
+            end if;
+            l_idx := l_idx + 1;
+            l_ws(l_idx).workspace_id := l_ws_id;
+            l_ws(l_idx).workspace_code := l_ws_code;
+            l_ws(l_idx).workspace_name := substr(l_ws_name, 1, 255);
+            l_ws(l_idx).is_production := l_is_prod;
+        end loop;
+
+        -- GUARDA 1: alcance vacio. Sin esto, la tabla quedaria en cero y
+        -- TODOS los proyectos se pausarian esa noche sin dejar rastro claro.
+        if l_ws.count = 0 then
+            raise_application_error(-20053, 'La carga de workspaces quedo en cero para el ambiente '
+                                            || c_environment
+                                            || ' (IS_PRODUCTION = '
+                                            || l_esperado
+                                            || '). OPC devolvio '
+                                            || l_count
+                                            || ' registros, '
+                                            || l_otro_ambito
+                                            || ' del otro ambiente y '
+                                            || l_invalidos
+                                            || ' invalidos. No se modifica TBL_WORKSPACES.');
+        end if;
+
+        -- GUARDA 2: caida brusca respecto a la corrida anterior.
+        select
+            count(*)
+        into l_previos
+        from
+            tbl_workspaces;
+
+        if
+            c_umbral_caida_ws > 0
+            and l_previos > 0
+            and l_ws.count < l_previos * c_umbral_caida_ws
+        then
+            raise_application_error(-20054, 'Caida brusca de workspaces: ayer '
+                                            || l_previos
+                                            || ', hoy '
+                                            || l_ws.count
+                                            || '. Posible respuesta parcial o perdida de permisos del usuario API. '
+                                            || 'No se modifica TBL_WORKSPACES. Si la baja es legitima, vaciar la tabla '
+                                            || 'manualmente o ajustar c_umbral_caida_ws.');
+        end if;
+
+        -- A partir de aqui ya no hay validaciones: DELETE + INSERT en la misma
+        -- transaccion. Se usa DELETE y no TRUNCATE porque TRUNCATE es DDL, hace
+        -- commit implicito y dejaria la tabla vacia si el INSERT fallara.
+        l_fecha_sync := systimestamp;
+        delete from tbl_workspaces;
+
+        forall i in 1..l_ws.count
+            insert into tbl_workspaces (
+                workspace_id,
+                workspace_code,
+                workspace_name,
+                is_production,
+                fecha_sincronizacion
+            ) values
+                ( l_ws(i).workspace_id,
+                  l_ws(i).workspace_code,
+                  l_ws(i).workspace_name,
+                  l_ws(i).is_production,
+                  l_fecha_sync );
+
+        dbms_output.put_line('Workspaces - OPC devolvio: '
+                             || l_count
+                             || ' | Del ambiente: '
+                             || l_ws.count
+                             || ' | Del otro ambiente: '
+                             || l_otro_ambito
+                             || ' | Invalidos: '
+                             || l_invalidos
+                             || ' | Corrida anterior: ' || l_previos);
+
+        commit;
+    exception
+        when others then
+            rollback;
+            raise;
+    end cargar_workspaces;
+
+    ------------------------------------------------------------------
     -- CARGAR_PROYECTOS
     -- CAMBIO: ahora tambien pobla WORKSPACE_CODE, requerido por el
     -- endpoint de actividades por linea base (que no acepta projectId).
@@ -174,7 +388,8 @@ create or replace package body veranolink.pkg_carga_opc as
                 status          varchar2(20),
                 contract_number varchar2(50),
                 estado          varchar2(20),
-                workspace_code  varchar2(60)
+                workspace_code  varchar2(60),
+                workspace_id    number
         );
         type t_nuevo_tab is
             table of t_nuevo_rec index by pls_integer;
@@ -189,11 +404,13 @@ create or replace package body veranolink.pkg_carga_opc as
         l_status         varchar2(20);
         l_contract_num   varchar2(50);
         l_workspace_code varchar2(60);
+        l_workspace_id   number;
         l_ok             pls_integer := 0;
         l_duplicados     pls_integer := 0;
         l_congelados     pls_integer := 0;
         l_omitidos       pls_integer := 0;
         l_idx            pls_integer := 0;
+        l_fuera_ambito   pls_integer := 0;
 
         function f_contrato_previo (
             p_project_id number
@@ -221,6 +438,25 @@ create or replace package body veranolink.pkg_carga_opc as
 
             return l_c;
         end f_cuenta_en_nuevos;
+        -- Un proyecto solo entra si su workspace pertenece al ambiente actual.
+        function f_ws_autorizado (
+            p_workspace_id number
+        ) return boolean is
+            l_c pls_integer;
+        begin
+            if p_workspace_id is null then
+                return false;
+            end if;
+            select
+                count(*)
+            into l_c
+            from
+                tbl_workspaces
+            where
+                workspace_id = p_workspace_id;
+
+            return l_c > 0;
+        end f_ws_autorizado;
 
     begin
         for r in (
@@ -281,6 +517,29 @@ create or replace package body veranolink.pkg_carga_opc as
                 p_path => '[%d].workspaceCode',
                 p0     => i
             );
+            l_workspace_id := apex_json.get_number(
+                p_path => '[%d].workspaceId',
+                p0     => i
+            );
+
+            -- Frontera de ambiente: si el workspace no esta en TBL_WORKSPACES,
+            -- el proyecto pertenece al otro ambiente y no se evalua siquiera.
+            -- No se toca su fila si ya existia: al no refrescarse FECHA_CARGA
+            -- queda pausado por el mismo mecanismo que un UDF desmarcado.
+            if not f_ws_autorizado(l_workspace_id) then
+                l_fuera_ambito := l_fuera_ambito + 1;
+                dbms_output.put_line(f_etiqueta_proy(l_project_id, l_project_code)
+                                     || ' FUERA DE AMBIENTE  Workspace: '
+                                     || nvl(
+                    to_char(l_workspace_id),
+                    '-'
+                )
+                                     || ' ('
+                                     || nvl(l_workspace_code, '-') || ')');
+
+                continue;
+            end if;
+
             if l_status != 'ACTIVE'
             or l_contract_num is null then
                 l_omitidos := l_omitidos + 1;
@@ -295,6 +554,7 @@ create or replace package body veranolink.pkg_carga_opc as
             l_nuevos(l_idx).contract_number := l_contract_num;
             l_nuevos(l_idx).estado := null;
             l_nuevos(l_idx).workspace_code := l_workspace_code;
+            l_nuevos(l_idx).workspace_id := l_workspace_id;
         end loop;
 
         for i in 1..l_nuevos.count loop
@@ -355,7 +615,8 @@ create or replace package body veranolink.pkg_carga_opc as
                     l_nuevos(i).status          as status,
                     l_nuevos(i).contract_number as contract_number,
                     l_nuevos(i).estado          as estado,
-                    l_nuevos(i).workspace_code  as workspace_code
+                    l_nuevos(i).workspace_code  as workspace_code,
+                    l_nuevos(i).workspace_id    as workspace_id
                 from
                     dual
             ) s on ( t.project_id = s.project_id )
@@ -367,6 +628,7 @@ create or replace package body veranolink.pkg_carga_opc as
                 t.contract_number = s.contract_number,
                 t.estado_integracion = s.estado,
                 t.workspace_code = s.workspace_code,
+                t.workspace_id = s.workspace_id,
                 t.fecha_carga = systimestamp
             when not matched then
             insert (
@@ -378,6 +640,7 @@ create or replace package body veranolink.pkg_carga_opc as
                 contract_number,
                 estado_integracion,
                 workspace_code,
+                workspace_id,
                 fecha_carga )
             values
                 ( s.project_id,
@@ -388,6 +651,7 @@ create or replace package body veranolink.pkg_carga_opc as
                   s.contract_number,
                   s.estado,
                   s.workspace_code,
+                  s.workspace_id,
                   systimestamp );
 
             if l_nuevos(i).estado = 'OK' then
@@ -417,6 +681,8 @@ create or replace package body veranolink.pkg_carga_opc as
                              || l_duplicados
                              || ' | Contrato cambiado: '
                              || l_congelados
+                             || ' | Fuera de ambiente: '
+                             || l_fuera_ambito
                              || ' | Omitidos por filtros: ' || l_omitidos);
 
         commit;
@@ -1113,6 +1379,7 @@ create or replace package body veranolink.pkg_carga_opc as
             where
                     p.estado_integracion = 'OK'
                 and p.workspace_code is not null
+                and trunc(p.fecha_carga) = trunc(sysdate)
                 and not exists (
                     select
                         1
@@ -1190,6 +1457,7 @@ create or replace package body veranolink.pkg_carga_opc as
             where
                     p.estado_integracion = 'OK'
                 and p.workspace_code is not null
+                and trunc(p.fecha_carga) = trunc(sysdate)
             order by
                 p.project_id
         ) loop
@@ -1971,4 +2239,4 @@ end pkg_carga_opc;
 /
 
 
--- sqlcl_snapshot {"hash":"1ee10b6d13a967d00625ae0b55b9304a0c0852f9","type":"PACKAGE_BODY","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"1792aa63ae687e340ccaf2fc4d82f4ad8ae534d1","type":"PACKAGE_BODY","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}

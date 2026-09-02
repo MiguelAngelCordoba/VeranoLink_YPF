@@ -1,5 +1,10 @@
 create or replace package veranolink.pkg_carga_opc as
 
+    -- Reconstruye TBL_WORKSPACES con los espacios de trabajo de OPC que
+    -- pertenecen al ambiente actual. Debe ejecutarse SIEMPRE antes de
+    -- cargar_proyectos: define que proyectos pueden entrar a la integracion.
+    procedure cargar_workspaces;
+
     -- Carga los proyectos marcados con el UDF 'Integracion Sequence' = TRUE.
     -- Aplica reglas de contrato (unicidad, congelamiento por cambio) y pobla
     -- WORKSPACE_CODE, necesario para los endpoints de linea base.
@@ -26,4 +31,4 @@ end pkg_carga_opc;
 /
 
 
--- sqlcl_snapshot {"hash":"a2d4ee4d1da6745a6b550124a32a13b8de003bef","type":"PACKAGE_SPEC","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"6f7d6246470e2ef37132638f670e376ff06b3380","type":"PACKAGE_SPEC","name":"PKG_CARGA_OPC","schemaName":"VERANOLINK","sxml":""}

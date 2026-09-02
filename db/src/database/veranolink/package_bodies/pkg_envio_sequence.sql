@@ -1,7 +1,7 @@
 create or replace package body veranolink.pkg_envio_sequence as
 
     c_company             constant varchar2(50) := 'YPF';
-    c_environment         constant number := 2;
+    c_environment         constant number := fn_ambiente;
     c_endpoint_crear      constant varchar2(100) := 'CrearActividad/?ContractID=';
     -- : el Postman usa 'ActualizarActividad/?ContractID='.
     --              Si el envio falla con 404, agregar la barra antes del '?'.
@@ -738,6 +738,9 @@ create or replace package body veranolink.pkg_envio_sequence as
     begin
         dbms_output.put_line('=== Inicio integracion diaria: '
                              || to_char(l_inicio, 'YYYY-MM-DD HH24:MI:SS') || ' ===');
+        l_paso := 'cargar_workspaces';
+        dbms_output.put_line('>>> ' || l_paso);
+        pkg_carga_opc.cargar_workspaces;
         l_paso := 'cargar_proyectos';
         dbms_output.put_line('>>> ' || l_paso);
         pkg_carga_opc.cargar_proyectos;
@@ -850,4 +853,4 @@ end pkg_envio_sequence;
 /
 
 
--- sqlcl_snapshot {"hash":"4d8044cec6381f423ae8944a758489363c11766b","type":"PACKAGE_BODY","name":"PKG_ENVIO_SEQUENCE","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"1918e04359f2e39c2ff6e21dbf8ad06e29cc5bd6","type":"PACKAGE_BODY","name":"PKG_ENVIO_SEQUENCE","schemaName":"VERANOLINK","sxml":""}
