@@ -81,8 +81,14 @@ page 27 (
                         ELSE 'Desconocido'
                     END AS previous_run_status,
                     --    prev_run.status previous_run_status,
-                       to_char(prev_run.previous_run_date - interval '5' hour, 'DD/MON/YYYY HH:MI:SS AM') as adjusted_previous_run_date,
-                       to_char(job.next_run_date - interval '5' hour, 'DD/MON/YYYY HH:MI:SS AM') as adjusted_next_run_date,
+                       to_char(
+                            prev_run.previous_run_date AT TIME ZONE 'America/Bogota',
+                            'DD/MON/YYYY HH:MI:SS AM'
+                        ) as adjusted_previous_run_date,
+                        to_char(
+                            job.next_run_date AT TIME ZONE 'America/Bogota',
+                            'DD/MON/YYYY HH:MI:SS AM'
+                        ) as adjusted_next_run_date,
                        job.repeat_interval,
                        decode(job.enabled, 'TRUE', 'Activo', 'Inactivo') status,
                        job.comments,
@@ -137,6 +143,7 @@ page 27 (
                     items: {
                         P29_NAME_JOB: #JOB_NAME#
                     }
+                    clearCache: 29
                     request: EDIT_JOB
                 }
                 linkText: <img src="#APEX_FILES#app_ui/img/icons/apex-edit-page.png" class="apex-edit-page" alt="">

@@ -204,6 +204,9 @@ list navigation-menu (
         layout {
             sequence: 76
         }
+        serverSideCondition {
+            type: never
+        }
     )
 
     entry aplicaciones (

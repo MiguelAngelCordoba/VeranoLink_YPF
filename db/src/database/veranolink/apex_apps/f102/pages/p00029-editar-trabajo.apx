@@ -210,9 +210,9 @@ page 29 (
                 SELECT 
                     log.log_id AS log_id,
                     log.job_name AS job_name,
-                    TO_CHAR(run.req_start_date - INTERVAL '5' HOUR, 'DD-MON-YYYY HH:MI:SS AM') AS schedule_time,
-                    TO_CHAR(run.actual_start_date - INTERVAL '5' HOUR, 'DD-MON-YYYY HH:MI:SS AM') AS start_time,
-                    TO_CHAR((run.actual_start_date - INTERVAL '5' HOUR) + run.run_duration, 'DD-MON-YYYY HH:MI:SS AM') AS end_time,
+                    CAST(run.req_start_date AT TIME ZONE 'America/Bogota' AS TIMESTAMP) AS schedule_time,
+                    CAST(run.actual_start_date AT TIME ZONE 'America/Bogota' AS TIMESTAMP) AS start_time,
+                    CAST((run.actual_start_date AT TIME ZONE 'America/Bogota') + run.run_duration AS TIMESTAMP) AS end_time,
                     TO_CHAR(run.run_duration, 'HH24:MI:SS') AS duration,
                     
                     CASE
@@ -226,30 +226,7 @@ page 29 (
                         WHEN log.status = 'FAILED' THEN 'Fallido'
                         WHEN log.status = 'STOPPED' THEN 'Interrumpido'
                         ELSE 'Desconocido'
-                    END AS status,
-                    '<div>' || 
-                        CASE 
-                            WHEN DBMS_LOB.GETLENGTH(run.binary_output) > 120000 THEN
-                                '<div class="cc-actions-column">
-                                    <span>
-                                        <a href="' || APEX_PAGE.GET_URL (
-                                            p_page   => 0,
-                                            p_items  => 'ID_PARAMETER',
-                                            p_values => log.log_id,
-                                            p_request => 'APPLICATION_PROCESS=DOWNLOAD_JSON'
-                                        ) || '" aria-hidden="false" class="fa fa-download t-Button t-Button--simple cc-download-btn" data-id="' || run.log_id || '"></a>
-                                    </span>
-                                </div>'
-                            WHEN run.binary_output IS NOT NULL THEN
-                                '<div class="cc-actions-column">
-                                    <span>
-                                        <a href="##" aria-hidden="false" class="fa fa-eye t-Button t-Button--simple cc-clear-btn" data-id="' || run.log_id || '"></a>
-                                    </span>
-                                </div>'
-                            ELSE 
-                                'No se genera JSON'
-                        END || 
-                    '</div>' AS "Ver logs"
+                    END AS status
                 FROM 
                     user_scheduler_job_log log
                 JOIN 
@@ -306,13 +283,13 @@ page 29 (
                 heading: Duración
             }
             layout {
-                sequence: 60
+                sequence: 100
             }
             source {
                 dataType: STRING
             }
             advanced {
-                endUserAlias: F
+                endUserAlias: Q
             }
         )
 
@@ -324,11 +301,14 @@ page 29 (
             layout {
                 sequence: 50
             }
+            appearance {
+                formatMask: DD-MON-YYYY HH:MI:SS AM
+            }
             source {
-                dataType: STRING
+                dataType: DATE
             }
             advanced {
-                endUserAlias: E
+                endUserAlias: O
             }
         )
 
@@ -349,12 +329,24 @@ page 29 (
         )
 
         column LOG_ID (
-            type: hidden
+            type: link
             heading {
-                heading: Log Id
+                heading: Ver detalle
+                alignment: center
             }
             layout {
-                sequence: 10
+                sequence: 110
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 34
+                    items: {
+                        P34_LOG_ID: #LOG_ID#
+                        P34_JOB_NAME: &P29_NAME_JOB.
+                    }
+                }
+                linkText: <span role="img" aria-label="Edit" class="fa fa-search" title="See Details"></span>
             }
             source {
                 dataType: NUMBER
@@ -388,11 +380,14 @@ page 29 (
             layout {
                 sequence: 30
             }
+            appearance {
+                formatMask: DD-MON-YYYY HH:MI:SS AM
+            }
             source {
-                dataType: STRING
+                dataType: DATE
             }
             advanced {
-                endUserAlias: C
+                endUserAlias: M
             }
         )
 
@@ -404,11 +399,14 @@ page 29 (
             layout {
                 sequence: 40
             }
+            appearance {
+                formatMask: DD-MON-YYYY HH:MI:SS AM
+            }
             source {
-                dataType: STRING
+                dataType: DATE
             }
             advanced {
-                endUserAlias: D
+                endUserAlias: N
             }
         )
 
@@ -425,25 +423,6 @@ page 29 (
             }
             advanced {
                 endUserAlias: H
-            }
-        )
-
-        column "Ver logs" (
-            type: plainText
-            heading {
-                heading: Ver Logs
-            }
-            layout {
-                sequence: 90
-            }
-            source {
-                dataType: STRING
-            }
-            advanced {
-                endUserAlias: L
-            }
-            security {
-                escapeSpecialChars: false
             }
         )
 
@@ -473,6 +452,10 @@ page 29 (
                 sequence: 3
             )
 
+            displayColumn LOG_ID (
+                sequence: 7
+            )
+
             displayColumn OPERATION (
                 sequence: 5
             )
@@ -487,10 +470,6 @@ page 29 (
 
             displayColumn STATUS (
                 sequence: 6
-            )
-
-            displayColumn "Ver logs" (
-                sequence: 7
             )
 
         )
@@ -787,6 +766,31 @@ page 29 (
         }
     )
 
+    pageItem P29_START_DATE (
+        type: datePicker
+        label {
+            label: Fecha de inicio
+            alignment: left
+        }
+        settings {
+            showTime: true
+        }
+        layout {
+            sequence: 20
+            region: @información-del-trabajo
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            template: @optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: YYYY-MM-DD HH24:MI
+            width: 30
+        }
+    )
+
     pageItem P29_VALIDATOR (
         type: hidden
         layout {
@@ -887,10 +891,14 @@ page 29 (
                             );
                     
                             -- Configurar la hora de inicio a la hora actual + 1 minuto
+                                    -- Configurar la hora de inicio
                             DBMS_SCHEDULER.SET_ATTRIBUTE(
                                 name      => v_job_name,
                                 attribute => 'start_date',
-                                value     => SYSTIMESTAMP + INTERVAL '1' MINUTE
+                                value     => FROM_TZ(
+                                                TO_TIMESTAMP(:P29_START_DATE, 'YYYY-MM-DD HH24:MI'),
+                                                '-05:00'
+                                             )
                             );
                     
                             :P29_VALIDATOR := 1;
@@ -914,6 +922,7 @@ page 29 (
                     P29_REPEAT_INTERVAL
                     P29_DESCRIPTION
                     P29_JOB_INTERVAL
+                    P29_START_DATE
                 ]
                 itemsToReturn: P29_VALIDATOR
                 showProcessing: true
