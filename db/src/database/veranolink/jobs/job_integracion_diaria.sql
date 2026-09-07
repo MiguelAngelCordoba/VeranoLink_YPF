@@ -3,11 +3,11 @@ begin
         job_name            => 'VERANOLINK.JOB_INTEGRACION_DIARIA',
         job_type            => 'PLSQL_BLOCK',
         job_action          => 'BEGIN PKG_ENVIO_SEQUENCE.INTEGRACION_DIARIA; END;',
-        start_date          => timestamp '2026-08-01 22:00:00.0',
-        repeat_interval     => 'FREQ=DAILY; BYHOUR=22; BYMINUTE=0; BYSECOND=0',
+        start_date          => timestamp '2026-09-03 22:00:00.0',
+        repeat_interval     => 'FREQ=DAILY; interval=1;',
         end_date            => null,
         job_class           => 'DEFAULT_JOB_CLASS',
-        comments            => 'Integracion nocturna OPC -> Sequence: proyectos, WBS, actividades, envio de creaciones',
+        comments            => 'Integracion nocturna OPC -> Sequence: proyectos, WBS, actividades - Creación y actualización',
         auto_drop           => true,
         number_of_arguments => 0
     );
@@ -29,4 +29,4 @@ end;
 /
 
 
--- sqlcl_snapshot {"hash":"278cd6205f88c2e6082bc31ebfc0de7fe6733ebd","type":"JOB","name":"JOB_INTEGRACION_DIARIA","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"59b03f53ad00883db10e1a14878ab012c4637dfe","type":"JOB","name":"JOB_INTEGRACION_DIARIA","schemaName":"VERANOLINK","sxml":""}

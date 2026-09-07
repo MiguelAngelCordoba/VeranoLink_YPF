@@ -45,19 +45,32 @@ page 13 (
             type: sqlQuery
             sqlQuery:
                 ```sql
-                select ID_VL_SOURCE,
-                       SOURCE_URL,
-                       ID_VL_WS_TYPE,
-                       ID_VL_TYPE_ENVIRONMENT,
-                       C.NAME,
-                       CASE WHEN VL_SOURCE_STATE = 1 THEN 'ACTIVO'
-                       WHEN VL_SOURCE_STATE = 0 THEN 'INACTIVO' END ICON
-                from VL_SOURCES A 
-                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B ON A.ID_VL_COMPANY_APPLICATION=B.ID_VL_COMPANY_APPLICATION
-                LEFT JOIN VL_SOURCE_APPLICATIONS C ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION
-                
-                where B.VL_ID_COMPANY = :GET_COMPANY
-                order by SOURCE_URL, ID_VL_TYPE_ENVIRONMENT;
+                SELECT 'SOURCE' AS SOURCE_TYPE,
+                       A.ID_VL_SOURCE AS ID,
+                       A.SOURCE_URL,
+                       TE.TYPE_ENVIRONMENT AS ENVIRONMENT,
+                       C.NAME AS APPLICATION_NAME,
+                       CASE WHEN A.VL_SOURCE_STATE = 1 THEN 'ACTIVO'
+                            WHEN A.VL_SOURCE_STATE = 0 THEN 'INACTIVO' END AS ICON
+                FROM VL_SOURCES A
+                INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B
+                        ON A.ID_VL_COMPANY_APPLICATION = B.ID_VL_COMPANY_APPLICATION
+                LEFT JOIN VL_SOURCE_APPLICATIONS C
+                       ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION
+                LEFT JOIN VL_TYPES_ENVIRONMENT TE
+                       ON A.ID_VL_TYPE_ENVIRONMENT = TE.ID_VL_TYPE_ENVIRONMENT
+                WHERE B.VL_ID_COMPANY = :GET_COMPANY
+                UNION ALL
+                SELECT 'SEQUENCE' AS SOURCE_TYPE,
+                       S.ID_VL_SEQUENCE_SOURCE,
+                       S.SOURCE_URL,
+                       TE.TYPE_ENVIRONMENT AS ENVIRONMENT,
+                       'Sequence Enterprise',
+                       'ACTIVO'
+                FROM VL_SEQUENCE_SOURCES S
+                LEFT JOIN VL_TYPES_ENVIRONMENT TE
+                       ON S.ENVIRONMENT = TE.ID_VL_TYPE_ENVIRONMENT
+                ORDER BY SOURCE_URL, ENVIRONMENT
                 ```
         }
         layout {
@@ -73,7 +86,7 @@ page 13 (
             target: {
                 page: 14
                 items: {
-                    P14_ID_VL_SOURCE: #ID_VL_SOURCE#
+                    P14_ID_VL_SOURCE: #ID##ID_VL_SOURCE#
                 }
                 action: resetPagination
             }
@@ -89,6 +102,38 @@ page 13 (
         advanced {
             savedReportMappingIdentifier: 5645299556413346
         }
+
+        column APPLICATION_NAME (
+            type: plainText
+            heading {
+                heading: Aplicación
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: L
+            }
+        )
+
+        column ENVIRONMENT (
+            type: plainText
+            heading {
+                heading: Environment
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: M
+            }
+        )
 
         column ICON (
             type: plainText
@@ -106,65 +151,28 @@ page 13 (
             }
         )
 
-        column ID_VL_SOURCE (
-            type: hidden
-            heading {
-                heading: Id Vl Source
-            }
-            layout {
-                sequence: 10
-            }
-            source {
-                primaryKey: true
-                dataType: NUMBER
-            }
-            advanced {
-                endUserAlias: A
-            }
-        )
-
-        column ID_VL_TYPE_ENVIRONMENT (
-            type: plainTextBasedOnLov
-            heading {
-                heading: Ambiente
-            }
-            lov {
-                lov: @vl-types-environment-type-environment
-            }
-            layout {
-                sequence: 60
-            }
-            source {
-                dataType: NUMBER
-            }
-            advanced {
-                endUserAlias: F
-            }
-        )
-
-        column ID_VL_WS_TYPE (
-            type: plainTextBasedOnLov
-            heading {
-                heading: Tipo Web Service
-            }
-            lov {
-                lov: @vl-ws-types-name-ws
-            }
-            layout {
-                sequence: 50
-            }
-            source {
-                dataType: NUMBER
-            }
-            advanced {
-                endUserAlias: E
-            }
-        )
-
-        column NAME (
+        column ID (
             type: plainText
             heading {
-                heading: Aplicación
+                heading: Id
+                alignment: end
+            }
+            layout {
+                sequence: 90
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column SOURCE_TYPE (
+            type: plainText
+            heading {
+                heading: Source Type
             }
             layout {
                 sequence: 80
@@ -173,7 +181,7 @@ page 13 (
                 dataType: STRING
             }
             advanced {
-                endUserAlias: H
+                endUserAlias: I
             }
         )
 
@@ -207,20 +215,12 @@ page 13 (
                 rowsPerPage: 50
             }
 
-            displayColumn ICON (
-                sequence: 5
-            )
-
-            displayColumn ID_VL_TYPE_ENVIRONMENT (
-                sequence: 3
-            )
-
-            displayColumn ID_VL_WS_TYPE (
-                sequence: 4
-            )
-
-            displayColumn NAME (
+            displayColumn APPLICATION_NAME (
                 sequence: 1
+            )
+
+            displayColumn ICON (
+                sequence: 3
             )
 
             displayColumn SOURCE_URL (

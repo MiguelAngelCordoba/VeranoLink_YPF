@@ -202,6 +202,15 @@ page 14 (
         }
     )
 
+    pageItem P14_SOURCE_TYPE (
+        type: hidden
+        layout {
+            sequence: 90
+            region: @gestión-de-fuentes
+            slot: regionBody
+        }
+    )
+
     pageItem P14_SOURCE_URL (
         type: textField
         label {

@@ -36,13 +36,13 @@ prompt APPLICATION 102 - Verano Link
 --   Exported By:     VERANOLINK
 --   Flashback:       0
 --   Export Type:     Application Export
---     Pages:                     34
---       Items:                  121
+--     Pages:                     35
+--       Items:                  125
 --       Validations:             35
 --       Processes:               41
---       Regions:                 68
---       Buttons:                 60
---       Dynamic Actions:         78
+--       Regions:                 69
+--       Buttons:                 61
+--       Dynamic Actions:         79
 --     Shared Components:
 --       Logic:
 --         Items:                 14
@@ -67,7 +67,7 @@ prompt APPLICATION 102 - Verano Link
 --           Button:               3
 --           Report:              12
 --         LOVs:                  11
---         Plug-ins:              12
+--         Plug-ins:              11
 --       PWA:
 --       Globalization:
 --       Reports:
@@ -124,6 +124,7 @@ wwv_imp_workspace.create_flow(
 ,p_substitution_value_01=>'Verano Link'
 ,p_file_prefix=>nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_files_version=>28
+,p_version_scn=>'5454809996'
 ,p_print_server_type=>'NATIVE'
 ,p_file_storage=>'DB'
 ,p_is_pwa=>'Y'
@@ -7854,558 +7855,6 @@ wwv_flow_imp_shared.create_plugin_file(
 );
 end;
 /
-prompt --application/shared_components/plugins/region_type/com_oracle_apex_badge_list
-begin
-wwv_flow_imp_shared.create_plugin(
- p_id=>wwv_flow_imp.id(15649330117011443611)
-,p_plugin_type=>'REGION TYPE'
-,p_name=>'COM.ORACLE.APEX.BADGE_LIST'
-,p_display_name=>'Badge List'
-,p_apexlang_name=>'badgeList'
-,p_image_prefix=>nvl(wwv_flow_application_install.get_static_plugin_file_prefix('REGION TYPE','COM.ORACLE.APEX.BADGE_LIST'),'#IMAGE_PREFIX#plugins/com.oracle.apex.badgelist/2.0/')
-,p_javascript_file_urls=>'#PLUGIN_FILES#com_oracle_apex_badgelist.js'
-,p_plsql_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'function render (',
-'    p_region              in apex_plugin.t_region,',
-'    p_plugin              in apex_plugin.t_plugin,',
-'    p_is_printer_friendly in boolean )',
-'    return apex_plugin.t_region_render_result is',
-'begin',
-'    apex_javascript.add_onload_code (',
-'        p_code => ''com_oracle_apex_badgelist(''||',
-'            apex_javascript.add_value(p_region.static_id)||',
-'            ''{''||',
-'                -- why is this attribute needed if is not used?',
-'                apex_javascript.add_attribute(',
-'                    ''pageItems'', ',
-'                    apex_plugin_util.page_item_names_to_jquery(p_region.ajax_items_to_submit)',
-'                )||',
-'                apex_javascript.add_attribute(',
-'                    ''ajaxIdentifier'', ',
-'                    apex_plugin.get_ajax_identifier, ',
-'                    false, ',
-'                    false',
-'                )||',
-'            ''}''||',
-'        '');''',
-'    );',
-'--    CSS for Big Value List',
-'--    apex_css.add_file (',
-'--        p_name      => ''com_oracle_apex_badge_list'',',
-'--        p_directory => p_plugin.file_prefix );',
-'    -- Start the list',
-'',
-'',
-'    -- It''s time to emit the selected rows',
-'',
-'',
-'    return null;',
-'',
-'end render;',
-'',
-'function ajax (',
-'    p_region in apex_plugin.t_region,',
-'    p_plugin in apex_plugin.t_plugin',
-') return apex_plugin.t_region_ajax_result ',
-'is',
-'    -- It''s better to have named variables instead of using the generic ones,',
-'    -- makes the code more readable. We are using the same defaults for the',
-'    -- required attributes as in the plug-in attribute configuration, because',
-'    -- they can still be null. Keep them in sync!',
-'    c_top_label_column    constant varchar2(255) := p_region.attribute_09;',
-'    c_value_column        constant varchar2(255) := p_region.attribute_02;',
-'    c_bottom_label_column constant varchar2(255) := p_region.attribute_01;',
-'    c_percent_column      constant varchar2(255) := p_region.attribute_03;',
-'    c_link_target         constant varchar2(255) := p_region.attribute_04;',
-'    ',
-'    c_layout            constant varchar2(1)   := p_region.attribute_05;',
-'    c_chart_size        constant varchar2(3)   := p_region.attribute_06;',
-'    c_chart_type        constant varchar2(3)   := p_region.attribute_07;',
-'    c_colored           constant varchar2(1)   := p_region.attribute_08;',
-'',
-'    l_bottom_label_column_no pls_integer;',
-'    l_top_label_column_no    pls_integer;',
-'    l_value_column_no        pls_integer;',
-'    l_percent_column_no      pls_integer;',
-'    l_column_value_list      apex_plugin_util.t_column_value_list2;',
-'    ',
-'    l_top_label      varchar2(4000);',
-'    l_value             varchar2(4000);',
-'    l_bottom_label      varchar2(4000);',
-'    l_percent           number;',
-'    l_url               varchar2(4000);',
-'    l_class             varchar2(255);',
-'',
-'begin',
-'    apex_json.initialize_output (',
-'        p_http_cache => false );',
-'        -- Read the data based on the region source query',
-'    l_column_value_list := apex_plugin_util.get_data2 (',
-'                               p_sql_statement  => p_region.source,',
-'                               p_min_columns    => 2,',
-'                               p_max_columns    => null,',
-'                               p_component_name => p_region.name );',
-'',
-'    -- Get the actual column# for faster access and also verify that the data type',
-'    -- of the column matches with what we are looking for',
-'    l_top_label_column_no := apex_plugin_util.get_column_no (',
-'      p_attribute_label   => ''Top Label'',',
-'      p_column_alias      => c_top_label_column,',
-'      p_column_value_list => l_column_value_list,',
-'      p_is_required       => false,',
-'      p_data_type         => apex_plugin_util.c_data_type_varchar2',
-'    );',
-'',
-'    l_value_column_no   := apex_plugin_util.get_column_no (',
-'                               p_attribute_label   => ''Value'',',
-'                               p_column_alias      => c_value_column,',
-'                               p_column_value_list => l_column_value_list,',
-'                               p_is_required       => true,',
-'                               p_data_type         => apex_plugin_util.c_data_type_varchar2 );',
-'',
-'    -- Get the actual column# for faster access and also verify that the data type',
-'    -- of the column matches with what we are looking for',
-'    l_bottom_label_column_no := apex_plugin_util.get_column_no (',
-'      p_attribute_label   => ''Bottom Label'',',
-'      p_column_alias      => c_bottom_label_column,',
-'      p_column_value_list => l_column_value_list,',
-'      p_is_required       => false,',
-'      p_data_type         => apex_plugin_util.c_data_type_varchar2',
-'    );',
-'                                      ',
-'    l_percent_column_no := apex_plugin_util.get_column_no (',
-'                             p_attribute_label   => ''Percent'',',
-'                             p_column_alias      => c_percent_column,',
-'                             p_column_value_list => l_column_value_list,',
-'                             p_is_required       => false,',
-'                             p_data_type         => apex_plugin_util.c_data_type_number );',
-'    ',
-'    -- begin output as json',
-'    owa_util.mime_header(''application/json'', false);',
-'    htp.p(''cache-control: no-cache'');',
-'    htp.p(''pragma: no-cache'');',
-'    owa_util.http_header_close;',
-' --   l_message_when_no_data_found := apex_escape.html_whitelist(',
-'  --      apex_plugin_util.replace_substitutions (',
-'   --             p_value  => c_message_when_no_data_found,',
-'   --             p_escape => false',
-'    --        )',
-'    --    );',
-'    apex_json.open_object();',
-'    apex_json.write(''layout'', c_layout); ',
-'    apex_json.write(''chart_size'', c_chart_size); ',
-'    apex_json.write(''chart_type'', c_chart_type); ',
-'    apex_json.write(''colored'', c_colored); ',
-'    apex_json.open_array(''data'');',
-'    for l_row_num in 1 .. l_column_value_list(1).value_list.count loop',
-'        begin',
-'            apex_json.open_object(); ',
-'            -- Set the column values of our current row so that apex_plugin_util.replace_substitutions',
-'            -- can do substitutions for columns contained in the region source query.',
-'            apex_plugin_util.set_component_values (',
-'                p_column_value_list => l_column_value_list,',
-'                p_row_num           => l_row_num );',
-'',
-'            if l_top_label_column_no is not null',
-'            then',
-'              -- get the top label',
-'              l_top_label := ',
-'                 apex_plugin_util.get_value_as_varchar2 (',
-'                     p_data_type => l_column_value_list(l_top_label_column_no).data_type,',
-'                     p_value     => l_column_value_list(l_top_label_column_no).value_list(l_row_num) );',
-'',
-'              apex_json.write(''topLabel'', l_top_label); ',
-'            end if;',
-'            ',
-'            -- get the value',
-'            l_value := apex_plugin_util.get_value_as_varchar2 (',
-'                               p_data_type => l_column_value_list(l_value_column_no).data_type,',
-'                               p_value     => l_column_value_list(l_value_column_no).value_list(l_row_num) );',
-'',
-'            apex_json.write(''value'', l_value); ',
-'',
-'            if l_bottom_label_column_no is not null',
-'            then',
-'              -- get the bottom label',
-'              l_bottom_label := ',
-'                 apex_plugin_util.get_value_as_varchar2 (',
-'                     p_data_type => l_column_value_list(l_bottom_label_column_no).data_type,',
-'                     p_value     => l_column_value_list(l_bottom_label_column_no).value_list(l_row_num) );',
-'',
-'              apex_json.write(''bottomLabel'', l_bottom_label); ',
-'            end if;',
-'',
-'            -- get percent',
-'            if l_percent_column_no is not null then',
-'                l_percent := l_column_value_list(l_percent_column_no).value_list(l_row_num).number_value;',
-'                apex_json.    write(''percent'', l_percent); ',
-'            end if;',
-'',
-'            -- get the link target if it does exist',
-'            if c_link_target is not null then',
-'                l_url := apex_util.prepare_url (',
-'                             apex_plugin_util.replace_substitutions (',
-'                                 p_value  => c_link_target,',
-'                                 p_escape => false ));',
-'                apex_json.    write(''url'', l_url);                ',
-'            end if;',
-'            ',
-'            apex_json.close_object();        ',
-'',
-'',
-'            apex_plugin_util.clear_component_values;',
-'        exception when others then',
-'            apex_plugin_util.clear_component_values;',
-'            raise;',
-'        end;',
-'    end loop;',
-'    apex_json.close_all();',
-'    ',
-'    return null;',
-'exception when others then',
-'    htp.p(''error: ''||apex_escape.html(sqlerrm));',
-'    return null;',
-'end ajax;',
-'',
-'',
-''))
-,p_api_version=>1
-,p_render_function=>'render'
-,p_ajax_function=>'ajax'
-,p_standard_attributes=>'SOURCE_SQL:AJAX_ITEMS_TO_SUBMIT:ESCAPE_OUTPUT'
-,p_substitute_attributes=>false
-,p_reference_id=>wwv_imp_util.get_subscription_id(1557719565043480755,2700,wwv_flow_t_varchar2(),null)
-,p_subscribe_plugin_settings=>true
-,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<p>Badge lists are useful for displaying a region with a small number of counts for important statistics. For example, in Bug Tracker, this plug-in is used to show the total bugs, open bugs, open high priority bugs, and open critical severity bugs.</'
-||'p>',
-'<p>This plug-in is suitable for adding to the Home page to show important summary information.</p>'))
-,p_version_identifier=>'5.0.2'
-,p_about_url=>'http://apex.oracle.com/plugins'
-,p_files_version=>2461236171741
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187376659920835373)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>1
-,p_display_sequence=>25
-,p_static_id=>'attribute_01'
-,p_prompt=>'Bottom Label'
-,p_apexlang_name=>'bottomLabel'
-,p_attribute_type=>'REGION SOURCE COLUMN'
-,p_is_required=>false
-,p_column_data_types=>'VARCHAR2'
-,p_is_translatable=>false
-,p_help_text=>'Select the column from the region SQL Query that holds the labels for the badges.'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187377058461835374)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>2
-,p_display_sequence=>20
-,p_static_id=>'attribute_02'
-,p_prompt=>'Value'
-,p_apexlang_name=>'value'
-,p_attribute_type=>'REGION SOURCE COLUMN'
-,p_is_required=>true
-,p_column_data_types=>'VARCHAR2'
-,p_is_translatable=>false
-,p_help_text=>'Select the column from the region SQL Query that holds the values for the badges.'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187377532162835375)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>3
-,p_display_sequence=>30
-,p_static_id=>'attribute_03'
-,p_prompt=>'Percent'
-,p_apexlang_name=>'percent'
-,p_attribute_type=>'REGION SOURCE COLUMN'
-,p_is_required=>false
-,p_column_data_types=>'NUMBER'
-,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_imp.id(1187385076805835381)
-,p_depending_on_has_to_exist=>true
-,p_depending_on_condition_type=>'EQUALS'
-,p_depending_on_expression=>'PERCENT'
-,p_help_text=>'Select the column from the region SQL Query that holds the percentage values for the badges. Percentages will be displayed together with the value within the badge.'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187377910778835376)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>4
-,p_display_sequence=>40
-,p_static_id=>'attribute_04'
-,p_prompt=>'Link Target'
-,p_apexlang_name=>'linkTarget'
-,p_attribute_type=>'LINK'
-,p_is_required=>false
-,p_is_translatable=>false
-,p_examples=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<p>Example 1: URL to navigate to page 10 and set P10_EMPNO to the EMPNO value of the clicked entry.',
-'<pre>f?p=&amp;APP_ID.:10:&amp;APP_SESSION.::&amp;DEBUG.:RP,10:P10_EMPNO:&amp;EMPNO.</pre>',
-'</p>',
-'<p>Example 2: Display the EMPNO value of the clicked entry in a JavaScript alert',
-'<pre>javascript:alert(''current empno: &amp;EMPNO.'');</pre>',
-'</p>'))
-,p_help_text=>'<p>Enter a target page to be called when the user clicks a badge entry.</p>'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187378328608835376)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>5
-,p_display_sequence=>50
-,p_static_id=>'attribute_05'
-,p_prompt=>'Layout'
-,p_apexlang_name=>'layout'
-,p_attribute_type=>'SELECT LIST'
-,p_is_required=>true
-,p_is_common=>false
-,p_default_value=>'0'
-,p_is_translatable=>false
-,p_lov_type=>'STATIC'
-,p_help_text=>'<p>Select the layout to determine how the badge list is displayed.</p>'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187380249192835378)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>10
-,p_display_value=>'1 column'
-,p_return_value=>'1'
-,p_apexlang_name=>'1Column'
-,p_help_text=>'Displays only one badge per row. Therefore, if there are three badges they are displayed on three rows.'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187380667047835378)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>20
-,p_display_value=>'2 columns'
-,p_return_value=>'2'
-,p_apexlang_name=>'2Columns'
-,p_help_text=>'Displays only two badges per row. Therefore, if there are three badges they are displayed on two rows.'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187381158735835378)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>30
-,p_display_value=>'3 columns'
-,p_return_value=>'3'
-,p_apexlang_name=>'3Columns'
-,p_help_text=>'<p>Displays a maximum of three badges per row. Therefore, if there are four badges they are displayed on two rows.</p>'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187381674172835378)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>40
-,p_display_value=>'4 columns'
-,p_return_value=>'4'
-,p_apexlang_name=>'4Columns'
-,p_help_text=>'<p>Displays a maximum of four badges per row. Therefore, if there are six badges they are displayed on two rows.</p>'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187378726612835376)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>50
-,p_display_value=>'5 columns'
-,p_return_value=>'5'
-,p_apexlang_name=>'5Columns'
-,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<p>Displays a maximum of fix badges per row. Therefore, if there are seven badges they are displayed on two rows.</p>',
-'<p>Note: on smaller displays where the badges cannot be displayed appropriately, the responsive region will revert to less column and additional rows. For example, seven badges may be displayed as three columns on three rows, instead of five columns '
-||'on two rows.</p>'))
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187379221868835377)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>5
-,p_display_value=>'Fit to Page'
-,p_return_value=>'0'
-,p_apexlang_name=>'fitToPage'
-,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<p>Sizes the badges to stretch across the page. The width of each badge will be determined by the number of badges and the display width.</p>',
-'<p>Note: Badges will not wrap when displayed on smaller devices.</p>'))
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187379691860835377)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187378328608835376)
-,p_display_sequence=>7
-,p_display_value=>'Float to Left'
-,p_return_value=>'F'
-,p_apexlang_name=>'floatToLeft'
-,p_help_text=>'<p>Sizes the badges based on the width of the label for each badge. All badges will be displayed to the left of the region.</p>'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187382164769835379)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>6
-,p_display_sequence=>70
-,p_static_id=>'attribute_06'
-,p_prompt=>'Badge Size'
-,p_apexlang_name=>'badgeSize'
-,p_attribute_type=>'SELECT LIST'
-,p_is_required=>true
-,p_is_common=>false
-,p_default_value=>'L'
-,p_is_translatable=>false
-,p_depending_on_attribute_id=>wwv_flow_imp.id(1187385076805835381)
-,p_depending_on_has_to_exist=>true
-,p_depending_on_condition_type=>'NOT_EQUALS'
-,p_depending_on_expression=>'BOX'
-,p_lov_type=>'STATIC'
-,p_help_text=>'Select the size of badge to display.'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187384619274835380)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187382164769835379)
-,p_display_sequence=>40
-,p_display_value=>'Extra Extra Large'
-,p_return_value=>'XXL'
-,p_apexlang_name=>'extraExtraLarge'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187384099741835380)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187382164769835379)
-,p_display_sequence=>30
-,p_display_value=>'Extra Large'
-,p_return_value=>'B'
-,p_apexlang_name=>'extraLarge'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187383617731835380)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187382164769835379)
-,p_display_sequence=>20
-,p_display_value=>'Large'
-,p_return_value=>'L'
-,p_apexlang_name=>'large'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187383065034835379)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187382164769835379)
-,p_display_sequence=>10
-,p_display_value=>'Medium'
-,p_return_value=>'M'
-,p_apexlang_name=>'medium'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187382629819835379)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187382164769835379)
-,p_display_sequence=>0
-,p_display_value=>'Small'
-,p_return_value=>'S'
-,p_apexlang_name=>'small'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187385076805835381)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>7
-,p_display_sequence=>1
-,p_static_id=>'attribute_07'
-,p_prompt=>'Badge Style'
-,p_apexlang_name=>'badgeStyle'
-,p_attribute_type=>'SELECT LIST'
-,p_is_required=>true
-,p_default_value=>'BOX'
-,p_is_translatable=>false
-,p_lov_type=>'STATIC'
-,p_help_text=>'Select the shape of the badges to display.'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187386047048835381)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187385076805835381)
-,p_display_sequence=>20
-,p_display_value=>'Circular'
-,p_return_value=>'DOT'
-,p_apexlang_name=>'circular'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187385477036835381)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187385076805835381)
-,p_display_sequence=>10
-,p_display_value=>'Default'
-,p_return_value=>'BOX'
-,p_apexlang_name=>'default'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187386484561835381)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187385076805835381)
-,p_display_sequence=>15
-,p_display_value=>'Default with Percent'
-,p_return_value=>'PERCENT'
-,p_apexlang_name=>'defaultWithPercent'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187386978557835382)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>8
-,p_display_sequence=>80
-,p_static_id=>'attribute_08'
-,p_prompt=>'Color'
-,p_apexlang_name=>'color'
-,p_attribute_type=>'SELECT LIST'
-,p_is_required=>true
-,p_default_value=>'N'
-,p_is_translatable=>false
-,p_lov_type=>'STATIC'
-,p_help_text=>'Select if the badges should be displayed in different colors, or without colors.'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187387918734835382)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187386978557835382)
-,p_display_sequence=>20
-,p_display_value=>'No'
-,p_return_value=>'N'
-,p_apexlang_name=>'no'
-);
-wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(1187387377268835382)
-,p_plugin_attribute_id=>wwv_flow_imp.id(1187386978557835382)
-,p_display_sequence=>10
-,p_display_value=>'Yes'
-,p_return_value=>'Y'
-,p_apexlang_name=>'yes'
-);
-wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(1187388413688835383)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_attribute_scope=>'COMPONENT'
-,p_attribute_sequence=>9
-,p_display_sequence=>10
-,p_static_id=>'attribute_09'
-,p_prompt=>'Top Label'
-,p_apexlang_name=>'topLabel'
-,p_attribute_type=>'REGION SOURCE COLUMN'
-,p_is_required=>false
-,p_column_data_types=>'VARCHAR2'
-,p_is_translatable=>false
-);
-wwv_flow_imp_shared.create_plugin_std_attribute(
- p_id=>wwv_flow_imp.id(1187391548888835394)
-,p_plugin_id=>wwv_flow_imp.id(15649330117011443611)
-,p_name=>'SOURCE_SQL'
-,p_sql_min_column_count=>2
-,p_examples=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'<pre>',
-'select ''Open''               as label,',
-'       to_char(320,''9G990'') as value,',
-'       13                   as percent',
-'  from dual',
-' union all',
-'select ''Closed''             as label,',
-'       to_char(87,''9G990'')  as value,',
-'       70                   as percent',
-'  from dual',
-'</pre>'))
-);
-end;
-/
 prompt --application/shared_components/plugins/region_type/rodrigomesquita_wizard
 begin
 wwv_flow_imp_shared.create_plugin(
@@ -14431,7 +13880,7 @@ wwv_flow_imp_shared.create_list(
  p_id=>wwv_flow_imp.id(61281122714918426)
 ,p_name=>'Navigation Menu'
 ,p_static_id=>'navigation-menu'
-,p_version_scn=>'317287568'
+,p_version_scn=>'SH256:AyhiTHF1wgquLDFp3dcGjpFTQ22TT8wwXCieGxbq-mQ'
 );
 wwv_flow_imp_shared.create_list_item(
  p_id=>wwv_flow_imp.id(61600222667855766)
@@ -14448,6 +13897,7 @@ wwv_flow_imp_shared.create_list_item(
 ,p_list_item_link_text=>'API''s Personalizadas'
 ,p_static_id=>'api-s-personalizadas'
 ,p_list_item_icon=>'fa-pencil-square'
+,p_list_item_disp_cond_type=>'NEVER'
 ,p_list_item_current_type=>'TARGET_PAGE'
 );
 wwv_flow_imp_shared.create_list_item(
@@ -41651,19 +41101,32 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_item_display_point=>'ABOVE'
 ,p_query_type=>'SQL'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select ID_VL_SOURCE,',
-'       SOURCE_URL,',
-'       ID_VL_WS_TYPE,',
-'       ID_VL_TYPE_ENVIRONMENT,',
-'       C.NAME,',
-'       CASE WHEN VL_SOURCE_STATE = 1 THEN ''ACTIVO''',
-'       WHEN VL_SOURCE_STATE = 0 THEN ''INACTIVO'' END ICON',
-'from VL_SOURCES A ',
-'INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B ON A.ID_VL_COMPANY_APPLICATION=B.ID_VL_COMPANY_APPLICATION',
-'LEFT JOIN VL_SOURCE_APPLICATIONS C ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION',
-'',
-'where B.VL_ID_COMPANY = :GET_COMPANY',
-'order by SOURCE_URL, ID_VL_TYPE_ENVIRONMENT;'))
+'SELECT ''SOURCE'' AS SOURCE_TYPE,',
+'       A.ID_VL_SOURCE AS ID,',
+'       A.SOURCE_URL,',
+'       TE.TYPE_ENVIRONMENT AS ENVIRONMENT,',
+'       C.NAME AS APPLICATION_NAME,',
+'       CASE WHEN A.VL_SOURCE_STATE = 1 THEN ''ACTIVO''',
+'            WHEN A.VL_SOURCE_STATE = 0 THEN ''INACTIVO'' END AS ICON',
+'FROM VL_SOURCES A',
+'INNER JOIN VL_COMPANIES_SOURCE_APPLICATIONS B',
+'        ON A.ID_VL_COMPANY_APPLICATION = B.ID_VL_COMPANY_APPLICATION',
+'LEFT JOIN VL_SOURCE_APPLICATIONS C',
+'       ON B.ID_VL_SOURCE_APPLICATION = C.ID_VL_SOURCE_APPLICATION',
+'LEFT JOIN VL_TYPES_ENVIRONMENT TE',
+'       ON A.ID_VL_TYPE_ENVIRONMENT = TE.ID_VL_TYPE_ENVIRONMENT',
+'WHERE B.VL_ID_COMPANY = :GET_COMPANY',
+'UNION ALL',
+'SELECT ''SEQUENCE'' AS SOURCE_TYPE,',
+'       S.ID_VL_SEQUENCE_SOURCE,',
+'       S.SOURCE_URL,',
+'       TE.TYPE_ENVIRONMENT AS ENVIRONMENT,',
+'       ''Sequence Enterprise'',',
+'       ''ACTIVO''',
+'FROM VL_SEQUENCE_SOURCES S',
+'LEFT JOIN VL_TYPES_ENVIRONMENT TE',
+'       ON S.ENVIRONMENT = TE.ID_VL_TYPE_ENVIRONMENT',
+'ORDER BY SOURCE_URL, ENVIRONMENT'))
 ,p_plug_source_type=>'NATIVE_IR'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_units=>'INCHES'
@@ -41708,9 +41171,31 @@ wwv_flow_imp_page.create_worksheet(
 ,p_show_notify=>'Y'
 ,p_download_formats=>'CSV:HTML:XLSX:PDF'
 ,p_enable_mail_download=>'Y'
-,p_detail_link=>'f?p=&APP_ID.:14:&SESSION.::&DEBUG.:RP,:P14_ID_VL_SOURCE:#ID_VL_SOURCE#'
+,p_detail_link=>'f?p=&APP_ID.:14:&SESSION.::&DEBUG.:RP,:P14_ID_VL_SOURCE:#ID##ID_VL_SOURCE#'
 ,p_detail_link_text=>'<span role="img" aria-label="Edit"><span class="fa fa-edit" aria-hidden="true" title="Edit"></span></span>'
 ,p_internal_uid=>5645299556413346
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2497604312644331)
+,p_db_column_name=>'APPLICATION_NAME'
+,p_display_order=>110
+,p_column_identifier=>'L'
+,p_column_label=>unistr('Aplicaci\00F3n')
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2497764991644332)
+,p_db_column_name=>'ENVIRONMENT'
+,p_display_order=>120
+,p_column_identifier=>'M'
+,p_column_label=>'Environment'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(64978771314942124)
@@ -41724,50 +41209,23 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(64480378273462868)
-,p_db_column_name=>'ID_VL_SOURCE'
-,p_display_order=>10
-,p_is_primary_key=>'Y'
-,p_column_identifier=>'A'
-,p_column_label=>'Id Vl Source'
+ p_id=>wwv_flow_imp.id(2497496964644329)
+,p_db_column_name=>'ID'
+,p_display_order=>90
+,p_column_identifier=>'J'
+,p_column_label=>'Id'
 ,p_column_type=>'NUMBER'
-,p_display_text_as=>'HIDDEN_ESCAPE_SC'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(64978599801942123)
-,p_db_column_name=>'ID_VL_TYPE_ENVIRONMENT'
-,p_display_order=>60
-,p_column_identifier=>'F'
-,p_column_label=>'Ambiente'
-,p_column_type=>'NUMBER'
-,p_display_text_as=>'LOV_ESCAPE_SC'
-,p_heading_alignment=>'LEFT'
-,p_rpt_named_lov=>wwv_flow_imp.id(62772201547245733)
-,p_rpt_show_filter_lov=>'1'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(64978574610942122)
-,p_db_column_name=>'ID_VL_WS_TYPE'
-,p_display_order=>50
-,p_column_identifier=>'E'
-,p_column_label=>'Tipo Web Service'
-,p_column_type=>'NUMBER'
-,p_display_text_as=>'LOV_ESCAPE_SC'
-,p_heading_alignment=>'LEFT'
-,p_rpt_named_lov=>wwv_flow_imp.id(62770685385245735)
-,p_rpt_show_filter_lov=>'1'
-,p_use_as_row_header=>'N'
-,p_available_clientside=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(9038372609061879)
-,p_db_column_name=>'NAME'
+ p_id=>wwv_flow_imp.id(2497347837644328)
+,p_db_column_name=>'SOURCE_TYPE'
 ,p_display_order=>80
-,p_column_identifier=>'H'
-,p_column_label=>unistr('Aplicaci\00F3n')
+,p_column_identifier=>'I'
+,p_column_label=>'Source Type'
 ,p_column_type=>'STRING'
 ,p_heading_alignment=>'LEFT'
 ,p_use_as_row_header=>'N'
@@ -41791,7 +41249,7 @@ wwv_flow_imp_page.create_worksheet_rpt(
 ,p_report_alias=>'61545'
 ,p_status=>'PUBLIC'
 ,p_is_default=>'Y'
-,p_report_columns=>'NAME:SOURCE_URL:ID_VL_TYPE_ENVIRONMENT:ID_VL_WS_TYPE:ICON'
+,p_report_columns=>'APPLICATION_NAME:SOURCE_URL:ICON'
 );
 wwv_flow_imp_page.create_page_button(
  p_id=>wwv_flow_imp.id(64971149699222415)
@@ -42067,6 +41525,16 @@ wwv_flow_imp_page.create_page_item(
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_imp.id(64957023086222441)
 ,p_use_cache_before_default=>'NO'
+,p_source_type=>'ALWAYS_NULL'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'value_protected', 'Y')).to_clob
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(2497284640644327)
+,p_name=>'P14_SOURCE_TYPE'
+,p_item_sequence=>90
+,p_item_plug_id=>wwv_flow_imp.id(64957023086222441)
 ,p_source_type=>'ALWAYS_NULL'
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
@@ -42857,11 +42325,12 @@ wwv_flow_imp_page.create_page_button(
 ,p_button_sequence=>70
 ,p_button_name=>'Ejecutar'
 ,p_static_id=>'ejecutar'
-,p_button_action=>'SUBMIT'
+,p_button_action=>'DEFINED_BY_DA'
 ,p_button_template_options=>'#DEFAULT#'
 ,p_button_template_id=>wwv_flow_imp.id(61457107559918331)
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Ejecutar'
+,p_warn_on_unsaved_changes=>null
 ,p_grid_new_row=>'Y'
 );
 wwv_flow_imp_page.create_page_branch(
@@ -43646,6 +43115,28 @@ wwv_flow_imp_page.create_page_da_action(
 ,p_client_condition_type=>'EQUALS'
 ,p_client_condition_element=>'P15_ACTIVE'
 ,p_client_condition_expression=>'Y'
+);
+wwv_flow_imp_page.create_page_da_event(
+ p_id=>wwv_flow_imp.id(2495822269644313)
+,p_name=>'Trigger event'
+,p_static_id=>'trigger-event'
+,p_event_sequence=>100
+,p_triggering_element_type=>'BUTTON'
+,p_triggering_button_id=>wwv_flow_imp.id(65501606723865568)
+,p_bind_type=>'bind'
+,p_execution_type=>'IMMEDIATE'
+,p_bind_event_type=>'click'
+);
+wwv_flow_imp_page.create_page_da_action(
+ p_id=>wwv_flow_imp.id(2495936219644314)
+,p_event_id=>wwv_flow_imp.id(2495822269644313)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_static_id=>'native-javascript-code'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'js_code', 'apex.event.trigger(document, ''IDIOM'');')).to_clob
 );
 wwv_flow_imp_page.create_page_process(
  p_id=>wwv_flow_imp.id(65499976617865551)
@@ -45329,7 +44820,7 @@ wwv_flow_imp_page.create_page_plug(
 ,p_query_type=>'SQL'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'SELECT OBJECT_NAME AS VER, OBJECT_NAME, CREATED',
-'  FROM dba_objects WHERE OWNER = :GET_COMPANY_NAME AND OBJECT_TYPE = ''TABLE'' AND OBJECT_NAME IN (SELECT TABLE_NAME FROM VL_SAVED_TABLES WHERE ID_USER=:GET_ID);;'))
+'  FROM all_objects WHERE OWNER = :GET_COMPANY_NAME AND OBJECT_TYPE = ''TABLE'' AND OBJECT_NAME IN (SELECT TABLE_NAME FROM VL_SAVED_TABLES WHERE ID_USER=:GET_ID);;'))
 ,p_plug_source_type=>'NATIVE_IR'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_units=>'INCHES'
@@ -50288,8 +49779,14 @@ wwv_flow_imp_page.create_page_plug(
 '        ELSE ''Desconocido''',
 '    END AS previous_run_status,',
 '    --    prev_run.status previous_run_status,',
-'       to_char(prev_run.previous_run_date - interval ''5'' hour, ''DD/MON/YYYY HH:MI:SS AM'') as adjusted_previous_run_date,',
-'       to_char(job.next_run_date - interval ''5'' hour, ''DD/MON/YYYY HH:MI:SS AM'') as adjusted_next_run_date,',
+'       to_char(',
+'            prev_run.previous_run_date AT TIME ZONE ''America/Bogota'',',
+'            ''DD/MON/YYYY HH:MI:SS AM''',
+'        ) as adjusted_previous_run_date,',
+'        to_char(',
+'            job.next_run_date AT TIME ZONE ''America/Bogota'',',
+'            ''DD/MON/YYYY HH:MI:SS AM''',
+'        ) as adjusted_next_run_date,',
 '       job.repeat_interval,',
 '       decode(job.enabled, ''TRUE'', ''Activo'', ''Inactivo'') status,',
 '       job.comments,',
@@ -50359,7 +49856,7 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_display_order=>90
 ,p_column_identifier=>'I'
 ,p_column_label=>'Editar'
-,p_column_link=>'f?p=&APP_ID.:29:&SESSION.:EDIT_JOB:&DEBUG.::P29_NAME_JOB:#JOB_NAME#'
+,p_column_link=>'f?p=&APP_ID.:29:&SESSION.:EDIT_JOB:&DEBUG.:29:P29_NAME_JOB:#JOB_NAME#'
 ,p_column_linktext=>'<img src="#APEX_FILES#app_ui/img/icons/apex-edit-page.png" class="apex-edit-page" alt="">'
 ,p_column_type=>'STRING'
 ,p_heading_alignment=>'LEFT'
@@ -50885,9 +50382,9 @@ wwv_flow_imp_page.create_page_plug(
 'SELECT ',
 '    log.log_id AS log_id,',
 '    log.job_name AS job_name,',
-'    TO_CHAR(run.req_start_date - INTERVAL ''5'' HOUR, ''DD-MON-YYYY HH:MI:SS AM'') AS schedule_time,',
-'    TO_CHAR(run.actual_start_date - INTERVAL ''5'' HOUR, ''DD-MON-YYYY HH:MI:SS AM'') AS start_time,',
-'    TO_CHAR((run.actual_start_date - INTERVAL ''5'' HOUR) + run.run_duration, ''DD-MON-YYYY HH:MI:SS AM'') AS end_time,',
+'    CAST(run.req_start_date AT TIME ZONE ''America/Bogota'' AS TIMESTAMP) AS schedule_time,',
+'    CAST(run.actual_start_date AT TIME ZONE ''America/Bogota'' AS TIMESTAMP) AS start_time,',
+'    CAST((run.actual_start_date AT TIME ZONE ''America/Bogota'') + run.run_duration AS TIMESTAMP) AS end_time,',
 '    TO_CHAR(run.run_duration, ''HH24:MI:SS'') AS duration,',
 '    ',
 '    CASE',
@@ -50901,30 +50398,7 @@ unistr('        WHEN log.operation = ''CHAIN_RUN'' THEN ''Ejecuci\00F3n de caden
 '        WHEN log.status = ''FAILED'' THEN ''Fallido''',
 '        WHEN log.status = ''STOPPED'' THEN ''Interrumpido''',
 '        ELSE ''Desconocido''',
-'    END AS status,',
-'    ''<div>'' || ',
-'        CASE ',
-'            WHEN DBMS_LOB.GETLENGTH(run.binary_output) > 120000 THEN',
-'                ''<div class="cc-actions-column">',
-'                    <span>',
-'                        <a href="'' || APEX_PAGE.GET_URL (',
-'                            p_page   => 0,',
-'                            p_items  => ''ID_PARAMETER'',',
-'                            p_values => log.log_id,',
-'                            p_request => ''APPLICATION_PROCESS=DOWNLOAD_JSON''',
-'                        ) || ''" aria-hidden="false" class="fa fa-download t-Button t-Button--simple cc-download-btn" data-id="'' || run.log_id || ''"></a>',
-'                    </span>',
-'                </div>''',
-'            WHEN run.binary_output IS NOT NULL THEN',
-'                ''<div class="cc-actions-column">',
-'                    <span>',
-'                        <a href="##" aria-hidden="false" class="fa fa-eye t-Button t-Button--simple cc-clear-btn" data-id="'' || run.log_id || ''"></a>',
-'                    </span>',
-'                </div>''',
-'            ELSE ',
-'                ''No se genera JSON''',
-'        END || ',
-'    ''</div>'' AS "Ver logs"',
+'    END AS status',
 'FROM ',
 '    user_scheduler_job_log log',
 'JOIN ',
@@ -50986,10 +50460,10 @@ wwv_flow_imp_page.create_worksheet(
 ,p_internal_uid=>3950683206240641
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(7540487495620988)
+ p_id=>wwv_flow_imp.id(2495192876644306)
 ,p_db_column_name=>'DURATION'
-,p_display_order=>60
-,p_column_identifier=>'F'
+,p_display_order=>100
+,p_column_identifier=>'Q'
 ,p_column_label=>unistr('Duraci\00F3n')
 ,p_column_type=>'STRING'
 ,p_heading_alignment=>'LEFT'
@@ -50997,13 +50471,15 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(7540338652620987)
+ p_id=>wwv_flow_imp.id(2494914277644304)
 ,p_db_column_name=>'END_TIME'
 ,p_display_order=>50
-,p_column_identifier=>'E'
+,p_column_identifier=>'O'
 ,p_column_label=>unistr('Tiempo de finalizaci\00F3n')
-,p_column_type=>'STRING'
+,p_column_type=>'DATE'
 ,p_heading_alignment=>'LEFT'
+,p_format_mask=>'DD-MON-YYYY HH:MI:SS AM'
+,p_tz_dependent=>'N'
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
@@ -51021,11 +50497,13 @@ wwv_flow_imp_page.create_worksheet_column(
 wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(7539956930620983)
 ,p_db_column_name=>'LOG_ID'
-,p_display_order=>10
+,p_display_order=>110
 ,p_column_identifier=>'A'
-,p_column_label=>'Log Id'
+,p_column_label=>'Ver detalle'
+,p_column_link=>'f?p=&APP_ID.:34:&SESSION.::&DEBUG.::P34_LOG_ID,P34_JOB_NAME:#LOG_ID#,&P29_NAME_JOB.'
+,p_column_linktext=>'<span role="img" aria-label="Edit" class="fa fa-search" title="See Details"></span>'
 ,p_column_type=>'NUMBER'
-,p_display_text_as=>'HIDDEN_ESCAPE_SC'
+,p_column_alignment=>'CENTER'
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
@@ -51041,24 +50519,28 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(7540172178620985)
+ p_id=>wwv_flow_imp.id(2494797202644302)
 ,p_db_column_name=>'SCHEDULE_TIME'
 ,p_display_order=>30
-,p_column_identifier=>'C'
+,p_column_identifier=>'M'
 ,p_column_label=>'Tiempo programado'
-,p_column_type=>'STRING'
+,p_column_type=>'DATE'
 ,p_heading_alignment=>'LEFT'
+,p_format_mask=>'DD-MON-YYYY HH:MI:SS AM'
+,p_tz_dependent=>'N'
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(7540300556620986)
+ p_id=>wwv_flow_imp.id(2494888135644303)
 ,p_db_column_name=>'START_TIME'
 ,p_display_order=>40
-,p_column_identifier=>'D'
+,p_column_identifier=>'N'
 ,p_column_label=>unistr('Tiempo de ejecuci\00F3n')
-,p_column_type=>'STRING'
+,p_column_type=>'DATE'
 ,p_heading_alignment=>'LEFT'
+,p_format_mask=>'DD-MON-YYYY HH:MI:SS AM'
+,p_tz_dependent=>'N'
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
@@ -51073,18 +50555,6 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_use_as_row_header=>'N'
 ,p_available_clientside=>'N'
 );
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(7622503438286854)
-,p_db_column_name=>'Ver logs'
-,p_display_order=>90
-,p_column_identifier=>'L'
-,p_column_label=>'Ver Logs'
-,p_column_type=>'STRING'
-,p_display_text_as=>'WITHOUT_MODIFICATION'
-,p_heading_alignment=>'LEFT'
-,p_use_as_row_header=>'N'
-,p_available_clientside=>'N'
-);
 wwv_flow_imp_page.create_worksheet_rpt(
  p_id=>wwv_flow_imp.id(7615180754230636)
 ,p_application_user=>'APXWS_DEFAULT'
@@ -51093,7 +50563,7 @@ wwv_flow_imp_page.create_worksheet_rpt(
 ,p_status=>'PUBLIC'
 ,p_is_default=>'Y'
 ,p_display_rows=>10
-,p_report_columns=>'SCHEDULE_TIME:START_TIME:END_TIME:DURATION:OPERATION:STATUS:Ver logs'
+,p_report_columns=>'SCHEDULE_TIME:START_TIME:END_TIME:DURATION:OPERATION:STATUS:LOG_ID'
 );
 wwv_flow_imp_page.create_page_button(
  p_id=>wwv_flow_imp.id(7804599434717045)
@@ -51319,6 +50789,28 @@ wwv_flow_imp_page.create_page_item(
   'trim_spaces', 'BOTH')).to_clob
 );
 wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(2494675922644301)
+,p_name=>'P29_START_DATE'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_imp.id(9036551951061861)
+,p_prompt=>'Fecha de inicio'
+,p_format_mask=>'YYYY-MM-DD HH24:MI'
+,p_source_type=>'ALWAYS_NULL'
+,p_display_as=>'NATIVE_DATE_PICKER_APEX'
+,p_cSize=>30
+,p_begin_on_new_line=>'N'
+,p_begin_on_new_field=>'N'
+,p_field_template=>wwv_flow_imp.id(61454585300918334)
+,p_item_template_options=>'#DEFAULT#'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'display_as', 'POPUP',
+  'max_date', 'NONE',
+  'min_date', 'NONE',
+  'multiple_months', 'N',
+  'show_time', 'Y',
+  'use_defaults', 'Y')).to_clob
+);
+wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(7995288242994174)
 ,p_name=>'P29_VALIDATOR'
 ,p_item_sequence=>10
@@ -51351,7 +50843,7 @@ wwv_flow_imp_page.create_page_da_action(
 ,p_action=>'NATIVE_EXECUTE_PLSQL_CODE'
 ,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
   'items_to_return', 'P29_VALIDATOR',
-  'items_to_submit', 'P29_JOB_NAME,P29_ENABLED,P29_REPEAT_INTERVAL,P29_DESCRIPTION,P29_JOB_INTERVAL',
+  'items_to_submit', 'P29_JOB_NAME,P29_ENABLED,P29_REPEAT_INTERVAL,P29_DESCRIPTION,P29_JOB_INTERVAL,P29_START_DATE',
   'language', 'PLSQL',
   'plsql_code', wwv_flow_string.join(wwv_flow_t_varchar2(
     'DECLARE',
@@ -51389,10 +50881,14 @@ wwv_flow_imp_page.create_page_da_action(
     '        );',
     '',
     '        -- Configurar la hora de inicio a la hora actual + 1 minuto',
+    '                -- Configurar la hora de inicio',
     '        DBMS_SCHEDULER.SET_ATTRIBUTE(',
     '            name      => v_job_name,',
     '            attribute => ''start_date'',',
-    '            value     => SYSTIMESTAMP + INTERVAL ''1'' MINUTE',
+    '            value     => FROM_TZ(',
+    '                            TO_TIMESTAMP(:P29_START_DATE, ''YYYY-MM-DD HH24:MI''),',
+    '                            ''-05:00''',
+    '                         )',
     '        );',
     '',
     '        :P29_VALIDATOR := 1;',
@@ -52136,6 +51632,265 @@ wwv_flow_imp_page.create_page_process(
 );
 end;
 /
+prompt --application/pages/page_00034
+begin
+wwv_flow_imp_page.create_page(
+ p_id=>34
+,p_name=>'LOG OPC'
+,p_alias=>'LOG-OPC'
+,p_page_mode=>'MODAL'
+,p_step_title=>unistr('Detalle de Ejecuci\00F3n')
+,p_autocomplete_on_off=>'OFF'
+,p_step_template=>wwv_flow_imp.id(61288318147918405)
+,p_page_template_options=>'#DEFAULT#'
+,p_dialog_resizable=>'Y'
+,p_protection_level=>'C'
+,p_page_component_map=>'18'
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(2513830350883380)
+,p_plug_name=>'LOG OPC'
+,p_static_id=>'log-opc'
+,p_region_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_imp.id(61340232423918380)
+,p_plug_display_sequence=>10
+,p_plug_item_display_point=>'ABOVE'
+,p_query_type=>'SQL'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT LOS.ID_LOG,',
+'       LOS.CONTRACT_NUMBER,',
+'       LOS.TIPO_OBJETO,',
+'       LOS.OBJECT_CODE,',
+'       LOS.OBJECT_NAME,',
+'       LOS.UPDATE_SINCRONIZADO,',
+'       LOS.ACCION,',
+'       CAST(FROM_TZ(LOS.FECHA_EJECUCION, ''UTC'') AT TIME ZONE ''America/Bogota'' AS TIMESTAMP) AS FECHA_EJECUCION,',
+'       LOS.RESULTADO,',
+'       LOS.HIERARCHY_PATH_ID,',
+'       LOS.ID_LOTE',
+'  FROM LOG_OPC_SEQUENCE LOS',
+'  JOIN (',
+'        SELECT *',
+'          FROM USER_SCHEDULER_JOB_RUN_DETAILS',
+'         WHERE LOG_ID = :P34_LOG_ID',
+'       ) RUN',
+'    ON FROM_TZ(LOS.FECHA_EJECUCION, ''UTC'')',
+'         >= RUN.actual_start_date',
+'   AND FROM_TZ(LOS.FECHA_EJECUCION, ''UTC'')',
+'         <= RUN.actual_start_date + RUN.run_duration',
+' ORDER BY LOS.FECHA_EJECUCION DESC;'))
+,p_plug_source_type=>'NATIVE_IR'
+,p_ajax_items_to_submit=>'P34_LOG_ID'
+,p_prn_content_disposition=>'ATTACHMENT'
+,p_prn_units=>'INCHES'
+,p_prn_paper_size=>'LETTER'
+,p_prn_width=>11
+,p_prn_height=>8.5
+,p_prn_orientation=>'HORIZONTAL'
+,p_prn_page_header_font_color=>'#000000'
+,p_prn_page_header_font_family=>'Helvetica'
+,p_prn_page_header_font_weight=>'normal'
+,p_prn_page_header_font_size=>'12'
+,p_prn_page_footer_font_color=>'#000000'
+,p_prn_page_footer_font_family=>'Helvetica'
+,p_prn_page_footer_font_weight=>'normal'
+,p_prn_page_footer_font_size=>'12'
+,p_prn_header_bg_color=>'#EEEEEE'
+,p_prn_header_font_color=>'#000000'
+,p_prn_header_font_family=>'Helvetica'
+,p_prn_header_font_weight=>'bold'
+,p_prn_header_font_size=>'10'
+,p_prn_body_bg_color=>'#FFFFFF'
+,p_prn_body_font_color=>'#000000'
+,p_prn_body_font_family=>'Helvetica'
+,p_prn_body_font_weight=>'normal'
+,p_prn_body_font_size=>'10'
+,p_prn_border_width=>.5
+,p_prn_page_header_alignment=>'CENTER'
+,p_prn_page_footer_alignment=>'CENTER'
+,p_prn_border_color=>'#666666'
+,p_ai_enabled=>false
+);
+wwv_flow_imp_page.create_worksheet(
+ p_id=>wwv_flow_imp.id(2496024845644315)
+,p_pagination_type=>'ROWS_X_TO_Y'
+,p_pagination_display_pos=>'BOTTOM_RIGHT'
+,p_report_list_mode=>'TABS'
+,p_lazy_loading=>false
+,p_show_detail_link=>'N'
+,p_show_notify=>'Y'
+,p_download_formats=>'CSV:HTML:XLSX:PDF'
+,p_enable_mail_download=>'Y'
+,p_internal_uid=>2496024845644315
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496700831644322)
+,p_db_column_name=>'ACCION'
+,p_display_order=>70
+,p_column_identifier=>'G'
+,p_column_label=>'Accion'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496278778644317)
+,p_db_column_name=>'CONTRACT_NUMBER'
+,p_display_order=>20
+,p_column_identifier=>'B'
+,p_column_label=>'Contract Number'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496812456644323)
+,p_db_column_name=>'FECHA_EJECUCION'
+,p_display_order=>80
+,p_column_identifier=>'H'
+,p_column_label=>'Fecha Ejecucion'
+,p_column_type=>'DATE'
+,p_heading_alignment=>'LEFT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2497045078644325)
+,p_db_column_name=>'HIERARCHY_PATH_ID'
+,p_display_order=>100
+,p_column_identifier=>'J'
+,p_column_label=>'Hierarchy Path Id'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496139663644316)
+,p_db_column_name=>'ID_LOG'
+,p_display_order=>10
+,p_column_identifier=>'A'
+,p_column_label=>'Id Log'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2497132889644326)
+,p_db_column_name=>'ID_LOTE'
+,p_display_order=>110
+,p_column_identifier=>'K'
+,p_column_label=>'Lote'
+,p_column_type=>'NUMBER'
+,p_column_alignment=>'CENTER'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496428226644319)
+,p_db_column_name=>'OBJECT_CODE'
+,p_display_order=>40
+,p_column_identifier=>'D'
+,p_column_label=>'Object Code'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496574564644320)
+,p_db_column_name=>'OBJECT_NAME'
+,p_display_order=>50
+,p_column_identifier=>'E'
+,p_column_label=>'Object Name'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496968615644324)
+,p_db_column_name=>'RESULTADO'
+,p_display_order=>90
+,p_column_identifier=>'I'
+,p_column_label=>'Resultado'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496396919644318)
+,p_db_column_name=>'TIPO_OBJETO'
+,p_display_order=>30
+,p_column_identifier=>'C'
+,p_column_label=>'Tipo Objeto'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(2496674488644321)
+,p_db_column_name=>'UPDATE_SINCRONIZADO'
+,p_display_order=>60
+,p_column_identifier=>'F'
+,p_column_label=>'Update Sincronizado'
+,p_column_type=>'DATE'
+,p_heading_alignment=>'LEFT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+,p_available_clientside=>'N'
+);
+wwv_flow_imp_page.create_worksheet_rpt(
+ p_id=>wwv_flow_imp.id(2549623307825731)
+,p_application_user=>'APXWS_DEFAULT'
+,p_report_seq=>10
+,p_report_alias=>'primary'
+,p_status=>'PUBLIC'
+,p_is_default=>'Y'
+,p_report_columns=>'CONTRACT_NUMBER:TIPO_OBJETO:OBJECT_CODE:OBJECT_NAME:UPDATE_SINCRONIZADO:ACCION:FECHA_EJECUCION:RESULTADO:HIERARCHY_PATH_ID:ID_LOTE'
+);
+wwv_flow_imp_page.create_page_button(
+ p_id=>wwv_flow_imp.id(2495609100644311)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_imp.id(2513830350883380)
+,p_button_name=>unistr('Atr\00E1s')
+,p_static_id=>unistr('atr\00E1s')
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_imp.id(61457107559918331)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>unistr('Atr\00E1s')
+,p_button_position=>'CREATE'
+,p_button_redirect_url=>'f?p=&APP_ID.:29:&SESSION.:VIEW_LOGS:&DEBUG.::P29_NAME_JOB:&P34_JOB_NAME.'
+,p_warn_on_unsaved_changes=>null
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(2495789796644312)
+,p_name=>'P34_JOB_NAME'
+,p_item_sequence=>50
+,p_source_type=>'ALWAYS_NULL'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'value_protected', 'Y')).to_clob
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(2495259832644307)
+,p_name=>'P34_LOG_ID'
+,p_item_sequence=>40
+,p_source_type=>'ALWAYS_NULL'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'value_protected', 'Y')).to_clob
+);
+end;
+/
 prompt --application/pages/page_09998
 begin
 wwv_flow_imp_page.create_page(
@@ -52780,7 +52535,6 @@ end;
 prompt --application/end_environment
 begin
 wwv_flow_imp.import_end(p_auto_install_sup_obj => nvl(wwv_flow_application_install.get_auto_install_sup_obj, false)
-,p_has_subscriptions=>true
 );
 commit;
 end;
@@ -52790,4 +52544,4 @@ prompt  ...done
 
 
 
--- sqlcl_snapshot {"hash":"c116002201159d28cbf612b4d8b88fc8f54bca55","type":"APEX","name":"f102.sql","schemaName":"VERANOLINK","sxml":""}
+-- sqlcl_snapshot {"hash":"0be50d21e94ff329f01a49b64ffe8611867e1ae6","type":"APEX","name":"f102.sql","schemaName":"VERANOLINK","sxml":""}

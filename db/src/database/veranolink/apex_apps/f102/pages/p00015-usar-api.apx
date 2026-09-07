@@ -156,7 +156,7 @@ page 15 (
             templateOptions: #DEFAULT#
         }
         behavior {
-            warnOnUnsavedChanges: doNotCheck
+            action: definedByDynamicAction
         }
     )
 
@@ -864,6 +864,30 @@ page 15 (
                 type: item=value
                 item: P15_ACTIVE
                 value: Y
+            }
+        )
+
+    )
+
+    dynamicAction trigger-event (
+        name: Trigger event
+        execution {
+            sequence: 100
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @ejecutar
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: apex.event.trigger(document, 'IDIOM');
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
             }
         )
 
